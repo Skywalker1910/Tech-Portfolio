@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata = {
   title: "Aditya More — Data Science & ML Engineering",
   description: "Graduate student in Computer Science (Data Science & Informatics) seeking Data Scientist/ML Engineer roles. Experience in Python, ML, and scalable course development.",
-  metadataBase: new URL("https://example.com"), // change after deploy
+  metadataBase: new URL("https://github.com/Skywalker1910/Tech-Portfolio"), // GitHub repository URL
   openGraph: {
     title: "Aditya More — Data Science & ML Engineering",
     description: "Graduate student with experience in machine learning, data analytics, and educational technology.",

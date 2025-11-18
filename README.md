@@ -1,4 +1,22 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tech Portfolio - Aditya More
+
+A modern, interactive portfolio website showcasing data science projects, academic work, and professional experience. Built with Next.js 15, TypeScript, and Tailwind CSS v4.
+
+## 🚀 Features
+
+- **Modern Tech Stack**: Next.js 15 with App Router, TypeScript, Tailwind CSS v4
+- **Interactive Background**: GPU-optimized particle effects with mouse interaction
+- **Multiple Themes**: Dark/Light mode with custom Batman and Clemson Tigers themes
+- **Project Showcase**: Filterable project gallery with search and categorization
+- **Responsive Design**: Mobile-first approach with seamless desktop experience
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15.5.4
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS 4.0
+- **Font**: Inter from Google Fonts
+- **Build Tool**: Turbopack
 
 ## Getting Started
 
