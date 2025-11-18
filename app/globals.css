@@ -1,26 +1,227 @@
+:root { font-family: var(--font-inter), ui-sans-serif, system-ui; }
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Theme tokens */
+:root{
+  --bg:#0b0c0f;
+  --ink:#0b1220;
+  --muted:#6b7280;
+  --brand:#6d28d9; /* violet */
+  --accent:#14b8a6; /* teal */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Batman Theme */
+/* Batman Theme */
+.batman {
+  --primary: #dc2626;
+  --primary-foreground: #ffffff;
+  --secondary: #000000;
+  --accent: #dc2626;
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #111111;
+  --border: #dc2626;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.batman {
+  background: #000000;
+}
+
+/* Batman theme color overrides */
+.batman .text-violet-400 { color: #f87171 !important; }
+.batman .text-violet-500 { color: #ef4444 !important; }
+.batman .text-violet-600 { color: #dc2626 !important; }
+.batman .bg-violet-600 { background-color: #dc2626 !important; }
+.batman .hover\:bg-violet-500:hover { background-color: #ef4444 !important; }
+.batman .border-violet-500 { border-color: #dc2626 !important; }
+.batman .ring-violet-500 { --tw-ring-color: #dc2626 !important; }
+.batman .border-violet-700 { border-color: #b91c1c !important; }
+.batman .text-violet-300 { color: #fca5a5 !important; }
+
+/* Clemson Tigers Theme */
+.clemson {
+  --bg: #0a0e27;
+  --ink: #1a1f3a;
+  --muted: #6b7280;
+  --brand: #f56500; /* clemson orange */
+  --accent: #522d80; /* clemson purple */
+}
+
+.clemson body {
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1810 100%);
+  color: #f0f0f0;
+}
+
+/* Clemson theme color overrides */
+.clemson .text-violet-400 { color: #fb923c !important; }
+.clemson .text-violet-500 { color: #f97316 !important; }
+.clemson .text-violet-600 { color: #ea580c !important; }
+.clemson .bg-violet-600 { background-color: #f97316 !important; }
+.clemson .hover\:bg-violet-500:hover { background-color: #fb923c !important; }
+.clemson .border-violet-500 { border-color: #f97316 !important; }
+.clemson .ring-violet-500 { --tw-ring-color: #f97316 !important; }
+.clemson .border-violet-700 { border-color: #ea580c !important; }
+.clemson .text-violet-300 { color: #fdba74 !important; }
+
+.clemson .text-teal-400 { color: #a78bfa !important; }
+.clemson .text-teal-500 { color: #8b5cf6 !important; }
+.clemson .border-teal-700 { border-color: #6d28d9 !important; }
+.clemson .text-teal-300 { color: #c4b5fd !important; }
+
+/* Additional color mappings for Batman theme - simplified to red, black, white */
+.batman .text-orange-400 { color: #dc2626 !important; }
+.batman .text-emerald-400 { color: #dc2626 !important; }
+.batman .text-teal-400 { color: #dc2626 !important; }
+.batman .text-teal-500 { color: #dc2626 !important; }
+.batman .border-teal-700 { border-color: #dc2626 !important; }
+.batman .text-teal-300 { color: #ffffff !important; }
+.batman .bg-slate-900 { background-color: #000000 !important; }
+.batman .bg-slate-800 { background-color: #111111 !important; }
+.batman .border-slate-800 { border-color: #333333 !important; }
+.batman .text-yellow-400 { color: #dc2626 !important; }
+.batman .bg-yellow-500 { background-color: #dc2626 !important; }
+.batman .hover\:bg-yellow-600:hover { background-color: #b91c1c !important; }
+.batman .border-yellow-500 { border-color: #dc2626 !important; }
+.batman .text-blue-400 { color: #dc2626 !important; }
+.batman .text-purple-400 { color: #dc2626 !important; }
+.batman .bg-gradient-to-r { background: #000000 !important; }
+.batman .from-slate-900 { --tw-gradient-from: #000000 !important; }
+.batman .to-slate-800 { --tw-gradient-to: #111111 !important; }
+.batman .text-white { color: #ffffff !important; }
+.batman .border-red-600 { border-color: #dc2626 !important; }
+.batman .bg-red-600 { background-color: #dc2626 !important; }
+.batman .hover\:bg-red-700:hover { background-color: #b91c1c !important; }
+
+/* Batman theme simplified styling - clean red, black, white */
+.batman .card {
+  background: #111111 !important;
+  border: 1px solid #dc2626 !important;
+  box-shadow: none !important;
+}
+
+.batman .hero-wrap {
+  background: #000000 !important;
+}
+
+.batman button, .batman .btn {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #dc2626 !important;
+  box-shadow: none !important;
+}
+
+.batman button:hover, .batman .btn:hover {
+  background: #b91c1c !important;
+  border: 1px solid #b91c1c !important;
+}
+
+/* Theme toggle button enhancements */
+.theme-slider {
+  position: relative;
+  background: linear-gradient(90deg, #334155, #475569);
+  border-radius: 9999px;
+  padding: 2px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.theme-slider:active {
+  cursor: grabbing;
+}
+
+.theme-slider-button {
+  position: relative;
+  border-radius: 9999px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0);
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+}
+
+.theme-slider-button:hover {
+  transform: translateY(-1px) scale(1.05);
+}
+
+/* Sliding indicator styles */
+.theme-slider .absolute {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.15);
+  cursor: grab;
+}
+
+.theme-slider .absolute:active {
+  cursor: grabbing;
+}
+
+/* Image styling within theme buttons */
+.theme-slider-button img {
+  border-radius: 50%;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+  pointer-events: none;
+}
+
+.theme-slider-button.active img {
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+/* Specific styling for different images */
+.theme-slider-button img[alt="Batman"] {
+  object-fit: contain !important;
+  background-color: #ffffff !important;
+  padding: 0px;
+  border: none !important;
+  pointer-events: none;
+}
+
+.theme-slider-button img[alt="Tigers"] {
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.theme-slider-button.active img[alt="Batman"] {
+  border: 1px solid rgba(220, 38, 38, 0.6) !important;
+  background-color: #ffffff !important;
+}
+
+/* Responsive design for theme slider */
+@media (max-width: 640px) {
+  .theme-slider {
+    padding: 2px;
+  }
+  
+  .theme-slider-button {
+    width: 28px;
+    height: 28px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.clemson .text-orange-400 { color: #fb923c !important; }
+.clemson .text-emerald-400 { color: #a78bfa !important; }
+.clemson .bg-slate-900 { background-color: #1a1f3a !important; }
+.clemson .bg-slate-800 { background-color: #2d1810 !important; }
+.clemson .border-slate-800 { border-color: #f97316 !important; }
+
+html, body { height: 100%; }
+
+/* Base body styles (still fine to use @apply) */
+body { @apply bg-white text-slate-900 antialiased; }
+.dark body { background: var(--bg); color:#e5e7eb; }
+
+/* === Tailwind v4: register custom utilities === */
+@utility container-max {
+  @apply max-w-6xl mx-auto px-4 sm:px-6;
+}
+
+@utility card {
+  @apply rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900;
+}
+
+@utility hero-wrap {
+  @apply relative overflow-hidden;
+}
+
+@utility hero-inner {
+  @apply container-max pt-16 md:pt-24 pb-8 md:pb-10;
 }
