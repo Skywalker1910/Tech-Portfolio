@@ -7,21 +7,20 @@ export default function Experience() {
       {/* Current Role - Graduate Student Hourly */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-violet-400 mb-4">Graduate Student Hourly – Clemson University</h2>
-        <p className="text-slate-300 mb-4 text-sm">Academic & Educational Technology | Aug 2024 – Present</p>
+        <p className="text-slate-300 mb-4 text-sm">Data Science | Aug 2024 – Dec 2025</p>
         <div className="card p-6 bg-slate-900/60 border-slate-800">
           <Timeline items={[{
-            title: "School of Computing",
-            org: "Clemson University",
-            period: "Aug 2024 – Present",
+            title: "Graduate Student Hourly – Data Science",
+            org: "Clemson University, School of Computing",
+            period: "Aug 2024 – Dec 2025",
             bullets: [
-              "Initial Phase: Designed lab and homework assignments for students enrolled in online degree on Coursera platform",
-              "Built source assignment notebooks with comprehensive test cases using asserts for automated validation",
-              "Implemented nbgrader tool to automate the grading process of Jupyter notebooks for Coursera labs",
-              "Spring 2025 Semester: Maintained live coursework material, resolving bugs in grader logic and notebook functionality",
-              "Conducted regular office hours to address student doubts and fix programming or logical bugs in notebooks",
-              "Current Project: Building automated grading framework for CPSC 6300 (Applied Data Science) in-person graduate class",
-              "Developing cross-platform grading solution to expand framework beyond online courses",
-              "GitHub Repository: https://github.com/Skywalker1910/cpsc6300-autograder (work in progress)"
+              "Designed and developed automated lab and homework assignments for a graduate-level Applied Data Science course",
+              "Built Jupyter Notebook-based assignments using Python and nbgrader for automated grading",
+              "Developed exercises covering data preprocessing, outlier detection (IQR, Z-score), model selection and cross-validation, feature selection, and PCA",
+              "Implemented automated testing logic using Python to validate student submissions across 200+ students",
+              "Created structured notebooks combining explanations, code scaffolding, and evaluation pipelines",
+              "Handled technical and course-related tickets on Salesforce, ensuring smooth learner experience",
+              "Conducted 2 weekly office hours to support students with technical and conceptual queries"
             ]
           }]} />
         </div>
@@ -53,7 +52,7 @@ export default function Experience() {
         <h2 className="text-xl font-semibold mb-4">Professional Development Journey</h2>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <h3 className="font-semibold text-violet-400 mb-2">Graduate Student Hourly @ Clemson (2024 - Present)</h3>
+            <h3 className="font-semibold text-violet-400 mb-2">Graduate Student Hourly – Data Science @ Clemson (2024–2025)</h3>
             <ul className="text-sm text-slate-300 space-y-1">
               <li>• Educational technology and platform development</li>
               <li>• Automated grading systems and nbgrader expertise</li>

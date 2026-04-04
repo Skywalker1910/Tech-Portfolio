@@ -1,52 +1,127 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { X, Bot, Sparkles } from "lucide-react";
+import AiInput from "./AiInput";
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const [msgs, setMsgs] = useState<{role:"user"|"assistant"; text:string}[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [msgs, setMsgs] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  async function send() {
-    const q = input.trim();
-    if (!q) return;
-    setMsgs(m => [...m, { role: "user", text: q }]);
-    setInput("");
-    setLoading(true);
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [msgs]);
+
+  async function send(q: string) {
+    if (!q.trim()) return;
+    setMsgs((m) => [...m, { role: "user", text: q }]);
     try {
-      const r = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: q }) });
+      const r = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: q }),
+      });
       const data = await r.json();
-      setMsgs(m => [...m, { role: "assistant", text: data.answer ?? "Sorry, I couldn't find that." }]);
-    } catch (e:any) {
-      setMsgs(m => [...m, { role: "assistant", text: "Error calling AI endpoint." }]);
-    } finally {
-      setLoading(false);
+      setMsgs((m) => [...m, { role: "assistant", text: data.answer ?? "Sorry, I couldn't find that." }]);
+    } catch (_e: unknown) {
+      setMsgs((m) => [...m, { role: "assistant", text: "Error calling AI endpoint." }]);
     }
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-50">
-      {open && (
-        <div className="w-[320px] h-[420px] card flex flex-col overflow-hidden bg-slate-900/90 border-slate-800">
-          <div className="px-3 py-2 border-b border-slate-800 font-medium text-slate-200">Ask about my work</div>
-          <div className="flex-1 p-3 overflow-auto space-y-2 text-sm">
-            {msgs.map((m, i) => (
-              <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
-                <span className={`inline-block px-3 py-2 rounded-2xl ${m.role === "user" ? "bg-violet-600 text-white" : "bg-slate-800 text-slate-200"}`}>
-                  {m.text}
-                </span>
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+      {/* Chat panel */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="w-[340px] flex flex-col rounded-2xl border border-white/10 bg-zinc-950/95 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden"
+            style={{ height: 440 }}
+          >
+            {/* Header */}
+            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/8 bg-zinc-900/60">
+              <span className="flex items-center justify-center w-7 h-7 rounded-full bg-violet-600/20 border border-violet-500/30">
+                <Bot size={14} className="text-violet-400" />
+              </span>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-white leading-none">Portfolio AI</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Ask me about Aditya&apos;s work</p>
               </div>
-            ))}
-            {loading && <div className="text-xs text-slate-400">Thinking…</div>}
-          </div>
-          <div className="p-2 border-t border-slate-800 flex gap-2">
-            <input className="flex-1 px-3 py-2 rounded-xl border border-slate-700 bg-slate-900 text-slate-200" placeholder="Ask about projects, education…" value={input} onChange={e => setInput(e.target.value)} />
-            <button onClick={send} className="px-3 py-2 rounded-xl border border-slate-700 text-slate-200">Send</button>
-          </div>
-        </div>
-      )}
-      <button onClick={() => setOpen(o => !o)} className="rounded-full px-4 py-2 bg-violet-600 text-white shadow-lg">
-        {open ? "Close" : "Chat"}
+              <button
+                onClick={() => setOpen(false)}
+                className="w-6 h-6 flex items-center justify-center rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X size={13} />
+              </button>
+            </div>
+
+            {/* Messages */}
+            <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-2.5 scrollbar-thin">
+              {msgs.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center gap-2 text-center px-4">
+                  <Sparkles size={22} className="text-violet-400 opacity-60" />
+                  <p className="text-xs text-zinc-500 leading-relaxed">
+                    Ask about projects, experience, skills, or anything else on this portfolio.
+                  </p>
+                </div>
+              )}
+              {msgs.map((m, i) => (
+                <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <span
+                    className={`inline-block px-3 py-2 rounded-2xl text-xs leading-relaxed max-w-[80%] ${
+                      m.role === "user"
+                        ? "bg-violet-600 text-white rounded-br-sm"
+                        : "bg-zinc-800/80 text-zinc-200 border border-white/5 rounded-bl-sm"
+                    }`}
+                  >
+                    {m.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Input */}
+            <div className="p-3 border-t border-white/8">
+              <AiInput
+                onSubmit={send}
+                placeholder="Ask about projects, skills..."
+                mainColor="#7c3aed"
+                backgroundColor="#09090b"
+                animationStyle="orbit"
+                rows={1}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Futuristic trigger button */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="group relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-zinc-950 border border-violet-500/40 text-violet-300 shadow-lg shadow-violet-900/30 hover:border-violet-400/70 hover:shadow-violet-700/40 hover:text-white transition-all duration-300"
+      >
+        {/* Glow ring */}
+        <span className="absolute inset-0 rounded-full bg-violet-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" />
+        <AnimatePresence mode="popLayout" initial={false}>
+          {open ? (
+            <motion.span key="close" initial={{ opacity: 0, rotate: -90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 90 }} transition={{ duration: 0.2 }} className="relative z-10 flex items-center gap-2">
+              <X size={15} />
+              <span className="text-xs font-medium tracking-wide">Close</span>
+            </motion.span>
+          ) : (
+            <motion.span key="open" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }} transition={{ duration: 0.2 }} className="relative z-10 flex items-center gap-2">
+              <Bot size={15} />
+              <span className="text-xs font-medium tracking-wide">Ask AI</span>
+            </motion.span>
+          )}
+        </AnimatePresence>
       </button>
     </div>
   );

@@ -1,10 +1,11 @@
-import Timeline, { Item } from "../../components/Timeline";
+import Timeline from "../../components/Timeline";
+import { Award } from "lucide-react";
 
 export default function Education() {
   return (
     <div className="container-max py-12">
       <h1 className="text-3xl font-bold mb-8">Education</h1>
-      
+
       {/* Master's Degree */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-violet-400 mb-4">Graduate Education</h2>
@@ -12,14 +13,13 @@ export default function Education() {
           <Timeline items={[{
             title: "M.S. Computer Science",
             org: "Clemson University",
-            period: "Expected Dec 2025",
+            period: "Jan 2024 – Dec 2025",
             bullets: [
               "Concentration: Data Science & Informatics",
               "Coursework: Deep Learning, Applied Data Science, Network Security, Advanced Algorithms",
-              "Graduate Student Hourly: Designed lab and homework assignments for online degree on Coursera platform",
-              "Built source assignment notebooks with test cases using asserts and nbgrader for automated grading",
-              "Maintained live coursework for Spring 2025 semester, resolving grader logic bugs and student issues",
-              "Developed cross-platform automated grading framework for CPSC 6300 in-person graduate class",
+              "Graduate Student Hourly – Data Science: Designed automated lab and homework assignments for Applied Data Science course",
+              "Built Jupyter Notebook assignments covering ML pipeline (preprocessing, outlier detection, cross-validation, PCA)",
+              "Implemented nbgrader automated grading for 200+ students",
               "Location: Clemson, SC"
             ]
           }]} />
@@ -33,41 +33,56 @@ export default function Education() {
           <Timeline items={[{
             title: "B.E. Computer Science & Engineering",
             org: "D Y Patil College of Engineering & Technology",
-            period: "Graduated Jul 2021",
+            period: "2017 – 2021",
             bullets: [
               "Bachelor of Engineering in Computer Science & Engineering",
               "Location: Kolhapur, India",
-              "Foundation in computer science fundamentals and software engineering",
-              "Coursework: Programming, Data Structures, Algorithms, Software Development",
               "Capstone projects in machine learning and computer vision",
-              "Strong foundation in mathematics and engineering principles"
+              "Led a 5-member team for the Covid-19 Safeguard real-time surveillance system",
+              "Built ANPR (License Plate Detection) system using OpenCV and Pytesseract"
             ]
           }]} />
         </div>
       </div>
 
-      {/* Academic Achievements */}
+      {/* Certifications */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold text-orange-400 mb-4">Certifications</h2>
+        <div className="card p-6 bg-slate-900/60 border-slate-800">
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { name: "Cybersecurity Fundamentals", area: "Security" },
+              { name: "Certified Information Security and Ethical Hacker (CISEH)", area: "Security" },
+              { name: "Introduction to Cybersecurity", area: "Security" },
+              { name: "Data Science Orientation", area: "Data Science" },
+              { name: "IBM Blockchain Essentials V2", area: "Blockchain" },
+            ].map((cert) => (
+              <div key={cert.name} className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50">
+                <span className="mt-1"><Award size={16} className="text-orange-400" /></span>
+                <div>
+                  <p className="text-sm font-medium text-slate-200">{cert.name}</p>
+                  <p className="text-xs text-slate-400">{cert.area}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Languages */}
       <div className="card p-6 bg-slate-900/60 border-slate-800">
-        <h2 className="text-xl font-semibold mb-4">Academic Highlights</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-semibold text-violet-400 mb-2">Graduate Level</h3>
-            <ul className="text-sm text-slate-300 space-y-1">
-              <li>• Advanced research in AI security and adversarial ML</li>
-              <li>• Educational technology: Coursera platform and cross-platform grading frameworks</li>
-              <li>• nbgrader automation and Jupyter notebook development</li>
-              <li>• Live course maintenance and student support systems</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-teal-400 mb-2">Undergraduate Level</h3>
-            <ul className="text-sm text-slate-300 space-y-1">
-              <li>• Strong foundation in computer science theory</li>
-              <li>• Hands-on experience with software development</li>
-              <li>• Project leadership and team collaboration</li>
-              <li>• Introduction to machine learning and AI concepts</li>
-            </ul>
-          </div>
+        <h2 className="text-xl font-semibold mb-4">Languages</h2>
+        <div className="flex flex-wrap gap-4">
+          {[
+            { lang: "English", level: "Professional" },
+            { lang: "Hindi", level: "Native / Bilingual" },
+            { lang: "Marathi", level: "Native / Bilingual" },
+          ].map((l) => (
+            <div key={l.lang} className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800 border border-slate-700">
+              <span className="font-medium text-slate-200">{l.lang}</span>
+              <span className="text-xs text-slate-400">— {l.level}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

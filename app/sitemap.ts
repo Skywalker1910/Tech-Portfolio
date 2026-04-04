@@ -5,6 +5,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "https://example.com/projects", lastModified: new Date() },
     { url: "https://example.com/education", lastModified: new Date() },
     { url: "https://example.com/experience", lastModified: new Date() },
-    { url: "https://example.com/academics", lastModified: new Date() },
+    { url: "https://example.com/skills", lastModified: new Date() },
+    { url: "https://example.com/socials", lastModified: new Date() },
+    { url: "https://example.com/contact", lastModified: new Date() },
   ];
 }

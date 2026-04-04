@@ -51,8 +51,11 @@ export default function BackgroundFX() {
     }
 
     function draw() {
-      // clear with a soft gradient glow
-      ctx.clearRect(0, 0, w, h);
+      // fill black background
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, w, h);
+
+      // subtle glow overlay
       const g = ctx.createRadialGradient(
         w * 0.8,
         h * 0.2,
@@ -166,8 +169,8 @@ export default function BackgroundFX() {
   }, []);
 
   return (
-    <div className="absolute inset-0 -z-10">
-      <canvas ref={canvasRef} className="w-full h-full opacity-90" />
+    <div className="fixed inset-0 -z-10 bg-black">
+      <canvas ref={canvasRef} className="w-full h-full" />
     </div>
   );
 }

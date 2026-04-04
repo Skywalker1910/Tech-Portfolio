@@ -1,59 +1,74 @@
 import Badge from "../../components/Badge";
+import {
+  SiPython, SiPostgresql, SiCplusplus,
+  SiPytorch, SiTensorflow, SiScikitlearn,
+  SiPlotly,
+  SiPandas, SiNumpy,
+  SiGit, SiGithub, SiDocker, SiJupyter, SiSalesforce, SiPostman,
+  SiOpencv, SiR,
+} from "react-icons/si";
+import { Cloud, BrainCircuit, BarChart3, ShieldAlert, Eye, Workflow, GraduationCap, TrendingUp, FlaskConical, BarChart2, Table2 } from "lucide-react";
 
-const skillCategories = [
+type Skill = { name: string; level: string; icon?: React.ReactNode };
+
+const skillCategories: { title: string; skills: Skill[] }[] = [
   {
     title: "Programming & Machine Learning",
     skills: [
-      { name: "Python", level: "Advanced" },
-      { name: "SQL", level: "Advanced" },
-      { name: "R", level: "Intermediate" },
-      { name: "C++", level: "Intermediate" },
-      { name: "PyTorch", level: "Advanced" },
-      { name: "TensorFlow", level: "Advanced" },
-      { name: "scikit-learn", level: "Advanced" },
+      { name: "Python",       level: "Advanced",     icon: <SiPython className="text-[#3776AB]" /> },
+      { name: "SQL",          level: "Advanced",     icon: <SiPostgresql className="text-[#336791]" /> },
+      { name: "R",            level: "Intermediate", icon: <SiR className="text-[#276DC3]" /> },
+      { name: "C++",          level: "Intermediate", icon: <SiCplusplus className="text-[#00599C]" /> },
+      { name: "PyTorch",      level: "Advanced",     icon: <SiPytorch className="text-[#EE4C2C]" /> },
+      { name: "TensorFlow",   level: "Advanced",     icon: <SiTensorflow className="text-[#FF6F00]" /> },
+      { name: "scikit-learn", level: "Advanced",     icon: <SiScikitlearn className="text-[#F7931E]" /> },
     ]
   },
   {
     title: "Data Visualization & Analytics",
     skills: [
-      { name: "Tableau", level: "Advanced" },
-      { name: "Power BI", level: "Advanced" },
-      { name: "matplotlib", level: "Advanced" },
-      { name: "seaborn", level: "Advanced" },
-      { name: "pandas", level: "Advanced" },
-      { name: "NumPy", level: "Advanced" },
+      { name: "Tableau",    level: "Advanced", icon: <Table2 size={18} className="text-[#E97627]" /> },
+      { name: "Power BI",   level: "Advanced", icon: <BarChart2 size={18} className="text-[#F2C811]" /> },
+      { name: "matplotlib", level: "Advanced", icon: <SiPlotly className="text-[#3F4F75]" /> },
+      { name: "seaborn",    level: "Advanced", icon: <FlaskConical size={18} className="text-teal-400" /> },
+      { name: "pandas",     level: "Advanced", icon: <SiPandas className="text-[#8b5cf6]" /> },
+      { name: "NumPy",      level: "Advanced", icon: <SiNumpy className="text-[#4DABCF]" /> },
     ]
   },
   {
     title: "Cloud & Development Tools",
     skills: [
-      { name: "AWS", level: "Intermediate" },
-      { name: "Git", level: "Advanced" },
-      { name: "Docker", level: "Intermediate" },
-      { name: "Jupyter", level: "Advanced" },
-      { name: "nbgrader", level: "Advanced" },
-      { name: "Salesforce", level: "Intermediate" },
+      { name: "AWS",        level: "Intermediate", icon: <Cloud size={18} className="text-[#FF9900]" /> },
+      { name: "Git",        level: "Advanced",     icon: <SiGit className="text-[#F05032]" /> },
+      { name: "GitHub",     level: "Advanced",     icon: <SiGithub className="text-zinc-300" /> },
+      { name: "Docker",     level: "Intermediate", icon: <SiDocker className="text-[#2496ED]" /> },
+      { name: "Jupyter",    level: "Advanced",     icon: <SiJupyter className="text-[#F37626]" /> },
+      { name: "OpenCV",     level: "Advanced",     icon: <SiOpencv className="text-[#5C3EE8]" /> },
+      { name: "Salesforce", level: "Intermediate", icon: <SiSalesforce className="text-[#00A1E0]" /> },
+      { name: "Postman",    level: "Intermediate", icon: <SiPostman className="text-[#FF6C37]" /> },
     ]
   },
   {
     title: "Specialized Areas",
     skills: [
-      { name: "Machine Learning", level: "Advanced" },
-      { name: "Data Analytics", level: "Advanced" },
-      { name: "Deep Learning", level: "Advanced" },
-      { name: "AI Security", level: "Intermediate" },
-      { name: "Computer Vision", level: "Advanced" },
-      { name: "Educational Technology", level: "Advanced" },
+      { name: "Machine Learning",       level: "Advanced",     icon: <BrainCircuit size={18} className="text-violet-400" /> },
+      { name: "Data Analytics",         level: "Advanced",     icon: <BarChart3 size={18} className="text-teal-400" /> },
+      { name: "Deep Learning",          level: "Advanced",     icon: <BrainCircuit size={18} className="text-orange-400" /> },
+      { name: "Statistical Modeling",   level: "Advanced",     icon: <TrendingUp size={18} className="text-sky-400" /> },
+      { name: "AI Security",            level: "Intermediate", icon: <ShieldAlert size={18} className="text-red-400" /> },
+      { name: "Computer Vision",        level: "Advanced",     icon: <Eye size={18} className="text-emerald-400" /> },
+      { name: "MLOps",                  level: "Intermediate", icon: <Workflow size={18} className="text-amber-400" /> },
+      { name: "Educational Technology", level: "Advanced",     icon: <GraduationCap size={18} className="text-pink-400" /> },
     ]
   }
 ];
 
 const getLevelColor = (level: string) => {
   switch (level) {
-    case "Advanced": return "teal";
+    case "Advanced":     return "teal";
     case "Intermediate": return "violet";
-    case "Beginner": return "gray";
-    default: return "gray";
+    case "Beginner":     return "gray";
+    default:             return "gray";
   }
 };
 
@@ -74,7 +89,14 @@ export default function Skills() {
             <div className="space-y-3">
               {category.skills.map((skill, j) => (
                 <div key={j} className="flex items-center justify-between">
-                  <span className="text-slate-200">{skill.name}</span>
+                  <span className="flex items-center gap-2.5 text-slate-200">
+                    {skill.icon && (
+                      <span className="flex items-center justify-center w-5 h-5 text-[18px] shrink-0">
+                        {skill.icon}
+                      </span>
+                    )}
+                    {skill.name}
+                  </span>
                   <Badge color={getLevelColor(skill.level)}>
                     {skill.level}
                   </Badge>
@@ -106,10 +128,10 @@ export default function Skills() {
       <div className="mt-8 card p-6 bg-slate-900/60 border-slate-800">
         <h2 className="text-xl font-semibold mb-4">Career Objective</h2>
         <p className="text-slate-300 leading-relaxed">
-          Actively seeking <strong className="text-white">Data Scientist / ML Engineer / Data Analyst</strong> roles 
-          to apply technical and analytical skills in delivering business impact. Available for full-time opportunities 
-          starting December 2025. Experienced in machine learning, data analytics, and scalable educational technology 
-          with a proven track record in both academic and industry settings.
+          Actively seeking <strong className="text-white">AI Engineer / ML Engineer / Data Scientist</strong> roles 
+          to apply technical and analytical skills in delivering business impact. Experienced in machine learning, 
+          data analytics, and scalable educational technology with a proven track record in both academic and 
+          industry settings.
         </p>
       </div>
     </div>

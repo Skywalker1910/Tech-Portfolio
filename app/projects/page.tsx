@@ -1,7 +1,9 @@
 "use client";
 import { useMemo, useState } from "react";
 import Badge from "../../components/Badge";
+import GitHubFlipButton from "../../components/GitHubFlipButton";
 import Link from "next/link";
+import { FlaskConical, ExternalLink } from "lucide-react";
 
 type Project = { 
   title: string; 
@@ -16,7 +18,69 @@ type Project = {
   featured?: boolean;
 };
 
+type CaseStudy = {
+  num: string;
+  title: string;
+  period: string;
+  context: string;
+  bullets: string[];
+  tags: string[];
+  github?: string;
+  accent: string; // tailwind color name
+};
+
+const CASE_STUDIES: CaseStudy[] = [
+  {
+    num: "01",
+    title: "Skynet – AQI Prediction System",
+    period: "Sept 2025 – Nov 2025",
+    context: "2025 NASA Space Apps Challenge",
+    bullets: [
+      "Built an end-to-end ML pipeline to forecast Air Quality Index (AQI) levels using multi-source data from NASA TEMPO, OpenAQ, weather, and traffic APIs.",
+      "Developed data ingestion and preprocessing workflows to integrate environmental, meteorological, and traffic datasets and engineer predictive features.",
+      "Trained ML models to capture temporal and spatial patterns impacting air quality across urban regions.",
+    ],
+    tags: ["Python", "scikit-learn", "pandas", "NumPy", "ML Pipeline", "NASA", "Air Quality"],
+    accent: "teal",
+  },
+  {
+    num: "02",
+    title: "Adversarial Attacks – Experimentation & Case Study",
+    period: "2024",
+    context: "AI Security Research · Clemson University",
+    bullets: [
+      "Studied and experimented with adversarial attack techniques including data poisoning, adversarial patches, and evasion attacks on computer vision models.",
+      "Conducted experiments on autonomous vehicle monocular depth estimation (MDE) systems, probing vulnerabilities in scene understanding, object perception, and depth estimation pipelines.",
+      "Analysed attack transferability and model robustness across multiple architectures under white-box and black-box threat models.",
+    ],
+    tags: ["Computer Vision", "Adversarial ML", "Data Poisoning", "Python", "Deep Learning", "AV Safety"],
+    accent: "violet",
+  },
+  {
+    num: "03",
+    title: "LLM Defense Evaluation Framework",
+    period: "Sept 2024 – Dec 2024",
+    context: "AI Security Research · Clemson University",
+    bullets: [
+      "Built a Python-based evaluation framework to systematically probe and benchmark LLM defense mechanisms against adversarial prompts.",
+      "Measured model behaviour across token-level patterns, semantic analysis, response latency, refusal rates, and adversarial attack success rates.",
+      "Instrumented GPT-3.5 and GPT-4 endpoints with automated test harnesses to quantify safety-guardrail effectiveness under diverse jailbreak strategies.",
+    ],
+    tags: ["LLM", "Python", "Evaluation", "Security", "Adversarial AI", "GPT"],
+    accent: "orange",
+  },
+];
+
 const ALL: Project[] = [
+  {
+    title: "Movie Recommendation System",
+    blurb: "AI-powered movie recommendation engine built using AI-assisted tools and autonomous agents.",
+    description: "Developed a movie recommendation system leveraging AI-assisted tools and agents to build and evaluate the recommendation pipeline. Explored collaborative filtering and content-based filtering techniques to surface personalized movie suggestions. Used AI agents to accelerate data exploration, feature engineering, and model iteration. Demonstrates practical application of LLM-assisted software development in building end-to-end ML systems.",
+    tags: ["Recommendation Systems", "Machine Learning", "AI Agents", "Python"],
+    year: 2025,
+    status: "completed",
+    featured: true,
+  },
   { 
     title: "MASTERKEY Jailbreak Replication", 
     blurb: "Advanced security research on Large Language Model vulnerabilities and defense mechanisms.", 
@@ -193,7 +257,94 @@ export default function Projects() {
           </button>
         </div>
       )}
+
+      {/* ── Experimentation & Case Studies ── */}
+      <div className="mt-20">
+        <div className="flex items-center gap-3 mb-2">
+          <FlaskConical size={18} className="text-violet-400" />
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">
+            Research & Experimentation
+          </p>
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+          Experimentation &amp; Case Studies
+        </h2>
+        <p className="text-sm text-zinc-500 max-w-xl mb-10 leading-relaxed">
+          Hands-on experiments, security research, and applied ML case studies — work that lives at the boundary of exploration and engineering.
+        </p>
+
+        <div className="space-y-0">
+          {CASE_STUDIES.map((cs) => (
+            <CaseStudyCard key={cs.num} cs={cs} />
+          ))}
+        </div>
+      </div>
     </div>
+  );
+}
+
+function CaseStudyCard({ cs }: { cs: CaseStudy }) {
+  const accentMap: Record<string, { border: string; num: string; tag: string; bullet: string; badge: string }> = {
+    teal:   { border: "border-teal-500/20 hover:border-teal-500/40",   num: "text-teal-500/30",   tag: "bg-teal-500/10 text-teal-300 border border-teal-500/20",   bullet: "bg-teal-400",   badge: "text-teal-400" },
+    violet: { border: "border-violet-500/20 hover:border-violet-500/40", num: "text-violet-500/30", tag: "bg-violet-500/10 text-violet-300 border border-violet-500/20", bullet: "bg-violet-400", badge: "text-violet-400" },
+    orange: { border: "border-orange-500/20 hover:border-orange-500/40", num: "text-orange-500/30", tag: "bg-orange-500/10 text-orange-300 border border-orange-500/20", bullet: "bg-orange-400", badge: "text-orange-400" },
+  };
+  const a = accentMap[cs.accent] ?? accentMap.violet;
+
+  return (
+    <article className={`group border-b border-zinc-800/60 first:border-t py-8 flex flex-col md:flex-row gap-6 md:gap-10 transition-colors`}>
+      {/* Number */}
+      <span className={`text-6xl md:text-7xl font-black leading-none font-mono select-none shrink-0 ${a.num} group-hover:opacity-60 transition-opacity`}>
+        {cs.num}
+      </span>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        {/* Context + period */}
+        <div className="flex flex-wrap items-center gap-3 mb-2">
+          <span className={`text-[10px] font-bold tracking-[0.25em] uppercase border border-zinc-700/70 bg-zinc-800/60 text-zinc-400 px-2 py-0.5 rounded`}>
+            {cs.context}
+          </span>
+          <span className="text-[11px] font-mono text-zinc-600">{cs.period}</span>
+        </div>
+
+        {/* Title */}
+        <h3 className="text-xl md:text-2xl font-bold text-white mb-4 leading-snug group-hover:text-zinc-200 transition-colors">
+          {cs.title}
+        </h3>
+
+        {/* Bullets */}
+        <ul className="space-y-2 mb-5">
+          {cs.bullets.map((b, i) => (
+            <li key={i} className="flex items-start gap-2.5 text-sm text-zinc-400 leading-relaxed">
+              <span className={`mt-2 w-1 h-1 rounded-full shrink-0 ${a.bullet} opacity-60`} />
+              {b}
+            </li>
+          ))}
+        </ul>
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2">
+          {cs.tags.map((t) => (
+            <span key={t} className={`text-[10px] font-medium px-2.5 py-0.5 rounded-full ${a.tag}`}>
+              {t}
+            </span>
+          ))}
+        </div>
+
+        {/* GitHub link if present */}
+        {cs.github && (
+          <a
+            href={cs.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`inline-flex items-center gap-1.5 mt-4 text-xs ${a.badge} hover:text-white transition-colors`}
+          >
+            View on GitHub <ExternalLink size={11} />
+          </a>
+        )}
+      </div>
+    </article>
   );
 }
 
@@ -240,41 +391,12 @@ function ProjectCard({ project }: { project: Project }) {
         {project.tags.map(t => <Badge key={t}>{t}</Badge>)}
       </div>
 
-      {/* Links */}
-      {(project.github || project.demo || project.link) && (
-        <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800">
-          {project.github && (
-            <a 
-              href={project.github} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
-            >
-              GitHub
-            </a>
-          )}
-          {project.demo && (
-            <a 
-              href={project.demo} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-xs px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
-            >
-              Live Demo
-            </a>
-          )}
-          {project.link && (
-            <a 
-              href={project.link} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-xs px-3 py-1.5 rounded-lg bg-teal-600 text-white hover:bg-teal-500 transition-colors"
-            >
-              View Project
-            </a>
-          )}
-        </div>
-      )}
+      {/* GitHub Button */}
+      <div className="pt-3 border-t border-slate-800 flex justify-center">
+        <GitHubFlipButton
+          href={project.github || "https://github.com/Skywalker1910"}
+        />
+      </div>
     </article>
   );
 }

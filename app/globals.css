@@ -3,11 +3,15 @@
 
 /* Theme tokens */
 :root{
-  --bg:#0b0c0f;
-  --ink:#0b1220;
+  --bg:#000000;
+  --ink:#000000;
   --muted:#6b7280;
   --brand:#6d28d9; /* violet */
   --accent:#14b8a6; /* teal */
+}
+
+body {
+  background-color: #000000;
 }
 
 /* Batman Theme */
@@ -205,9 +209,67 @@
 
 html, body { height: 100%; }
 
-/* Base body styles (still fine to use @apply) */
-body { @apply bg-white text-slate-900 antialiased; }
-.dark body { background: var(--bg); color:#e5e7eb; }
+/* Base body styles */
+body { background-color: #000000; color: #e5e7eb; -webkit-font-smoothing: antialiased; }
+.dark body { background: #000000; color:#e5e7eb; }
+
+/* Space Grotesk for all headings */
+h1, h2.page-title { font-family: var(--font-space-grotesk); }
+
+/* Hide default cursor site-wide on pointer devices (custom cursor handles it) */
+@media (pointer: fine) {
+  *, *::before, *::after { cursor: none !important; }
+}
+
+/* ── Light Theme ── warm cream, near-black text */
+.light body {
+  background-color: #e8e5de;
+  color: #111111;
+}
+
+/* Hide the canvas animation in light mode (body bg covers it naturally via stacking context) */
+.light .fixed.-z-10 { opacity: 0; pointer-events: none; }
+
+/* Navbar pill */
+.light .bg-zinc-900\/85 { background-color: rgba(255,255,255,0.85) !important; }
+.light .border-zinc-800 { border-color: #d1cec8 !important; }
+.light .text-zinc-300 { color: #333333 !important; }
+.light .hover\:text-white:hover { color: #000000 !important; }
+.light .hover\:bg-zinc-700:hover { background-color: #e0ddd6 !important; }
+.light .bg-zinc-700 { background-color: #d4d0c8 !important; }
+.light .bg-zinc-900 { background-color: #f5f3ef !important; }
+.light .bg-zinc-800 { background-color: #eceae4 !important; }
+.light .hover\:bg-zinc-800:hover { background-color: #eceae4 !important; }
+.light .h-5.w-px.bg-zinc-700 { background-color: #c8c5be !important; }
+
+/* Active nav pill: keep dark pill on light bg */
+.light .bg-white.text-black { background-color: #111111 !important; color: #ffffff !important; }
+
+/* Wordmark */
+.light .text-zinc-200 { color: #222222 !important; }
+.light .text-zinc-500 { color: #888880 !important; }
+
+/* Cards */
+.light .card {
+  background-color: #f0ede6 !important;
+  border-color: #d4d0c8 !important;
+  color: #111111 !important;
+}
+.light .bg-slate-900\/50,
+.light .bg-slate-900\/60 { background-color: rgba(240,237,230,0.8) !important; }
+.light .bg-slate-900 { background-color: #f0ede6 !important; }
+.light .border-slate-800 { border-color: #d4d0c8 !important; }
+.light .border-slate-700 { border-color: #c8c5be !important; }
+
+/* Text overrides */
+.light .text-slate-300 { color: #333333 !important; }
+.light .text-slate-400 { color: #555550 !important; }
+.light .text-white { color: #111111 !important; }
+.light .text-slate-200 { color: #222222 !important; }
+
+/* Buttons */
+.light .hover\:bg-slate-800:hover { background-color: #dedad2 !important; }
+.light .border-slate-700 { border-color: #c8c5be !important; }
 
 /* === Tailwind v4: register custom utilities === */
 @utility container-max {
@@ -219,9 +281,146 @@ body { @apply bg-white text-slate-900 antialiased; }
 }
 
 @utility hero-wrap {
-  @apply relative overflow-hidden;
+  @apply relative overflow-hidden min-h-screen;
 }
 
 @utility hero-inner {
-  @apply container-max pt-16 md:pt-24 pb-8 md:pb-10;
+  @apply container-max pt-16 md:pt-24 pb-8 md:pb-10 relative;
+  z-index: 1;
+}
+
+/* Social Icons — bare icons with branded tooltip on hover */
+.social-icons {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+.icon-content {
+  position: relative;
+}
+.icon-content .social-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 5px;
+  opacity: 0;
+  visibility: hidden;
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+  z-index: 10;
+}
+.icon-content:hover .social-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+.social-btn:hover {
+  transform: translateY(-3px);
+}
+.social-btn svg {
+  width: 27.5px;
+  height: 27.5px;
+}
+
+/* Brand icon colors on hover */
+.social-github:hover  { color: #e6edf3; }
+.social-github  .social-tooltip { background: #171515; }
+
+.social-linkedin:hover { color: #0a66c2; }
+.social-linkedin .social-tooltip { background: #0a66c2; }
+
+.social-email:hover   { color: #22c55e; }
+.social-email   .social-tooltip { background: #22c55e; }
+
+.social-instagram:hover { color: #e1306c; }
+.social-instagram .social-tooltip { background: linear-gradient(45deg, #f09433, #dc2743); }
+
+.social-discord:hover { color: #5865F2; }
+.social-discord .social-tooltip { background: #5865F2; }
+
+.social-facebook:hover { color: #1877F2; }
+.social-facebook .social-tooltip { background: #1877F2; }
+
+/* GitHub Flip Button (uiverse.io inspired 3D cube) */
+.gh-flip-btn {
+  display: inline-flex;
+  align-items: stretch;
+  border: 2px solid #fff;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.3s;
+  max-width: 100%;
+}
+.gh-flip-btn:hover {
+  border-color: #a78bfa;
+}
+.gh-flip-icon {
+  background-color: #fff;
+  color: #212121;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.gh-flip-icon svg {
+  width: 16px;
+  height: 16px;
+}
+.gh-flip-cube {
+  display: inline-flex;
+  position: relative;
+  width: 180px;
+  height: 32px;
+  transition: transform 0.4s;
+  transform-style: preserve-3d;
+}
+.gh-flip-btn:hover .gh-flip-cube {
+  transform: rotateX(90deg);
+}
+.gh-flip-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 32px;
+  padding: 0 10px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  backface-visibility: hidden;
+}
+.gh-flip-front {
+  background-color: #212121;
+  color: #fff;
+  transform: translateZ(16px);
+}
+.gh-flip-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #a78bfa;
+  color: #fff;
+  transform: rotateX(-90deg) translateZ(16px);
 }
