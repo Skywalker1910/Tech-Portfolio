@@ -8,7 +8,14 @@ import type { NextConfig } from "next";
 // Adjust the entries below to match the exact origin(s) (scheme + host
 // and port) you use while developing. Commonly that's http://<ip>:3000.
 const nextConfig: NextConfig = {
-  // ...other Next.js config options go here
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+    ],
+  },
   allowedDevOrigins: [
     // allow accessing the dev server from this local IP (common default port)
     "http://192.168.0.229:3000",

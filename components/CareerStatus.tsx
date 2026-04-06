@@ -6,7 +6,7 @@ import { GraduationCap, Briefcase, Target, MapPin, ShieldCheck, Rocket } from "l
 const items = [
   {
     icon: GraduationCap,
-    text: "M.S. Computer Science — Clemson University (Dec 2025)",
+    text: "M.S. Computer Science — Clemson University\n(Dec 2025)",
   },
   {
     icon: Briefcase,
@@ -67,7 +67,7 @@ export default function CareerStatus() {
               size={20}
               className="mt-0.5 shrink-0 text-violet-300 group-hover:text-white transition-colors"
             />
-            <span className="text-sm text-white/90 leading-relaxed">
+            <span className="text-sm text-white/90 leading-relaxed whitespace-pre-line">
               {highlight ? (
                 <>
                   Open to Roles:{" "}

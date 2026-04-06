@@ -1,13 +1,55 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, type ComponentType } from "react";
 import Image from "next/image";
 import { useScroll, useTransform, motion } from "framer-motion";
 import SentenceFlip from "../components/SentenceFlip";
 import CareerStatus from "../components/CareerStatus";
 import OrbitalDivider from "../components/OrbitalDivider";
-import { ShieldCheck, GraduationCap, Briefcase, ChevronDown, ArrowUpRight, ArrowRight } from "lucide-react";
+import { ShieldCheck, GraduationCap, Briefcase, ChevronDown, ArrowUpRight, ArrowRight, Brain, Eye, ShieldAlert, Languages, BookOpen, Phone, Workflow, Cpu, TestTube2, Bot, Swords, Car, Star, ClipboardList, Shield, Database, FlaskConical } from "lucide-react";
+import { SiPython, SiTensorflow, SiOpencv, SiJupyter, SiCoursera, SiSelenium, SiPytorch, SiOpenai, SiScikitlearn, SiPandas, SiNumpy, SiDocker, SiPostgresql } from "react-icons/si";
 import Link from "next/link";
+
+// ─── Tag icon map ────────────────────────────────────────────────────────────
+const TAG_ICONS: Record<string, ComponentType<{ size?: number; className?: string }>> = {
+  // Brand / library icons (Simple Icons)
+  "Python":                  SiPython,
+  "TensorFlow":              SiTensorflow,
+  "OpenCV":                  SiOpencv,
+  "nbgrader":                SiJupyter,
+  "Coursera":                SiCoursera,
+  "Test Automation":         SiSelenium,
+  "Deep Learning":           SiPytorch,
+  "PyTorch":                 SiPytorch,
+  "GPT-4":                   SiOpenai,
+  "scikit-learn":            SiScikitlearn,
+  "pandas":                  SiPandas,
+  "NumPy":                   SiNumpy,
+  "Docker":                  SiDocker,
+  "PostgreSQL":              SiPostgresql,
+  // Conceptual / domain icons (Lucide)
+  "Machine Learning":        Brain,
+  "ML Pipeline":             Brain,
+  "AI Security":             ShieldAlert,
+  "NLP":                     Languages,
+  "Computer Vision":         Eye,
+  "Curriculum Design":       BookOpen,
+  "Telecom":                 Phone,
+  "Agile":                   Workflow,
+  "Air Quality":             Workflow,
+  "QA":                      TestTube2,
+  "Computer Engineering":    Cpu,
+  "LLM":                     Bot,
+  "Transformers":            Bot,
+  "Adversarial AI":          Swords,
+  "Adversarial ML":          Swords,
+  "AV Safety":               Car,
+  "Recommender Systems":     Star,
+  "AI Agents":               Bot,
+  "Evaluation":              ClipboardList,
+  "Security":                Shield,
+  "Flask":                   FlaskConical,
+};
 
 // ─── Timeline data ───────────────────────────────────────────────────────────
 const colorMap = {
@@ -66,7 +108,7 @@ const timelineItems: {
   color: ColorKey;
   tags: string[];
   bullets: string[];
-  logo: { type: "image"; src: string; size?: number } | { type: "initials"; text: string; bg: string; fg: string };
+  logo: { type: "image"; src: string; size?: number; filter?: string } | { type: "initials"; text: string; bg: string; fg: string };
 }[] = [
   {
     period: "Aug 2024 – Dec 2025",
@@ -121,7 +163,7 @@ const timelineItems: {
     type: "Education",
     color: "blue",
     tags: ["Computer Engineering", "Python", "OpenCV", "TensorFlow"],
-    logo: { type: "image", src: "/dypcet-logo.png" },
+    logo: { type: "image", src: "/dypcet-logo.png", size: 200, filter: "brightness(0) invert(1)" },
     bullets: [
       "Graduated with Bachelor of Engineering in Computer Engineering.",
       "Built a Covid-19 Safeguard System using OpenCV & TensorFlow for real-time surveillance.",
@@ -134,12 +176,12 @@ const timelineItems: {
 const featuredProjects = [
   {
     num: "01",
-    type: "AI Security Research",
-    title: "MASTERKEY Jailbreak Replication",
-    year: "2025",
-    tags: ["LLM", "Security", "GPT-4", "Adversarial AI", "Evaluation"],
+    type: "ML System",
+    title: "Personalized Movie Recommendation System",
+    year: "2024",
+    tags: ["Recommender Systems", "PyTorch", "Flask", "PostgreSQL", "Docker"],
     blurb:
-      "Reproduced adversarial jailbreak attacks on GPT-3.5 and GPT-4. Built custom evaluation metrics to benchmark LLM defense robustness across multiple attack vectors.",
+      "End-to-end recommendation engine processing 26M+ ratings with FunkSVD matrix factorization, achieving ~21% improvement over baseline (RMSE 0.76).",
     href: "/projects",
     preview: {
       bg: "from-violet-950 via-purple-900/60 to-indigo-950",
@@ -149,12 +191,12 @@ const featuredProjects = [
   },
   {
     num: "02",
-    type: "Computer Vision Research",
-    title: "AdvRM Adversarial Patches",
-    year: "2024",
-    tags: ["Computer Vision", "Adversarial ML", "AV Safety", "Deep Learning"],
+    type: "ML Pipeline",
+    title: "Skynet – AQI Prediction System",
+    year: "2025",
+    tags: ["ML Pipeline", "scikit-learn", "pandas", "NumPy", "Air Quality"],
     blurb:
-      "Crafted adversarial patches that fool self-driving car depth estimation models, exposing critical perception vulnerabilities in safety-critical autonomous systems.",
+      "Built an ML pipeline to forecast Air Quality Index using NASA TEMPO, OpenAQ, weather, and traffic data with temporal and spatial pattern modeling.",
     href: "/projects",
     preview: {
       bg: "from-teal-950 via-cyan-900/60 to-emerald-950",
@@ -164,12 +206,12 @@ const featuredProjects = [
   },
   {
     num: "03",
-    type: "ML System",
-    title: "Movie Recommendation System",
+    type: "LLM Research",
+    title: "R2D2 – Experimental Transformer-based LLM",
     year: "2025",
-    tags: ["Recommendation Systems", "Machine Learning", "AI Agents", "Python"],
+    tags: ["PyTorch", "Transformers", "NLP", "Deep Learning"],
     blurb:
-      "End-to-end AI-assisted recommendation engine using collaborative and content-based filtering, built with autonomous agents for rapid pipeline iteration.",
+      "Building transformer architectures from scratch to understand LLM internals — implementing tokenization, embeddings, and attention mechanisms.",
     href: "/projects",
     preview: {
       bg: "from-orange-950 via-amber-900/60 to-red-950",
@@ -218,10 +260,10 @@ function TimelineItem({
     >
       {/* ── Left: date + location + logo ── */}
       <div className="md:text-right md:pt-1 md:pr-5 flex md:flex-col gap-3 md:gap-1 items-center md:items-end">
-        <span className="text-[11px] font-mono text-zinc-500 whitespace-nowrap">
+        <span className="text-[13px] font-mono text-zinc-400 whitespace-nowrap">
           {item.period}
         </span>
-        <span className="text-[11px] text-zinc-600 whitespace-nowrap">{item.location}</span>
+        <span className="text-[13px] text-zinc-400 whitespace-nowrap">{item.location}</span>
         {/* Logo — desktop only, sits below location */}
         <div className="hidden md:flex justify-end mt-2">
           {item.logo.type === "image" ? (
@@ -230,7 +272,8 @@ function TimelineItem({
               alt={item.org}
               width={item.logo.size ?? 160}
               height={item.logo.size ?? 160}
-              className="rounded opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-200 object-contain"
+              className="rounded opacity-100 hover:scale-105 transition-all duration-200 object-contain"
+              style={item.logo.filter ? { filter: item.logo.filter } : undefined}
               title={item.org}
             />
           ) : (
@@ -262,7 +305,8 @@ function TimelineItem({
                 alt={item.org}
                 width={100}
                 height={100}
-                className="rounded opacity-80 object-contain"
+                className="rounded opacity-100 object-contain"
+                style={item.logo.filter ? { filter: item.logo.filter } : undefined}
               />
             ) : (
               <span
@@ -286,11 +330,15 @@ function TimelineItem({
 
         {/* tags */}
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {item.tags.map((tag) => (
-            <span key={tag} className={`text-[11px] px-2.5 py-0.5 rounded-full ${c.tag}`}>
-              {tag}
-            </span>
-          ))}
+          {item.tags.map((tag) => {
+            const TagIcon = TAG_ICONS[tag];
+            return (
+              <span key={tag} className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full ${c.tag}`}>
+                {TagIcon && <TagIcon size={10} />}
+                {tag}
+              </span>
+            );
+          })}
         </div>
 
         {/* bullets */}
@@ -321,9 +369,9 @@ export default function Home() {
   const heroX = useTransform(scrollYProgress, [0, 0.4], ["0%", "-22%"]);
 
   // Career card: fade + slide in from right + brighten
-  const cardOpacity = useTransform(scrollYProgress, [0.06, 0.38], [0, 1]);
+  const cardOpacity = useTransform(scrollYProgress, [0.06, 0.09, 0.38], [0, 0.9, 1]);
   const cardX = useTransform(scrollYProgress, [0.06, 0.38], [80, 0]);
-  const cardBrightness = useTransform(scrollYProgress, [0.06, 0.38], [0.3, 1.3]);
+  const cardBrightness = useTransform(scrollYProgress, [0.06, 0.33, 0.38], [0.3, 2.0, 1.0]);
   const cardFilter = useTransform(cardBrightness, (v) => `brightness(${v}) saturate(${0.4 + v * 0.8})`);
 
   // Scroll hint arrow: fades out early
@@ -543,14 +591,18 @@ export default function Home() {
                   {project.blurb}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-zinc-800/80 text-zinc-400 border border-zinc-700/50"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                  {project.tags.map((tag) => {
+                    const TagIcon = TAG_ICONS[tag];
+                    return (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-zinc-800/80 text-zinc-400 border border-zinc-700/50"
+                      >
+                        {TagIcon && <TagIcon size={9} />}
+                        {tag}
+                      </span>
+                    );
+                  })}
                 </div>
                 <Link
                   href={project.href}

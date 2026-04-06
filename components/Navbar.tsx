@@ -173,6 +173,14 @@ export default function Navbar() {
         Aditya More&nbsp;<span className="text-zinc-500">•</span>&nbsp;Tech Portfolio
       </Link>
 
+      {/* Top-right open to work badge */}
+      <div className="fixed top-5 right-5 z-50 hidden md:flex items-center">
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-1 rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          Open to Work
+        </span>
+      </div>
+
       {/* Floating pill navbar */}
       <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-auto">
         <nav className="flex items-center gap-0.5 px-2 py-1.5 rounded-full bg-zinc-900/85 backdrop-blur-md border border-zinc-800 shadow-2xl shadow-black/60 text-sm">

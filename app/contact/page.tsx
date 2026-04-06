@@ -1,4 +1,4 @@
-import { Mail, FileText } from "lucide-react";
+import { Mail, FileText, MessageSquare } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import type { Metadata } from "next";
 
@@ -45,11 +45,18 @@ const contacts = [
 export default function Contact() {
   return (
     <section className="container-max py-16 relative z-[1]">
-      <h1 className="text-3xl font-bold mb-2">Get in Touch</h1>
-      <p className="text-zinc-400 mb-10 max-w-lg">
-        I&apos;m actively looking for AI Engineer, ML Engineer, and Data Scientist roles.
-        Feel free to reach out — I&apos;d love to connect!
-      </p>
+      {/* Header */}
+      <div className="mb-12">
+        <div className="flex items-center gap-2 mb-3">
+          <MessageSquare size={15} className="text-orange-400" />
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">Contact</p>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-bold text-white">Get in Touch</h1>
+        <p className="mt-3 text-zinc-500 max-w-lg text-sm leading-relaxed">
+          I&apos;m actively looking for AI Engineer, ML Engineer, and Data Scientist roles.
+          Feel free to reach out — I&apos;d love to connect!
+        </p>
+      </div>
       <div className="grid sm:grid-cols-2 gap-4 max-w-xl">
         {contacts.map((c) => (
           <a

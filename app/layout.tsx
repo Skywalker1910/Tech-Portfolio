@@ -8,7 +8,7 @@ import BackgroundManager from "../components/BackgroundManager";
 import { Inter, Space_Grotesk } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-space-grotesk" });
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"], variable: "--font-space-grotesk" });
 
 export const metadata = {
   title: "Aditya More — AI Engineer & ML Engineer",
