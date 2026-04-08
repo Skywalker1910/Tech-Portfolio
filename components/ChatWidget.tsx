@@ -5,10 +5,17 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Bot, Sparkles } from "lucide-react";
 import AiInput from "./AiInput";
 
-export default function ChatWidget() {
+export default function ChatWidget({ hideButton }: { hideButton?: boolean } = {}) {
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Listen for custom event to open chat widget from other components
+  useEffect(() => {
+    const handleOpen = () => setOpen(true);
+    window.addEventListener("openChatWidget", handleOpen);
+    return () => window.removeEventListener("openChatWidget", handleOpen);
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -55,7 +62,7 @@ export default function ChatWidget() {
                 <p className="text-[10px] text-zinc-500 mt-0.5">Ask me about Aditya&apos;s work</p>
               </div>
               <button
-                onClick={() => setOpen(false)}
+                onClick={() => { setOpen(false); window.dispatchEvent(new CustomEvent("closeChatWidget")); }}
                 className="w-6 h-6 flex items-center justify-center rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <X size={13} />
@@ -65,11 +72,21 @@ export default function ChatWidget() {
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-2.5 scrollbar-thin">
               {msgs.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center gap-2 text-center px-4">
+                <div className="h-full flex flex-col items-center justify-center gap-3 text-center px-4">
                   <Sparkles size={22} className="text-violet-400 opacity-60" />
-                  <p className="text-xs text-zinc-500 leading-relaxed">
+                  <p className="text-xs text-zinc-400 leading-relaxed">
                     Ask about projects, experience, skills, or anything else on this portfolio.
                   </p>
+                  <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-yellow-500/8 border border-yellow-500/20 text-left">
+                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0 animate-pulse" />
+                    <p className="text-[10px] text-yellow-300/80 leading-snug">
+                      This feature is still{" "}
+                      <span className="font-semibold text-yellow-300">work in progress</span>.
+                      {" "}Check the{" "}
+                      <a href="/notice" className="underline underline-offset-2 text-yellow-300 hover:text-yellow-200 transition-colors">Notice page</a>
+                      {" "}for more details.
+                    </p>
+                  </div>
                 </div>
               )}
               {msgs.map((m, i) => (
@@ -103,7 +120,7 @@ export default function ChatWidget() {
       </AnimatePresence>
 
       {/* Futuristic trigger button */}
-      <button
+      {!hideButton && <button
         onClick={() => setOpen((o) => !o)}
         className="group relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-zinc-950 border border-violet-500/40 text-violet-300 shadow-lg shadow-violet-900/30 hover:border-violet-400/70 hover:shadow-violet-700/40 hover:text-white transition-all duration-300"
       >
@@ -122,7 +139,7 @@ export default function ChatWidget() {
             </motion.span>
           )}
         </AnimatePresence>
-      </button>
+      </button>}
     </div>
   );
 }

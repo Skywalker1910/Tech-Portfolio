@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Briefcase, MapPin, CheckCircle2, GraduationCap, Code2 } from "lucide-react";
 import { SiPython, SiJupyter, SiScikitlearn, SiPandas, SiNumpy, SiPostman, SiSelenium } from "react-icons/si";
@@ -14,6 +15,9 @@ type Role = {
   location: string;
   period: string;
   type: string;
+  logo: string;
+  logoSize?: number;
+  logoFilter?: string;
   gradient: string;
   orb1: string;
   orb2: string;
@@ -37,6 +41,8 @@ const roles: Role[] = [
     location: "Clemson, SC, USA",
     period: "Aug 2024 – Dec 2025",
     type: "Research & Teaching",
+    logo: "/soc-logo.png",
+    logoSize: 150,
     gradient: "from-violet-950 via-purple-900/40 to-indigo-950",
     orb1: "bg-violet-500",
     orb2: "bg-indigo-400",
@@ -48,11 +54,13 @@ const roles: Role[] = [
     tag: "bg-violet-500/10 text-violet-300 border border-violet-500/20",
     Icon: GraduationCap,
     bullets: [
-      "Designed and developed automated lab and homework assignments for a graduate-level Applied Data Science course",
-      "Built Jupyter Notebook-based assignments using Python and nbgrader, serving 200+ students across the grading pipeline",
-      "Developed exercises covering data preprocessing, outlier detection (IQR, Z-score), model selection, cross-validation, feature selection, and PCA",
-      "Implemented automated testing logic to validate student submissions and streamline end-to-end evaluation",
-      "Conducted 2 weekly office hours and managed course-related tickets to support students with technical and conceptual queries",
+      "Designed and developed Jupyter Notebook-based labs and assignments for a graduate-level Applied Data Science course",
+      "Built automated grading pipelines using nbgrader reducing manual effort",
+      "Developed hands-on exercises covering data preprocessing, outlier detection (IQR, Z-score), model selection, cross-validation, feature selection, and PCA",
+      "Implemented automated validation and testing logic to ensure consistent evaluation of student submissions",
+      "Supported students through weekly office hours, debugging ML workflows and help clarifying core concepts",
+      "Collaborated with faculty on curriculum design and course deployment on Coursera",
+      "Debugged and resolved autograder and grading pipeline issues via Salesforce tickets, implementing fixes, validating outputs, and deploying updated notebook versions",
     ],
     tags: [
       { label: "Python", Icon: SiPython },
@@ -70,6 +78,8 @@ const roles: Role[] = [
     location: "Pune, India",
     period: "Oct 2021 – Dec 2022",
     type: "Software Engineering",
+    logo: "/amdocs-logo.png",
+    logoSize: 135,
     gradient: "from-teal-950 via-emerald-900/40 to-cyan-950",
     orb1: "bg-teal-500",
     orb2: "bg-emerald-400",
@@ -81,11 +91,11 @@ const roles: Role[] = [
     tag: "bg-teal-500/10 text-teal-300 border border-teal-500/20",
     Icon: Code2,
     bullets: [
-      "Conducted comprehensive end-to-end testing for AT&T telecom systems across web, video, and retail platforms",
-      "Automated regression and functional test suites using Postman and Amdocs proprietary tools, improving team efficiency",
-      "Collaborated with a 25-member global team across US & India to ensure seamless system integration and release quality",
-      "Ensured quality assurance for mission-critical telecommunications infrastructure serving millions of customers",
-      "Gained deep experience in large-scale enterprise testing methodologies and cross-cultural team collaboration",
+      "Performed end-to-end, regression, and API testing for enterprise-scale telecom systems serving AT&T",
+      "Designed test cases and validation strategies for new feature releases based on product requirements and stakeholder discussions",
+      "Automated test workflows using Postman and proprietary tools, improving testing efficiency and coverage",
+      "Collaborated with cross-functional global teams (US & India) in Agile environments to ensure smooth release cycles",
+      "Participated in feature planning, requirement analysis, and system validation across multiple production releases",
     ],
     tags: [
       { label: "Postman", Icon: SiPostman },
@@ -110,7 +120,7 @@ export default function Experience() {
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-white">Professional Experience</h1>
         <p className="mt-3 text-zinc-500 max-w-lg text-sm leading-relaxed">
-          From telecom QA in Pune to AI research at Clemson — a journey across roles, technologies, and continents.
+          From enterprise software engineering to applied machine learning and AI systems — experience building, testing, and scaling real-world solutions.
         </p>
       </motion.div>
 
@@ -148,11 +158,14 @@ export default function Experience() {
               />
               {/* Header content */}
               <div className="relative z-10 h-full flex items-center px-6 gap-4">
-                <div
-                  className={`w-11 h-11 rounded-xl bg-black/40 border ${r.accentBorder} backdrop-blur-sm flex items-center justify-center shrink-0`}
-                >
-                  <r.Icon size={20} className={r.accent} />
-                </div>
+                <Image
+                  src={r.logo}
+                  alt={r.org}
+                  width={r.logoSize ?? 90}
+                  height={r.logoSize ?? 90}
+                  className="object-contain shrink-0"
+                  style={r.logoFilter ? { filter: r.logoFilter } : undefined}
+                />
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg font-bold text-white leading-tight">{r.title}</h2>
                   <p className={`text-sm font-semibold ${r.accent}`}>{r.org}</p>

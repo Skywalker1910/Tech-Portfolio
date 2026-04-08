@@ -1,3 +1,4 @@
+@import "../public/bb8-chat-droid.css";
 :root { font-family: var(--font-space-grotesk), ui-sans-serif, system-ui; }
 @import "tailwindcss";
 

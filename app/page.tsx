@@ -1,10 +1,14 @@
 "use client";
 
-import { useRef, useEffect, type ComponentType } from "react";
+import { useRef, useEffect, useState, type ComponentType } from "react";
 import Image from "next/image";
 import { useScroll, useTransform, motion } from "framer-motion";
 import SentenceFlip from "../components/SentenceFlip";
 import CareerStatus from "../components/CareerStatus";
+import dynamic from "next/dynamic";
+
+// Lazy-load droid to avoid SSR issues
+const BB8DroidAssistantButton = dynamic(() => import("../components/BB8DroidAssistantButton"), { ssr: false });
 import OrbitalDivider from "../components/OrbitalDivider";
 import { ShieldCheck, GraduationCap, Briefcase, ChevronDown, ArrowUpRight, ArrowRight, Brain, Eye, ShieldAlert, Languages, BookOpen, Phone, Workflow, Cpu, TestTube2, Bot, Swords, Car, Star, ClipboardList, Shield, Database, FlaskConical } from "lucide-react";
 import { SiPython, SiTensorflow, SiOpencv, SiJupyter, SiCoursera, SiSelenium, SiPytorch, SiOpenai, SiScikitlearn, SiPandas, SiNumpy, SiDocker, SiPostgresql } from "react-icons/si";
@@ -111,7 +115,7 @@ const timelineItems: {
   logo: { type: "image"; src: string; size?: number; filter?: string } | { type: "initials"; text: string; bg: string; fg: string };
 }[] = [
   {
-    period: "Aug 2024 – Dec 2025",
+    period: "Jan 2024 – Dec 2025",
     title: "M.S. Computer Science",
     org: "Clemson University",
     location: "Clemson, SC, USA",
@@ -120,9 +124,9 @@ const timelineItems: {
     tags: ["Machine Learning", "AI Security", "NLP", "Computer Vision"],
     logo: { type: "image", src: "/clemson-university-logo.png", size: 110 },
     bullets: [
-      "Specialized in ML, adversarial AI, and data-driven systems.",
-      "Replicated MASTERKEY jailbreak attacks on GPT models with custom evaluation metrics for model defenses.",
-      "Implemented adversarial patches against self-driving car depth estimation systems.",
+      "Developed advanced expertise in Data Science and Machine Learning.",
+      "Completed coursework in Machine Learning, Deep Learning, Cloud Computing, Algorithm Design and Statistical Methods.",
+      "Graduated with Master of Science in Computer Science.",
     ],
   },
   {
@@ -135,9 +139,9 @@ const timelineItems: {
     tags: ["Python", "nbgrader", "Coursera", "Curriculum Design"],
     logo: { type: "image", src: "/soc-logo.png", size: 187 },
     bullets: [
-      "Designed and automated lab & homework assignments for a graduate Applied Data Science course.",
-      "Built grading pipelines using nbgrader, reducing manual effort by 60%.",
-      "Supported 40+ students through office hours and course material development.",
+      "Designed and automated Jupyter-based labs and assignments for graduate-level Data Science class.",
+      "Built nbgrader pipelines, reducing manual grading effort.",
+      "Supported students with ML workflows, debugging, and course guidance through office hours.",
     ],
   },
   {
@@ -150,24 +154,24 @@ const timelineItems: {
     tags: ["Test Automation", "Telecom", "Agile", "QA"],
     logo: { type: "image", src: "/amdocs-logo.png" },
     bullets: [
-      "Executed functional and regression testing for telecom billing and OSS/BSS systems.",
-      "Automated test cases using scripting tools, improving test coverage by 35%.",
-      "Collaborated in Agile sprints across cross-functional global teams.",
+      "Performed end-to-end and API testing for large-scale telecom systems (AT&T).",
+      "Designed test strategies and validation workflows for production releases.",
+      "Collaborated across global Agile teams (US & India).",
     ],
   },
   {
     period: "Jul 2017 – Jul 2021",
-    title: "B.E. Computer Engineering",
-    org: "D.Y. Patil College of Engineering",
+    title: "B.E. Computer Science and Engineering",
+    org: "D.Y. Patil College of Engineering and Technology",
     location: "Kolhapur, India",
     type: "Education",
     color: "blue",
     tags: ["Computer Engineering", "Python", "OpenCV", "TensorFlow"],
     logo: { type: "image", src: "/dypcet-logo.png", size: 200, filter: "brightness(0) invert(1)" },
     bullets: [
-      "Graduated with Bachelor of Engineering in Computer Engineering.",
-      "Built a Covid-19 Safeguard System using OpenCV & TensorFlow for real-time surveillance.",
-      "Active member of coding club; built ML projects during final year.",
+      "Built strong foundations in programming, data structures, algorithms, and system design.",
+      "Graduated with Bachelor of Engineering in Computer Science.",
+      "Led a 5-member team to develop computer vision systems for real-world applications.",
     ],
   },
 ];
@@ -359,6 +363,19 @@ function TimelineItem({
 export default function Home() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const [chatOpen, setChatOpen] = useState(false);
+
+  useEffect(() => {
+    const onOpen = () => setChatOpen(true);
+    const onClose = () => setChatOpen(false);
+    window.addEventListener("openChatWidget", onOpen);
+    window.addEventListener("closeChatWidget", onClose);
+    return () => {
+      window.removeEventListener("openChatWidget", onOpen);
+      window.removeEventListener("closeChatWidget", onClose);
+    };
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: scrollRef,
     offset: ["start start", "end start"],
@@ -420,24 +437,45 @@ export default function Home() {
                   model development to evaluation and deployment.
                 </p>
 
-                <div className="mt-4 flex flex-wrap gap-3 justify-center">
-                  <Link
-                    href="/projects"
-                    className="rounded-full px-5 py-2.5 bg-violet-600 text-white hover:bg-violet-500 transition-colors"
-                  >
-                    View Projects
+                <div className="mt-6 flex flex-wrap gap-6 justify-center items-center">
+                  <Link href="/projects" className="group inline-flex items-center gap-4 select-none">
+                    <span
+                      className="text-xs md:text-sm font-bold tracking-[0.35em] uppercase"
+                      style={{ background: "linear-gradient(90deg, #a78bfa 0%, #818cf8 50%, #60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+                    >
+                      View Projects
+                    </span>
+                    <span className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 group-hover:bg-zinc-700 transition-colors duration-200">
+                      <ArrowRight size={15} className="text-white group-hover:translate-x-0.5 transition-transform duration-200" />
+                    </span>
                   </Link>
-                  <Link
-                    href="/experience"
-                    className="rounded-full px-5 py-2.5 border border-slate-700 hover:bg-slate-800 transition-colors"
-                  >
-                    Experience
+
+                  <div className="w-px h-5 bg-zinc-700 hidden sm:block" />
+
+                  <Link href="/experience" className="group inline-flex items-center gap-4 select-none">
+                    <span
+                      className="text-xs md:text-sm font-bold tracking-[0.35em] uppercase"
+                      style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a78bfa 60%, #f472b6 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+                    >
+                      Experience
+                    </span>
+                    <span className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 group-hover:bg-zinc-700 transition-colors duration-200">
+                      <ArrowRight size={15} className="text-white group-hover:translate-x-0.5 transition-transform duration-200" />
+                    </span>
                   </Link>
-                  <a
-                    href="mailto:aditya.more@outlook.in"
-                    className="rounded-full px-5 py-2.5 bg-orange-600 text-white hover:bg-orange-500 transition-colors"
-                  >
-                    Get in Touch
+
+                  <div className="w-px h-5 bg-zinc-700 hidden sm:block" />
+
+                  <a href="mailto:aditya.more@outlook.in" className="group inline-flex items-center gap-4 select-none">
+                    <span
+                      className="text-xs md:text-sm font-bold tracking-[0.35em] uppercase"
+                      style={{ background: "linear-gradient(90deg, #fb923c 0%, #f472b6 50%, #a78bfa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+                    >
+                      Get in Touch
+                    </span>
+                    <span className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 group-hover:bg-zinc-700 transition-colors duration-200">
+                      <ArrowUpRight size={15} className="text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
+                    </span>
                   </a>
                 </div>
 
@@ -496,10 +534,9 @@ export default function Home() {
           <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-600 mb-3">
             My Story
           </p>
-          <h2 className="text-4xl md:text-5xl font-bold text-white">The Journey</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-white">Career Timeline</h2>
           <p className="mt-3 text-zinc-500 max-w-lg text-sm leading-relaxed">
-            From engineering college in Pune to cutting-edge ML research in the United States —
-            here&apos;s how it unfolded.
+            From early foundations in computer science to building and analyzing modern AI and data science systems — my journey focuses on machine learning, data-driven solutions, and its real-world application.
           </p>
         </motion.div>
 
@@ -521,19 +558,45 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mt-24 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+          className="mt-24 flex flex-col sm:flex-row items-start sm:items-center gap-8"
         >
           <Link
             href="/experience"
-            className="rounded-full px-6 py-3 bg-zinc-900 border border-zinc-700 text-sm text-zinc-300 hover:text-white hover:border-zinc-500 transition-colors"
+            className="group inline-flex items-center gap-4 select-none"
           >
-            Full Experience →
+            <span
+              className="text-xs md:text-sm font-bold tracking-[0.35em] uppercase"
+              style={{
+                background:
+                  "linear-gradient(90deg, #a78bfa 0%, #c084fc 50%, #f472b6 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Full Experience
+            </span>
+            <span className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 group-hover:bg-zinc-700 group-hover:border-zinc-500 transition-all duration-200">
+              <ArrowRight size={15} className="text-white group-hover:translate-x-0.5 transition-transform duration-200" />
+            </span>
           </Link>
           <Link
             href="/projects"
-            className="rounded-full px-6 py-3 bg-violet-600 text-white text-sm hover:bg-violet-500 transition-colors"
+            className="group inline-flex items-center gap-4 select-none"
           >
-            See My Projects →
+            <span
+              className="text-xs md:text-sm font-bold tracking-[0.35em] uppercase"
+              style={{
+                background:
+                  "linear-gradient(90deg, #22d3ee 0%, #2dd4bf 50%, #4ade80 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              See My Projects
+            </span>
+            <span className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 group-hover:bg-zinc-700 group-hover:border-zinc-500 transition-all duration-200">
+              <ArrowRight size={15} className="text-white group-hover:translate-x-0.5 transition-transform duration-200" />
+            </span>
           </Link>
         </motion.div>
       </section>
@@ -554,9 +617,9 @@ export default function Home() {
           <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-600 mb-3">
             Featured Work
           </p>
-          <h2 className="text-4xl md:text-5xl font-bold text-white">Curated work</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-white">Featured Projects</h2>
           <p className="mt-3 text-zinc-500 max-w-lg text-sm leading-relaxed">
-            A selection of projects spanning AI security, computer vision, and machine learning systems.
+            Selected projects spanning machine learning, GenAI and computer vision, focused on real-world systems and experimentation.
           </p>
         </motion.div>
 
@@ -684,6 +747,163 @@ export default function Home() {
           </Link>
         </motion.div>
       </section>
+
+      {/* ═══════════════════════════════════════════
+          EXPLORE MORE — CTA SECTION
+      ═══════════════════════════════════════════ */}
+      <section className="container-max py-16 md:py-24 relative z-[10]">
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto"
+        >
+          {/* Section label */}
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-600 mb-3">
+            What&apos;s Next
+          </p>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Explore More</h2>
+          <p className="text-zinc-400 text-sm md:text-base leading-relaxed mb-8 max-w-xl mx-auto">
+            Interested in my work? Explore my projects in depth, connect with me, or interact with my AI assistant to learn more.
+          </p>
+
+          {/* AI Assistant highlight card */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="relative mb-12 mx-auto max-w-2xl"
+          >
+            {/* Outer glow */}
+            <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-violet-500/30 via-fuchsia-500/20 to-blue-500/30 blur-sm pointer-events-none" />
+            <div className="relative flex items-center gap-4 px-5 py-4 rounded-2xl border border-white/8 bg-zinc-900/80 backdrop-blur-md shadow-xl shadow-violet-950/30">
+              {/* Icon */}
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-blue-600 flex items-center justify-center shadow-lg shadow-violet-700/30">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="8" width="18" height="10" rx="5" fill="none" stroke="white" strokeWidth="1.6"/>
+                  <rect x="7.5" y="3" width="9" height="7" rx="4.5" fill="none" stroke="white" strokeWidth="1.6"/>
+                  <circle cx="8.5" cy="13.5" r="1.5" fill="white"/>
+                  <circle cx="15.5" cy="13.5" r="1.5" fill="white"/>
+                  <rect x="10.5" y="6" width="3" height="1.2" rx="0.6" fill="white"/>
+                </svg>
+              </div>
+              {/* Text */}
+              <div className="flex-1 text-left">
+                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-zinc-500 mb-0.5">AI Assistant</p>
+                <p className="text-sm text-zinc-300 leading-snug">
+                  Chat with{" "}
+                  <span
+                    className="font-bold"
+                    style={{
+                      background: "linear-gradient(90deg, #a78bfa 0%, #c084fc 60%, #38bdf8 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
+                    R2D2
+                  </span>
+                  , my AI assistant — ask about projects, experience, and skills.
+                </p>
+              </div>
+              {/* In Progress indicator */}
+              <div className="shrink-0 flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
+                </span>
+                <span className="text-[10px] text-yellow-500 font-medium tracking-wide hidden sm:inline">In Progress</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-8"
+          >
+            {/* View All Projects */}
+            <Link
+              href="/projects"
+              className="group inline-flex items-center gap-4 select-none"
+            >
+              <span
+                className="text-xs md:text-sm font-bold tracking-[0.35em] uppercase"
+                style={{
+                  background: "linear-gradient(90deg, #22d3ee 0%, #a78bfa 35%, #f472b6 65%, #fb923c 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                View All Projects
+              </span>
+              <span className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 group-hover:bg-zinc-700 group-hover:border-zinc-500 transition-all duration-200">
+                <ArrowRight size={15} className="text-white group-hover:translate-x-0.5 transition-transform duration-200" />
+              </span>
+            </Link>
+
+            {/* Get in Touch */}
+            <Link
+              href="/contact"
+              className="group inline-flex items-center gap-4 select-none"
+            >
+              <span
+                className="text-xs md:text-sm font-bold tracking-[0.35em] uppercase"
+                style={{
+                  background: "linear-gradient(90deg, #fb923c 0%, #f472b6 50%, #a78bfa 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Get in Touch
+              </span>
+              <span className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 group-hover:bg-zinc-700 group-hover:border-zinc-500 transition-all duration-200">
+                <ArrowRight size={15} className="text-white group-hover:translate-x-0.5 transition-transform duration-200" />
+              </span>
+            </Link>
+
+            {/* Talk to R2D2 */}
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("openChatWidget"))}
+              title="Ask about my projects, skills, or experience"
+              className="group inline-flex items-center gap-4 select-none"
+            >
+              <span
+                className="text-xs md:text-sm font-bold tracking-[0.35em] uppercase"
+                style={{
+                  background: "linear-gradient(90deg, #a78bfa 0%, #c084fc 50%, #38bdf8 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Talk to R2D2
+              </span>
+              <span className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 group-hover:bg-zinc-700 group-hover:border-zinc-500 transition-all duration-200">
+                <ArrowRight size={15} className="text-white group-hover:translate-x-0.5 transition-transform duration-200" />
+              </span>
+            </button>
+          </motion.div>
+        </motion.div>
+      </section>
+      {/* Simple floating chat button (bottom right) — hidden when chat is open */}
+      {!chatOpen && (
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent("openChatWidget"))}
+          className="fixed bottom-7 right-7 z-[100] flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white text-base font-bold shadow-lg shadow-violet-500/30 hover:shadow-fuchsia-500/40 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60"
+          style={{ boxShadow: "0 4px 32px #a78bfa55" }}
+          title="Chat with R2D2"
+          aria-label="Chat with R2D2"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="10" rx="5" fill="#181A2A" stroke="#a78bfa" strokeWidth="1.5"/><rect x="7.5" y="3" width="9" height="7" rx="4.5" fill="#181A2A" stroke="#a78bfa" strokeWidth="1.5"/><circle cx="8.5" cy="13.5" r="1.5" fill="#a78bfa"/><circle cx="15.5" cy="13.5" r="1.5" fill="#a78bfa"/><rect x="10.5" y="6.5" width="3" height="1" rx="0.5" fill="#a78bfa"/></svg>
+          <span className="hidden sm:inline">R2D2</span>
+        </button>
+      )}
     </div>
   );
 }

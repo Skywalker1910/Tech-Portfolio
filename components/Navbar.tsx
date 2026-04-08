@@ -131,6 +131,7 @@ const MORE_LINKS: { href: string; label: string; external?: boolean }[] = [
   { href: "/socials", label: "Socials" },
   { href: "/contact", label: "Contact" },
   { href: "/resume.pdf", label: "Resume ↗", external: true },
+  { href: "/notice", label: "Notice" },
   { href: "/privacy", label: "Privacy" },
 ];
 

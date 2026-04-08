@@ -5,13 +5,11 @@ import {
   SiPython, SiPostgresql, SiCplusplus,
   SiPytorch, SiTensorflow, SiScikitlearn,
   SiPlotly, SiPandas, SiNumpy,
-  SiGit, SiGithub, SiDocker, SiJupyter, SiSalesforce, SiPostman,
-  SiOpencv, SiR,
+  SiGit, SiDocker, SiJupyter,
 } from "react-icons/si";
 import {
   Cloud, BrainCircuit, BarChart3, ShieldAlert, Eye, Workflow,
-  GraduationCap, TrendingUp, FlaskConical, BarChart2, Table2, Cpu,
-  Code2, Settings2, Layers,
+  FlaskConical, Cpu, Code2, Settings2, Layers, MessageSquareCode, Database,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -53,12 +51,11 @@ const categories: Category[] = [
     chipCls: "bg-violet-500/10 border-violet-500/20 text-violet-100 hover:bg-violet-500/20",
     skills: [
       { name: "Python",       Icon: SiPython,      color: "text-[#3776AB]" },
-      { name: "SQL",          Icon: SiPostgresql,  color: "text-[#336791]" },
-      { name: "R",            Icon: SiR,           color: "text-[#276DC3]" },
       { name: "C++",          Icon: SiCplusplus,   color: "text-[#00599C]" },
+      { name: "SQL",          Icon: SiPostgresql,  color: "text-[#336791]" },
+      { name: "scikit-learn", Icon: SiScikitlearn, color: "text-[#F7931E]" },
       { name: "PyTorch",      Icon: SiPytorch,     color: "text-[#EE4C2C]" },
       { name: "TensorFlow",   Icon: SiTensorflow,  color: "text-[#FF6F00]" },
-      { name: "scikit-learn", Icon: SiScikitlearn, color: "text-[#F7931E]" },
     ],
   },
   {
@@ -75,17 +72,15 @@ const categories: Category[] = [
     accentBorder: "border-teal-500/20",
     chipCls: "bg-teal-500/10 border-teal-500/20 text-teal-100 hover:bg-teal-500/20",
     skills: [
-      { name: "Tableau",    Icon: Table2,       color: "text-[#E97627]" },
-      { name: "Power BI",   Icon: BarChart2,    color: "text-[#F2C811]" },
-      { name: "matplotlib", Icon: SiPlotly,     color: "text-[#3F4F75]" },
-      { name: "seaborn",    Icon: FlaskConical, color: "text-teal-400" },
       { name: "pandas",     Icon: SiPandas,     color: "text-[#8b5cf6]" },
       { name: "NumPy",      Icon: SiNumpy,      color: "text-[#4DABCF]" },
+      { name: "matplotlib", Icon: SiPlotly,     color: "text-[#3F4F75]" },
+      { name: "seaborn",    Icon: FlaskConical, color: "text-teal-400" },
     ],
   },
   {
-    title: "Cloud & Dev Tools",
-    eyebrow: "Toolchain",
+    title: "Tools & Infrastructure",
+    eyebrow: "Cloud & Dev Tools",
     CatIcon: Settings2,
     gradient: "from-sky-950 via-blue-900/40 to-cyan-950",
     orb1: "bg-sky-500",
@@ -99,16 +94,12 @@ const categories: Category[] = [
     skills: [
       { name: "AWS",        Icon: Cloud,        color: "text-[#FF9900]" },
       { name: "Git",        Icon: SiGit,        color: "text-[#F05032]" },
-      { name: "GitHub",     Icon: SiGithub,     color: "text-zinc-300" },
       { name: "Docker",     Icon: SiDocker,     color: "text-[#2496ED]" },
       { name: "Jupyter",    Icon: SiJupyter,    color: "text-[#F37626]" },
-      { name: "OpenCV",     Icon: SiOpencv,     color: "text-[#5C3EE8]" },
-      { name: "Salesforce", Icon: SiSalesforce, color: "text-[#00A1E0]" },
-      { name: "Postman",    Icon: SiPostman,    color: "text-[#FF6C37]" },
     ],
   },
   {
-    title: "Specialized Areas",
+    title: "Core Areas",
     eyebrow: "Domains",
     CatIcon: Layers,
     gradient: "from-orange-950 via-amber-900/30 to-rose-950",
@@ -121,14 +112,13 @@ const categories: Category[] = [
     accentBorder: "border-orange-500/20",
     chipCls: "bg-orange-500/10 border-orange-500/20 text-orange-100 hover:bg-orange-500/20",
     skills: [
-      { name: "Machine Learning",       Icon: BrainCircuit,  color: "text-violet-400" },
-      { name: "Data Analytics",         Icon: BarChart3,     color: "text-teal-400" },
-      { name: "Deep Learning",          Icon: BrainCircuit,  color: "text-orange-400" },
-      { name: "Statistical Modeling",   Icon: TrendingUp,    color: "text-sky-400" },
-      { name: "AI Security",            Icon: ShieldAlert,   color: "text-red-400" },
-      { name: "Computer Vision",        Icon: Eye,           color: "text-emerald-400" },
-      { name: "MLOps",                  Icon: Workflow,      color: "text-amber-400" },
-      { name: "Educational Technology", Icon: GraduationCap, color: "text-pink-400" },
+      { name: "Machine Learning",  Icon: BrainCircuit,      color: "text-violet-400" },
+      { name: "Deep Learning",     Icon: BrainCircuit,      color: "text-orange-400" },
+      { name: "Computer Vision",   Icon: Eye,               color: "text-emerald-400" },
+      { name: "LLMs",              Icon: MessageSquareCode, color: "text-sky-400" },
+      { name: "MLOps",             Icon: Workflow,          color: "text-amber-400" },
+      { name: "RAG Systems",       Icon: Database,          color: "text-teal-400" },
+      { name: "Adversarial ML",    Icon: ShieldAlert,       color: "text-red-400" },
     ],
   },
 ];

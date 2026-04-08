@@ -1,140 +1,64 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Mail } from "lucide-react";
 
-const W = 220;
-const FLAP_H = 72;   // height of flap triangle
-const BODY_H = 132;  // envelope body height
-
 export default function EnvelopeCard() {
-  const [open, setOpen] = useState(false);
-
   return (
-    <div
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      className="relative cursor-pointer select-none"
-      style={{ width: W, height: FLAP_H + BODY_H, perspective: "900px" }}
-    >
-      {/* ── ENVELOPE BODY (z-1) ── */}
+    <div className="pt-14"> {/* Space for letter to slide into */}
       <div
-        className="absolute left-0 right-0 rounded-b-xl border border-orange-500/25"
-        style={{
-          top: FLAP_H - 1, // overlap 1px to hide seam
-          height: BODY_H,
-          background: "#0f0f14",
-          zIndex: 1,
-        }}
+        className="relative bg-black w-[220px] group transition-all duration-700 aspect-video flex items-center justify-center rounded-lg"
       >
-        {/* V-crease lines */}
-        <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${W} ${BODY_H}`} preserveAspectRatio="none">
-          <line x1="0" y1={BODY_H} x2={W / 2} y2={BODY_H / 2} stroke="rgba(249,115,22,0.12)" strokeWidth="1.5" />
-          <line x1={W} y1={BODY_H} x2={W / 2} y2={BODY_H / 2} stroke="rgba(249,115,22,0.12)" strokeWidth="1.5" />
-        </svg>
-      </div>
-
-      {/* ── LETTER (z-2) — fades in inside the body after flap opens ── */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            key="letter"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 18 }}
-            transition={{ duration: 0.3, delay: 0.28, ease: "easeOut" }}
-            className="absolute left-2.5 right-2.5 rounded-lg flex flex-col px-3 pt-2.5 pb-2"
-            style={{
-              top: FLAP_H + 6,
-              height: BODY_H - 14,
-              background: "#f5ede0",
-              zIndex: 2,
-            }}
-          >
-            {/* Ruled lines */}
-            <div className="space-y-[5px] mb-2.5">
-              {[78, 55, 68, 45].map((w, i) => (
-                <div key={i} className="h-px bg-orange-300/50" style={{ width: `${w}%` }} />
-              ))}
-            </div>
-            {/* Message */}
-            <p className="text-[8px] text-zinc-600 leading-[1.7] flex-1">
-              "My inbox is surprisingly warm<br />
-              (unlike prod at 2 AM).<br />
-              Drop me a line — I reply<br />
-              faster than my models train."
-            </p>
-            {/* Signature */}
-            <div className="border-t border-orange-200/60 pt-1.5 flex items-center justify-between">
-              <span className="text-[7.5px] text-orange-500 font-bold italic">— Aditya More</span>
-              <span className="text-[7px] text-zinc-400">👋 Looking forward!</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── FLAP (z-10) — rotates back to reveal letter ── */}
-      <motion.div
-        className="absolute left-0 right-0"
-        style={{
-          top: 0,
-          height: FLAP_H,
-          transformOrigin: "top center",
-          zIndex: 10,
-        }}
-        animate={{ rotateX: open ? -170 : 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <svg
-          width="100%"
-          height="100%"
-          viewBox={`0 0 ${W} ${FLAP_H}`}
-          preserveAspectRatio="none"
+        {/* Letter content - slides up on hover */}
+        <div
+          className="transition-all flex flex-col items-center py-3 justify-start duration-300 group-hover:duration-1000 bg-[#f5ede0] w-full h-full absolute rounded-lg group-hover:-translate-y-14"
         >
-          <polygon
-            points={`0,0 ${W},0 ${W / 2},${FLAP_H}`}
-            fill="#0f0f14"
-            stroke="rgba(249,115,22,0.28)"
-            strokeWidth="1"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-      </motion.div>
+          {/* Message at top */}
+          <p className="px-4 text-[10px] text-zinc-700 leading-[1.5] text-center w-full font-medium">
+            I reply faster than<br />
+            my models converge.
+          </p>
+          {/* Divider */}
+          <div className="w-12 h-px bg-orange-300/60 my-2" />
+          {/* Subtext */}
+          <p className="px-4 text-[8px] text-zinc-500 text-center">
+            Let's build something cool.
+          </p>
+          {/* Signature */}
+          <div className="mt-3 pt-1.5 px-4 w-full flex items-center justify-center">
+            <span className="text-[8px] text-orange-500 font-semibold">— Aditya</span>
+          </div>
+        </div>
 
-      {/* ── TOP BORDER of body (z-11, always on top of flap seam) ── */}
-      <div
-        className="absolute left-0 right-0 border-t border-l border-r border-orange-500/25 rounded-t-none"
-        style={{ top: FLAP_H - 1, height: 2, zIndex: 11 }}
-      />
+        {/* Wax seal - shrinks and fades on hover */}
+        <button
+          className="bg-orange-500/20 text-orange-400 w-9 aspect-square rounded-full z-40 text-[10px] flex items-center justify-center font-semibold [clip-path:polygon(50%_0%,_80%_10%,_100%_35%,_100%_70%,_80%_90%,_50%_100%,_20%_90%,_0%_70%,_0%_35%,_20%_10%)] group-hover:opacity-0 transition-all duration-1000 group-hover:scale-0 group-hover:rotate-180 border-2 border-orange-500/40"
+        >
+          <Mail size={14} />
+        </button>
 
-      {/* ── WAXSEAL + label (z-20, fade out when open) ── */}
-      <motion.div
-        animate={{ opacity: open ? 0 : 1, scale: open ? 0.5 : 1 }}
-        transition={{ duration: 0.18 }}
-        className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full border border-orange-500/40 bg-orange-500/10 flex items-center justify-center"
-        style={{ bottom: 14, zIndex: 20 }}
-      >
-        <Mail size={13} className="text-orange-400" />
-      </motion.div>
+        {/* Top flap - collapses upward on hover */}
+        <div
+          className="tp transition-all duration-1000 group-hover:duration-100 bg-[#0f0f14] absolute w-full h-full rounded-t-lg [clip-path:polygon(50%_50%,_100%_0,_0_0)] group-hover:[clip-path:polygon(50%_0%,_100%_0,_0_0)]"
+        />
 
-      <motion.p
-        animate={{ opacity: open ? 0 : 0.7 }}
-        transition={{ duration: 0.15 }}
-        className="absolute left-3 font-mono text-zinc-500 pointer-events-none"
-        style={{ bottom: 16, fontSize: "7.5px", zIndex: 20 }}
-      >
-        <span className="text-zinc-400">To:</span> aditya.more@outlook.in
-      </motion.p>
+        {/* Left flap */}
+        <div
+          className="lft transition-all duration-700 absolute w-full h-full bg-[#0a0a0f] [clip-path:polygon(50%_50%,_0_0,_0_100%)] rounded-l-lg"
+        />
 
-      {/* ── Ambient glow ── */}
-      <div
-        className="absolute inset-0 rounded-xl pointer-events-none transition-opacity duration-300"
-        style={{
-          background: "radial-gradient(ellipse at 50% 100%, rgba(249,115,22,0.12), transparent 70%)",
-          opacity: open ? 1 : 0.5,
-        }}
-      />
+        {/* Right flap */}
+        <div
+          className="rgt transition-all duration-700 absolute w-full h-full bg-[#0f0f14] [clip-path:polygon(50%_50%,_100%_0,_100%_100%)] rounded-r-lg"
+        />
+
+        {/* Bottom flap */}
+        <div
+          className="btm transition-all duration-700 absolute w-full h-full bg-[#0a0a0f] [clip-path:polygon(50%_50%,_100%_100%,_0_100%)] rounded-b-lg"
+        />
+
+        {/* Border overlay */}
+        <div className="absolute inset-0 rounded-lg border border-orange-500/25 pointer-events-none z-50" />
+      </div>
     </div>
   );
 }

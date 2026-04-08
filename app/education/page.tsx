@@ -7,7 +7,9 @@ import { SiPython, SiPytorch, SiTensorflow, SiOpencv, SiJupyter, SiScikitlearn }
 const degrees = [
   {
     degree: "M.S. Computer Science",
-    concentration: "Data Science & Informatics",
+    degreeAwarded: "Master of Science in Computer Science",
+    concentration: "Data Science and Informatics",
+    gpa: "3.7 / 4.0",
     org: "Clemson University",
     location: "Clemson, SC, USA",
     period: "Jan 2024 – Dec 2025",
@@ -20,17 +22,23 @@ const degrees = [
     glow: "hover:shadow-violet-500/20",
     accent: "text-violet-400",
     tag: "bg-violet-500/10 text-violet-300 border border-violet-500/20",
-    coursework: ["Deep Learning", "Applied Data Science", "Network Security", "Advanced Algorithms", "Computer Vision", "NLP"],
+    gpaBg: "bg-violet-500/10 text-violet-300 border-violet-500/30",
+    coursework: ["Machine Learning", "Deep Learning", "Design and Analysis of Algorithms", "Data Science", "Statistical Methods"],
     bullets: [
-      "Specialized in ML systems, adversarial AI, and data-driven engineering.",
-      "Graduate Student Hourly — designed automated lab & homework assignments for Applied Data Science.",
-      "Built nbgrader pipelines serving 200+ students; authored ML notebooks covering PCA, cross-validation, and outlier detection.",
+      "Specialized in **Machine Learning** and **Data Science** systems.",
+      "Built and evaluated **ML** and **deep learning** models on real-world datasets.",
+      "Conducted experiments on **LLM robustness**, modern AI systems and defense mechanisms.",
+      "Designed and implemented **data pipelines** and model evaluation workflows.",
+      "Explored modern AI systems including **LLMs**, **RAG pipelines**, and cloud-based ML workflows.",
+      "Applied **statistical methods** for data analysis, model validation, and performance evaluation.",
     ],
     tags: [{ label: "Python", Icon: SiPython }, { label: "PyTorch", Icon: SiPytorch }, { label: "scikit-learn", Icon: SiScikitlearn }, { label: "Jupyter", Icon: SiJupyter }],
   },
   {
     degree: "B.E. Computer Science and Engineering",
+    degreeAwarded: "Bachelor of Engineering in Computer Science",
     concentration: "Computer Science & Engineering",
+    gpa: "3.22 / 4.0",
     org: "D.Y. Patil College of Engineering & Technology",
     location: "Kolhapur, India",
     period: "Aug 2017 – Jul 2021",
@@ -43,11 +51,14 @@ const degrees = [
     glow: "hover:shadow-blue-500/20",
     accent: "text-blue-400",
     tag: "bg-blue-500/10 text-blue-300 border border-blue-500/20",
-    coursework: ["Data Structures", "Algorithms", "Computer Networks", "Operating Systems", "Machine Learning", "Image Processing"],
+    gpaBg: "bg-blue-500/10 text-blue-300 border-blue-500/30",
+    coursework: ["Data Structures", "Programming Language Labs (C, C++)", "Data Analytics", "Operating Systems", "Advanced Database Systems", "Internet of Things"],
     bullets: [
-      "Graduated with B.E. in Computer Engineering.",
-      "Led 5-member team to build Covid-19 Safeguard System — real-time face mask & social distancing detection.",
-      "Built ANPR (License Plate Detection) system using OpenCV and Pytesseract.",
+      "Built strong foundations in **programming (C, C++)**, **data structures**, and **algorithms**.",
+      "Gained core knowledge in **operating systems**, **computer networks**, **database systems**, and **distributed systems**.",
+      "Led a 5-member team for pre-final and final year projects to develop an **Automatic License Plate Recognition** system using **OpenCV** and a real-time **COVID-19 surveillance system** for face mask detection and social distancing monitoring.",
+      "Developed hands-on experience in **computer vision**, **system design**, and full project lifecycle development.",
+      "Applied **software engineering** principles including object-oriented design, testing, and system implementation.",
     ],
     tags: [{ label: "Python", Icon: SiPython }, { label: "TensorFlow", Icon: SiTensorflow }, { label: "OpenCV", Icon: SiOpencv }],
     logoFilter: "brightness(0) invert(1)",
@@ -138,21 +149,42 @@ export default function Education() {
 
             {/* Body */}
             <div className="flex flex-col flex-1 p-5">
-              <div className="flex items-start justify-between gap-2 mb-1">
+              {/* Degree + GPA row */}
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
                 <h2 className="text-lg font-bold text-white leading-snug">{d.degree}</h2>
+                <span className={`self-start sm:self-auto text-[11px] font-semibold px-2.5 py-1 rounded-full border ${d.gpaBg} whitespace-nowrap`}>
+                  GPA: {d.gpa}
+                </span>
               </div>
+
+              {/* University + Location */}
               <p className={`text-xs font-semibold ${d.accent} mb-0.5`}>{d.org}</p>
-              <div className="flex items-center gap-1 text-[11px] text-zinc-500 mb-4">
+              <div className="flex items-center gap-1 text-[11px] text-zinc-500 mb-3">
                 <MapPin size={10} />
                 {d.location}
               </div>
 
-              {/* Bullets */}
+              {/* Degree Awarded + Concentration */}
+              <div className="mb-4 space-y-1">
+                <p className="text-[11px] text-zinc-400">
+                  <span className="text-zinc-500">Degree Awarded:</span>{" "}
+                  <span className="text-zinc-300">{d.degreeAwarded}</span>
+                </p>
+                <p className="text-[11px] text-zinc-400">
+                  <span className="text-zinc-500">Concentration:</span>{" "}
+                  <span className="text-zinc-300">{d.concentration}</span>
+                </p>
+              </div>
+
+              {/* Key Highlights */}
+              <p className="text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-2 flex items-center gap-1.5">
+                Key Highlights
+              </p>
               <ul className="space-y-1.5 mb-4">
                 {d.bullets.map((b, j) => (
                   <li key={j} className="flex items-start gap-2 text-xs text-zinc-400 leading-relaxed">
                     <span className={`mt-[5px] w-1 h-1 rounded-full shrink-0 ${d.orb1.replace("bg-", "bg-")}`} />
-                    {b}
+                    <span dangerouslySetInnerHTML={{ __html: b.replace(/\*\*(.*?)\*\*/g, '<strong class="text-zinc-200">$1</strong>') }} />
                   </li>
                 ))}
               </ul>
