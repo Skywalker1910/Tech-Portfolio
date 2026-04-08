@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { docClient, CONTACTS_TABLE } from "@/lib/dynamodb";
 
 type ContactSubmission = {
   id: string;
@@ -10,33 +10,6 @@ type ContactSubmission = {
   message: string;
   submittedAt: string;
 };
-
-const DATA_FILE = path.join(process.cwd(), "data", "contacts.json");
-
-async function ensureDataFile() {
-  const dir = path.dirname(DATA_FILE);
-  try {
-    await fs.access(dir);
-  } catch {
-    await fs.mkdir(dir, { recursive: true });
-  }
-  try {
-    await fs.access(DATA_FILE);
-  } catch {
-    await fs.writeFile(DATA_FILE, JSON.stringify([], null, 2));
-  }
-}
-
-async function getSubmissions(): Promise<ContactSubmission[]> {
-  await ensureDataFile();
-  const data = await fs.readFile(DATA_FILE, "utf-8");
-  return JSON.parse(data);
-}
-
-async function saveSubmissions(submissions: ContactSubmission[]) {
-  await ensureDataFile();
-  await fs.writeFile(DATA_FILE, JSON.stringify(submissions, null, 2));
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -60,7 +33,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create submission
     const submission: ContactSubmission = {
       id: crypto.randomUUID(),
       firstName: firstName.trim(),
@@ -70,10 +42,12 @@ export async function POST(req: NextRequest) {
       submittedAt: new Date().toISOString(),
     };
 
-    // Save to file
-    const submissions = await getSubmissions();
-    submissions.push(submission);
-    await saveSubmissions(submissions);
+    await docClient.send(
+      new PutCommand({
+        TableName: CONTACTS_TABLE,
+        Item: submission,
+      })
+    );
 
     return NextResponse.json(
       { success: true, message: "Message received!" },
@@ -88,10 +62,18 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Protect with a secret admin key — set CONTACT_ADMIN_KEY in environment variables
+  const adminKey = req.headers.get("x-admin-key");
+  if (!adminKey || adminKey !== process.env.CONTACT_ADMIN_KEY) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const submissions = await getSubmissions();
-    return NextResponse.json(submissions);
+    const result = await docClient.send(
+      new ScanCommand({ TableName: CONTACTS_TABLE })
+    );
+    return NextResponse.json(result.Items ?? []);
   } catch (error) {
     console.error("Error fetching submissions:", error);
     return NextResponse.json(
