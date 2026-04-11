@@ -20,7 +20,7 @@ export default function OrbitalDivider() {
   return (
     <div
       className="absolute bottom-0 left-0 w-full pointer-events-none overflow-hidden"
-      style={{ height: 280, zIndex: 2 }}
+      style={{ height: "clamp(120px, 18vw, 280px)", zIndex: 1 }}
     >
       <svg
         viewBox="0 0 1440 280"

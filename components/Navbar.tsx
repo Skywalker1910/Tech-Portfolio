@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sun, Moon, ChevronDown, Sparkles, Orbit } from "lucide-react";
+import CareerStatus from "./CareerStatus";
 
 function BackgroundToggle() {
   const [bg, setBg] = useState<string | null>(null);
@@ -138,7 +139,9 @@ const MORE_LINKS: { href: string; label: string; external?: boolean }[] = [
 export default function Navbar() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [careerOpen, setCareerOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const careerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   const allMobileLinks: { href: string; label: string; external?: boolean }[] = [
@@ -152,12 +155,16 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setMoreOpen(false);
+    setCareerOpen(false);
   }, [pathname]);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
         setMoreOpen(false);
+      }
+      if (careerRef.current && !careerRef.current.contains(e.target as Node)) {
+        setCareerOpen(false);
       }
     }
     document.addEventListener("mousedown", handler);
@@ -174,12 +181,28 @@ export default function Navbar() {
         Aditya More&nbsp;<span className="text-zinc-500">•</span>&nbsp;Tech Portfolio
       </Link>
 
-      {/* Top-right open to work badge */}
-      <div className="fixed top-5 right-5 z-50 hidden md:flex items-center">
-        <span className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-1 rounded-full">
+      {/* Top-right open to work badge — clickable to show career status */}
+      <div className="fixed top-5 right-5 z-50 hidden md:flex" ref={careerRef}>
+        <button
+          onClick={() => setCareerOpen((o) => !o)}
+          className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-1 rounded-full hover:bg-emerald-500/20 transition-colors cursor-pointer"
+        >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
           Open to Work
-        </span>
+        </button>
+        <AnimatePresence>
+          {careerOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute top-full mt-3 right-0 w-[400px]"
+            >
+              <CareerStatus />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Floating pill navbar */}
