@@ -382,8 +382,17 @@ export default function Home() {
   });
 
   // Hero transforms: scale down + drift left on scroll
-  const heroScale = useTransform(scrollYProgress, [0, 0.4], [1, 0.72]);
-  const heroX = useTransform(scrollYProgress, [0, 0.4], ["0%", "-22%"]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const heroScale = useTransform(scrollYProgress, [0, 0.4], [1, isMobile ? 0.92 : 0.72]);
+  const heroX = useTransform(scrollYProgress, [0, 0.4], ["0%", isMobile ? "0%" : "-22%"]);
 
   // Career card: fade + slide in from right + brighten
   const cardOpacity = useTransform(scrollYProgress, [0.06, 0.09, 0.38], [0, 0.9, 1]);
@@ -399,7 +408,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════
           STICKY HERO  (220 vh scroll container)
       ═══════════════════════════════════════════ */}
-      <div ref={scrollRef} style={{ height: "130vh" }}>
+      <div ref={scrollRef} className="h-[100vh] md:h-[130vh]">
         <div className="sticky top-24 h-[calc(100vh-6rem)] flex flex-col justify-center overflow-hidden relative z-[10]">
           <div className="container-max w-full">
             <div className="relative flex items-center justify-center">
@@ -413,7 +422,7 @@ export default function Home() {
                 }}
                 className="w-full text-center"
               >
-                <h1 className="text-6xl md:text-8xl font-extrabold tracking-tight leading-tight whitespace-nowrap">
+                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-tight">
                   Hi, I&apos;m{" "}
                   <span className="text-orange-400">Aditya More</span>
                 </h1>
@@ -431,13 +440,13 @@ export default function Home() {
                   />
                 </div>
 
-                <p className="mt-0.5 text-xl text-slate-300 max-w-2xl leading-relaxed mx-auto text-center">
+                <p className="mt-0.5 text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl leading-relaxed mx-auto text-center px-2 sm:px-0">
                   Experienced in building machine learning systems, data-driven models, and
                   AI solutions across the full ML pipeline — from data preprocessing and
                   model development to evaluation and deployment.
                 </p>
 
-                <div className="mt-6 flex flex-wrap gap-6 justify-center items-center">
+                <div className="mt-6 flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 justify-center items-center">
                   <Link href="/projects" className="group inline-flex items-center gap-4 select-none">
                     <span
                       className="text-xs md:text-sm font-bold tracking-[0.35em] uppercase"
@@ -479,7 +488,7 @@ export default function Home() {
                   </a>
                 </div>
 
-                <p className="mt-3 text-sm text-slate-400 flex items-center justify-center gap-1.5">
+                <p className="mt-3 text-xs sm:text-sm text-slate-400 flex items-center justify-center gap-1.5 px-2 sm:px-0">
                   <ShieldCheck size={14} className="text-slate-400 shrink-0" />
                   <span>
                     <strong>Work Authorization:</strong> Authorized to work in the United States
@@ -505,7 +514,7 @@ export default function Home() {
           {/* Scroll hint */}
           <motion.div
             style={{ opacity: arrowOpacity }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-zinc-600"
+            className="absolute bottom-[clamp(2rem,20vw,8rem)] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-zinc-600"
           >
             <span className="text-[10px] tracking-[0.2em] uppercase">scroll</span>
             <motion.div
@@ -635,7 +644,7 @@ export default function Home() {
               className="group border-b border-zinc-800/60 py-8 first:border-t flex flex-col md:flex-row gap-6 md:gap-10 items-stretch"
             >
               {/* Number */}
-              <span className="text-6xl md:text-8xl font-black text-zinc-800/70 group-hover:text-zinc-700 transition-colors shrink-0 leading-none font-mono select-none">
+              <span className="text-5xl sm:text-6xl md:text-8xl font-black text-zinc-800/70 group-hover:text-zinc-700 transition-colors shrink-0 leading-none font-mono select-none">
                 {project.num}
               </span>
 
