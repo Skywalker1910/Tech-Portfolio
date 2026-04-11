@@ -39,7 +39,7 @@ export default function SentenceFlip({
       <div
         ref={measureRef}
         aria-hidden
-        className="invisible absolute text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold py-1"
+        className="invisible absolute text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold py-0.5"
       >
         {longest}
       </div>
@@ -51,8 +51,7 @@ export default function SentenceFlip({
           animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           exit={{ opacity: 0, filter: "blur(8px)", y: -14 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-violet-300 py-1"
-          style={{ textShadow: "0 0 12px #a78bfa, 0 0 28px #7c3aed" }}
+          className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-violet-300 py-0.5"
         >
           {lines[index]}
         </motion.div>

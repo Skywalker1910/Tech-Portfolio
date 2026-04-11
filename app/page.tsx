@@ -4,7 +4,6 @@ import { useRef, useEffect, useState, type ComponentType } from "react";
 import Image from "next/image";
 import { useScroll, useTransform, motion } from "framer-motion";
 import SentenceFlip from "../components/SentenceFlip";
-import CareerStatus from "../components/CareerStatus";
 import dynamic from "next/dynamic";
 
 // Lazy-load droid to avoid SSR issues
@@ -391,14 +390,8 @@ export default function Home() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const heroScale = useTransform(scrollYProgress, [0, 0.4], [1, isMobile ? 0.92 : 0.72]);
-  const heroX = useTransform(scrollYProgress, [0, 0.4], ["0%", isMobile ? "0%" : "-22%"]);
-
-  // Career card: fade + slide in from right + brighten
-  const cardOpacity = useTransform(scrollYProgress, [0.06, 0.09, 0.38], [0, 0.9, 1]);
-  const cardX = useTransform(scrollYProgress, [0.06, 0.38], [80, 0]);
-  const cardBrightness = useTransform(scrollYProgress, [0.06, 0.33, 0.38], [0.3, 2.0, 1.0]);
-  const cardFilter = useTransform(cardBrightness, (v) => `brightness(${v}) saturate(${0.4 + v * 0.8})`);
+  const heroScale = useTransform(scrollYProgress, [0, 0.4], [1, isMobile ? 0.95 : 0.88]);
+  const heroX = useTransform(scrollYProgress, [0, 0.4], ["0%", "0%"]);
 
   // Scroll hint arrow: fades out early
   const arrowOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
@@ -410,7 +403,7 @@ export default function Home() {
       ═══════════════════════════════════════════ */}
       <div ref={scrollRef} className="h-[100vh] md:h-[130vh]">
         <div className="sticky top-24 h-[calc(100vh-6rem)] flex flex-col justify-center overflow-hidden relative z-[10]">
-          <div className="container-max w-full">
+          <div className="container-max w-full pb-[clamp(40px,6vw,80px)]">
             <div className="relative flex items-center justify-center">
 
               {/* ── Hero copy: full-width centered initially, drifts left on scroll ── */}
@@ -427,7 +420,7 @@ export default function Home() {
                   <span className="text-orange-400">Aditya More</span>
                 </h1>
 
-                <div className="mt-2 inline-block text-left">
+                <div className="mt-1 -mb-2 inline-block text-left">
                   <SentenceFlip
                     lines={[
                       "AI / ML Systems",
@@ -440,7 +433,7 @@ export default function Home() {
                   />
                 </div>
 
-                <p className="mt-0.5 text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl leading-relaxed mx-auto text-center px-2 sm:px-0">
+                <p className="mt-0 text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl leading-relaxed mx-auto text-center px-2 sm:px-0">
                   Experienced in building machine learning systems, data-driven models, and
                   AI solutions across the full ML pipeline — from data preprocessing and
                   model development to evaluation and deployment.
@@ -494,16 +487,6 @@ export default function Home() {
                     <strong>Work Authorization:</strong> Authorized to work in the United States
                   </span>
                 </p>
-              </motion.div>
-
-              {/* ── Career status card: absolute right, fades in as hero drifts left ── */}
-              <motion.div
-                style={{ opacity: cardOpacity, x: cardX, filter: cardFilter }}
-                className="absolute right-0 top-[50%] -translate-y-1/2 hidden md:block w-[440px] pointer-events-none"
-              >
-                <div className="pointer-events-auto">
-                  <CareerStatus />
-                </div>
               </motion.div>
             </div>
           </div>
