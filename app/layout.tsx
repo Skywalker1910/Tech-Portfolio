@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import ChatWidget from "../components/ChatWidget";
 import CustomCursor from "../components/CustomCursor";
 import BackgroundManager from "../components/BackgroundManager";
+import GhPagesBanner from "../components/GhPagesBanner";
 import { Inter, Space_Grotesk } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-black text-white px-3 py-1 rounded">
           Skip to content
         </a>
+        {process.env.NEXT_PUBLIC_GITHUB_PAGES === "true" && <GhPagesBanner />}
         <BackgroundManager />
         <Navbar />
         <main id="main" className="flex-1 pt-24">{children}</main>

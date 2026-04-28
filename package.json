@@ -2,11 +2,15 @@
   "name": "tech-portfolio",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://skywalker1910.github.io/Tech-Portfolio",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:ghpages": "cross-env NEXT_PUBLIC_GITHUB_PAGES=true next build --turbopack",
+    "predeploy": "npm run build:ghpages",
+    "deploy": "gh-pages -b gh-pages -d out --dotfiles"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1027.0",
@@ -27,8 +31,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
+    "gh-pages": "^6.3.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

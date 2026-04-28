@@ -7,8 +7,22 @@ import type { NextConfig } from "next";
 //
 // Adjust the entries below to match the exact origin(s) (scheme + host
 // and port) you use while developing. Commonly that's http://<ip>:3000.
+
+// When NEXT_PUBLIC_GITHUB_PAGES=true, produce a fully-static export
+// targeting https://skywalker1910.github.io/Tech-Portfolio/
+const isGitHubPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
+
 const nextConfig: NextConfig = {
+  // --- GitHub Pages static-export settings (no-op for Amplify/main) ---
+  ...(isGitHubPages && {
+    output: "export",
+    basePath: "/Tech-Portfolio",
+    assetPrefix: "/Tech-Portfolio",
+    trailingSlash: true,
+  }),
   images: {
+    // next/image optimisation requires a server; disable for the static build
+    unoptimized: isGitHubPages,
     remotePatterns: [
       {
         protocol: "https",
