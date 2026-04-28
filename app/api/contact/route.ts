@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, CONTACTS_TABLE } from "@/lib/dynamodb";
 
+export const dynamic = "force-static";
+
 type ContactSubmission = {
   id: string;
   firstName: string;

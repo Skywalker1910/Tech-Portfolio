@@ -87,6 +87,27 @@ export default function Contact() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="lg:col-span-3"
         >
+          {process.env.NEXT_PUBLIC_GITHUB_PAGES === "true" ? (
+            <div className="rounded-2xl border border-amber-700/40 bg-amber-950/30 p-6 space-y-3">
+              <p className="text-amber-300 text-sm font-semibold">
+                Contact form unavailable in this version
+              </p>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                This is a static mirror hosted on GitHub Pages. The contact form
+                requires a backend that isn&apos;t available here. Please use the
+                direct links on the right, or visit the full site to send a
+                message.
+              </p>
+              <a
+                href="https://adityamore.dev/contact"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-violet-400 hover:text-violet-300 underline underline-offset-2 transition-colors"
+              >
+                Open contact form on adityamore.dev →
+              </a>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name row */}
             <div className="grid sm:grid-cols-2 gap-4">
@@ -189,6 +210,7 @@ export default function Contact() {
               </p>
             )}
           </form>
+          )}
         </motion.div>
 
         {/* Sidebar - quick contact links */}
