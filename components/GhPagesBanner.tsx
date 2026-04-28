@@ -7,7 +7,7 @@ import { ExternalLink } from "lucide-react";
  */
 export default function GhPagesBanner() {
   return (
-    <div className="w-full bg-amber-950/60 border-b border-amber-700/40 px-4 py-2 flex items-center justify-center gap-2 text-xs text-amber-300 z-50">
+    <div className="w-full bg-amber-950/60 border-t border-amber-700/40 px-4 py-2 flex items-center justify-center gap-2 text-xs text-amber-300 z-50">
       <span>
         You&apos;re viewing a static mirror. Some features (contact form, AI
         assistant) require the full site.
