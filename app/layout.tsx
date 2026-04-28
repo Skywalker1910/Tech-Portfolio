@@ -33,8 +33,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Navbar />
         <main id="main" className="flex-1 pt-24">{children}</main>
         <Footer />
-        {process.env.NEXT_PUBLIC_GITHUB_PAGES === "true" && <GhPagesBanner />}
         <ChatWidget hideButton />
+        {process.env.NEXT_PUBLIC_GITHUB_PAGES === "true" && <GhPagesBanner />}
         <CustomCursor />
         <script dangerouslySetInnerHTML={{__html:`try{const t=localStorage.getItem('theme');if(['dark','light','batman','clemson'].includes(t)){document.documentElement.classList.add(t)}else{document.documentElement.classList.add('dark')}}catch{document.documentElement.classList.add('dark')}`}} />
       </body>
