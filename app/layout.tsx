@@ -1,11 +1,8 @@
 import "./globals.css";
 import type { ReactNode } from "react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import ChatWidget from "../components/ChatWidget";
+import ConditionalLayout from "../components/ConditionalLayout";
 import CustomCursor from "../components/CustomCursor";
 import BackgroundManager from "../components/BackgroundManager";
-import GhPagesBanner from "../components/GhPagesBanner";
 import { Inter, Space_Grotesk } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -30,11 +27,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Skip to content
         </a>
         <BackgroundManager />
-        <Navbar />
-        <main id="main" className="flex-1 pt-24">{children}</main>
-        <Footer />
-        {process.env.NEXT_PUBLIC_GITHUB_PAGES === "true" && <GhPagesBanner />}
-        <ChatWidget hideButton />
+        <ConditionalLayout>
+          {children}
+        </ConditionalLayout>
         <CustomCursor />
         <script dangerouslySetInnerHTML={{__html:`try{const t=localStorage.getItem('theme');if(['dark','light','batman','clemson'].includes(t)){document.documentElement.classList.add(t)}else{document.documentElement.classList.add('dark')}}catch{document.documentElement.classList.add('dark')}`}} />
       </body>

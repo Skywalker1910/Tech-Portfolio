@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { docClient, CONTACTS_TABLE } from "@/lib/dynamodb";
+import { docClient, CONTACTS_TABLE, DeleteCommand, UpdateCommand } from "@/lib/dynamodb";
 
 // This route must be dynamic so POST requests are handled at request time.
 // The GitHub Pages static export excludes it via a webpack stub in next.config.ts.
 export const dynamic = "force-dynamic";
+
+type SenderType = "recruiter" | "visitor" | "friend" | "test" | null;
 
 type ContactSubmission = {
   id: string;
@@ -13,6 +15,8 @@ type ContactSubmission = {
   email: string;
   message: string;
   submittedAt: string;
+  read: boolean;
+  senderType: SenderType;
 };
 
 export async function POST(req: NextRequest) {
@@ -44,6 +48,8 @@ export async function POST(req: NextRequest) {
       email: email.trim().toLowerCase(),
       message: message.trim(),
       submittedAt: new Date().toISOString(),
+      read: false,
+      senderType: null,
     };
 
     await docClient.send(
@@ -68,9 +74,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  // Protect with a secret admin key — set CONTACT_ADMIN_KEY in environment variables
+  // Protect with a secret admin key — set ADMIN_KEY in environment variables
   const adminKey = req.headers.get("x-admin-key");
-  if (!adminKey || adminKey !== process.env.CONTACT_ADMIN_KEY) {
+  if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -85,5 +91,82 @@ export async function GET(req: NextRequest) {
       { error: "Failed to fetch submissions" },
       { status: 500 }
     );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const adminKey = req.headers.get("x-admin-key");
+  if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await req.json();
+    if (!id || typeof id !== "string") {
+      return NextResponse.json({ error: "Missing or invalid id" }, { status: 400 });
+    }
+
+    await docClient.send(
+      new DeleteCommand({ TableName: CONTACTS_TABLE, Key: { id } })
+    );
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting submission:", error);
+    return NextResponse.json({ error: "Failed to delete submission" }, { status: 500 });
+  }
+}
+
+const VALID_SENDER_TYPES = new Set(["recruiter", "visitor", "friend", "test", null]);
+
+export async function PATCH(req: NextRequest) {
+  const adminKey = req.headers.get("x-admin-key");
+  if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const { id, read, senderType } = body;
+
+    if (!id || typeof id !== "string") {
+      return NextResponse.json({ error: "Missing or invalid id" }, { status: 400 });
+    }
+
+    const updates: string[] = [];
+    const names: Record<string, string> = {};
+    const values: Record<string, unknown> = {};
+
+    if (typeof read === "boolean") {
+      updates.push("#rd = :read");
+      names["#rd"] = "read";
+      values[":read"] = read;
+    }
+
+    if ("senderType" in body) {
+      if (!VALID_SENDER_TYPES.has(senderType)) {
+        return NextResponse.json({ error: "Invalid senderType" }, { status: 400 });
+      }
+      updates.push("senderType = :senderType");
+      values[":senderType"] = senderType ?? null;
+    }
+
+    if (updates.length === 0) {
+      return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+    }
+
+    await docClient.send(
+      new UpdateCommand({
+        TableName: CONTACTS_TABLE,
+        Key: { id },
+        UpdateExpression: `SET ${updates.join(", ")}`,
+        ExpressionAttributeNames: Object.keys(names).length ? names : undefined,
+        ExpressionAttributeValues: values,
+      })
+    );
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error updating submission:", error);
+    return NextResponse.json({ error: "Failed to update submission" }, { status: 500 });
   }
 }
