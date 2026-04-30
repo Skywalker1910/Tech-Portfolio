@@ -2,12 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, CONTACTS_TABLE } from "@/lib/dynamodb";
 
-// GitHub Pages static export cannot include dynamic route handlers.
-// Use force-static only for that build so it compiles cleanly (the route is
-// non-functional on the static mirror anyway). In production (Amplify) the
-// handler runs fully as a server-side route.
-export const dynamic =
-  process.env.NEXT_PUBLIC_GITHUB_PAGES === "true" ? "force-static" : "force-dynamic";
+// This route must be dynamic so POST requests are handled at request time.
+// The GitHub Pages static export excludes it via a webpack stub in next.config.ts.
+export const dynamic = "force-dynamic";
 
 type ContactSubmission = {
   id: string;

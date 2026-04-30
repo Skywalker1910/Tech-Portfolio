@@ -20,6 +20,20 @@ const nextConfig: NextConfig = {
     assetPrefix: "/Tech-Portfolio",
     trailingSlash: true,
   }),
+  // Replace API route handlers with empty stubs in the GitHub Pages static
+  // export. The routes cannot run on a static host and force-dynamic would
+  // cause a build error under output:"export".
+  ...(isGitHubPages && {
+    webpack(config: import("webpack").Configuration) {
+      config.module = config.module ?? { rules: [] };
+      config.module.rules = config.module.rules ?? [];
+      (config.module.rules as import("webpack").RuleSetRule[]).push({
+        test: /app[\\/]api[\\/].*[\\/]route\.ts$/,
+        use: "null-loader",
+      });
+      return config;
+    },
+  }),
   images: {
     // next/image optimisation requires a server; disable for the static build
     unoptimized: isGitHubPages,
