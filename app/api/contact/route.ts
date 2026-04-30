@@ -58,9 +58,10 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Contact form error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Contact form error:", message, error);
     return NextResponse.json(
-      { error: "Failed to process your message" },
+      { error: "Failed to process your message", detail: message },
       { status: 500 }
     );
   }
