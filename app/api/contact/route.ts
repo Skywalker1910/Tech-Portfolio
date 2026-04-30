@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, CONTACTS_TABLE } from "@/lib/dynamodb";
 
-export const dynamic = "force-static";
+// This route must be dynamic so POST requests are handled at request time.
+// The GitHub Pages static export excludes it via a webpack stub in next.config.ts.
+export const dynamic = "force-dynamic";
 
 type ContactSubmission = {
   id: string;
