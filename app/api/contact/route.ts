@@ -74,9 +74,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  // Protect with a secret admin key — set CONTACT_ADMIN_KEY in environment variables
+  // Protect with a secret admin key — set ADMIN_KEY in environment variables
   const adminKey = req.headers.get("x-admin-key");
-  if (!adminKey || adminKey !== process.env.CONTACT_ADMIN_KEY) {
+  if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const adminKey = req.headers.get("x-admin-key");
-  if (!adminKey || adminKey !== process.env.CONTACT_ADMIN_KEY) {
+  if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -120,7 +120,7 @@ const VALID_SENDER_TYPES = new Set(["recruiter", "visitor", "friend", "test", nu
 
 export async function PATCH(req: NextRequest) {
   const adminKey = req.headers.get("x-admin-key");
-  if (!adminKey || adminKey !== process.env.CONTACT_ADMIN_KEY) {
+  if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
