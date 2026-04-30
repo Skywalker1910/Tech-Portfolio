@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import DashboardShell from "@/components/DashboardShell";
 
 export const metadata = {
-  title: "Admin Dashboard — Portfolio",
+  title: "Admin — Command Center",
   robots: { index: false, follow: false },
 };
 
