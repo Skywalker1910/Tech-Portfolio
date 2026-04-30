@@ -16,6 +16,11 @@ This document tracks known issues, active investigations, and ideas for future d
 ### Metadata Base URL
 - `metadataBase` in `app/layout.tsx` currently points to the GitHub repository URL rather than the live domain. This can affect how Open Graph previews are resolved. It should be updated to `https://adityamore.dev`.
 
+### Amplify Infrastructure Notes
+- The `AmplifySSRLoggingRole` is the actual execution role for Amplify's managed SSR compute (despite the misleading name). Any AWS service the SSR runtime needs to access (DynamoDB, SSM, etc.) requires permissions on this role.
+- Amplify reserves the `AWS_` env var prefix. Custom credentials must use a different prefix (e.g. `APP_AWS_*`) and be passed explicitly to the SDK client.
+- Amplify delivers env vars to the SSR runtime via SSM Parameter Store. The execution role must have `ssm:GetParametersByPath` on `arn:aws:ssm:*:*:parameter/amplify/{appId}/*` or env vars will silently fail to inject at runtime.
+
 ---
 
 ## Future Ideas and Features in Development
