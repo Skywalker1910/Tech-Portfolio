@@ -61,7 +61,16 @@ export async function POST(req: NextRequest) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("Contact form error:", message, error);
     return NextResponse.json(
-      { error: "Failed to process your message", detail: message },
+      {
+        error: "Failed to process your message",
+        detail: message,
+        env_check: {
+          has_APP_AWS_ACCESS_KEY_ID: !!process.env.APP_AWS_ACCESS_KEY_ID,
+          has_APP_AWS_SECRET_ACCESS_KEY: !!process.env.APP_AWS_SECRET_ACCESS_KEY,
+          has_APP_AWS_REGION: !!process.env.APP_AWS_REGION,
+          has_DYNAMODB_CONTACTS_TABLE: !!process.env.DYNAMODB_CONTACTS_TABLE,
+        },
+      },
       { status: 500 }
     );
   }
