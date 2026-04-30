@@ -24,10 +24,11 @@ const nextConfig: NextConfig = {
   // export. The routes cannot run on a static host and force-dynamic would
   // cause a build error under output:"export".
   ...(isGitHubPages && {
-    webpack(config: import("webpack").Configuration) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    webpack(config: any) {
       config.module = config.module ?? { rules: [] };
       config.module.rules = config.module.rules ?? [];
-      (config.module.rules as import("webpack").RuleSetRule[]).push({
+      config.module.rules.push({
         test: /app[\\/]api[\\/].*[\\/]route\.ts$/,
         use: "null-loader",
       });
