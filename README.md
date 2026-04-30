@@ -1,96 +1,120 @@
-# Tech Portfolio - Aditya More
+# Tech Portfolio — Aditya More
 
-A modern, interactive portfolio website showcasing data science projects, academic work, and professional experience. Built with Next.js 15, TypeScript, and Tailwind CSS v4.
+A personal portfolio web application built to go beyond the limitations of a one-page resume. This project serves as a living showcase of my skills, projects, and professional journey, presented through an interactive and polished interface.
 
-## 🚀 Features
+Live (primary): [adityamore.dev](https://adityamore.dev)
+Live (GitHub Pages mirror): [skywalker1910.github.io/Tech-Portfolio](https://skywalker1910.github.io/Tech-Portfolio)
 
-- **Modern Tech Stack**: Next.js 15 with App Router, TypeScript, Tailwind CSS v4
-- **Interactive Background**: GPU-optimized particle effects with mouse interaction
-- **Multiple Themes**: Dark/Light mode with custom Batman and Clemson Tigers themes
-- **Project Showcase**: Filterable project gallery with search and categorization
-- **Responsive Design**: Mobile-first approach with seamless desktop experience
+---
 
-## 🛠️ Tech Stack
+## About This Project
 
-- **Framework**: Next.js 15.5.4
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS 4.0
-- **Font**: Inter from Google Fonts
-- **Build Tool**: Turbopack
+The core idea behind this web application is to create a single, centralized source that accurately represents who I am as a software and AI/ML engineer. A traditional resume is constrained to one page and cannot adequately capture the depth of projects, research, and skills that define a modern engineering career. This portfolio is the answer to that problem.
 
-## Getting Started
+The goals of this project are:
 
-First, run the development server:
+- **Showcase work in depth** — Projects, research, and experience presented with full context, not just a bullet point.
+- **Provide an interactive experience** — Visitors can explore skills, timelines, and projects in an engaging interface rather than reading a static document.
+- **Consolidate everything in one place** — Work history, education, projects, skills, and contact information all accessible under one roof.
+- **Stand out in a competitive job market** — Demonstrate not just what I have built, but how I think about building software.
+- **Practice industry-grade software development** — This project is developed following standard SDLC practices: version control, branching, issue tracking, code review discipline, CI/CD pipelines, and production-grade deployment.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Interactive Interface
+- Animated particle field background with real-time mouse interaction (GPU-optimized canvas rendering)
+- Interstellar background mode as an alternate visual theme
+- BB-8 inspired AI assistant droid — an animated, stateful floating button that opens an AI-powered chat interface
+- Custom cursor with interactive states
+- Dark and light theme toggle with persistent user preference
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Content Sections
+- Home — Introduction with animated sentence flip, scroll-driven animations, and a summary of skills and highlights
+- Projects — Full project gallery with tag-based filtering and categorization
+- Experience — Professional timeline with detailed role descriptions
+- Education — Academic background and certifications
+- Skills — Categorized technical skill set
+- Socials — Links and contact channels
+- Contact — Contact form backed by AWS DynamoDB
 
-## Learn More
+### Technical Highlights
+- Server-side API routes for the contact form and GitHub data fetching
+- Interactive 3D globe visualization using the `cobe` library
+- GitHub profile integration via a live API proxy
+- Responsive, mobile-first layout
+- Accessibility considerations including skip-to-content links and reduced-motion support
+- SEO-ready with Open Graph metadata and a generated sitemap
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Animation | Framer Motion |
+| UI Icons | Lucide React, React Icons |
+| Globe | Cobe |
+| Backend (contact) | AWS DynamoDB via AWS SDK v3 |
+| Fonts | Inter, Space Grotesk (Google Fonts) |
+| Build Tool | Turbopack |
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment Architecture
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is deployed across two environments to maximize availability.
 
-## Console testing (accessing from another device on your LAN)
+### Primary — AWS (adityamore.dev)
+- **AWS Amplify** handles CI/CD, build, and hosting. Every push to the `main` branch triggers an automatic production deployment.
+- **AWS Route 53** manages the DNS for the custom `adityamore.dev` domain.
+- The application runs as a full Next.js server with API routes, image optimization, and server-side rendering enabled.
 
-If you want to open the dev site from a gaming console or any other device on your local network, follow these steps:
+### Mirror — GitHub Pages (skywalker1910.github.io/Tech-Portfolio)
+- A fully static export of the application is deployed to GitHub Pages via the `gh-pages` branch.
+- This mirror exists specifically for users on restricted networks — such as university campuses — where `.dev` TLD domains may be blocked at the DNS level.
+- The static build is produced with `npm run build:ghpages` which sets `NEXT_PUBLIC_GITHUB_PAGES=true`, enabling the static export configuration in `next.config.ts` (base path, asset prefix, static image handling).
+- Deployment to GitHub Pages is done via `npm run deploy` using the `gh-pages` package.
 
-1. Make sure the dev server is bound to all network interfaces so other devices can reach it. In PowerShell run:
+---
 
-```powershell
-$env:HOST = '0.0.0.0'
-npm run dev
-```
+## Using This as a Template
 
-On macOS/Linux you can use:
+This repository is open source under the MIT License. If you would like to use it as the foundation for your own portfolio, you are welcome to do so.
 
-```bash
-HOST=0.0.0.0 npm run dev
-```
+### Steps to get started
 
-2. On the console, open the browser and navigate to http://<your-pc-ip>:3000 (replace <your-pc-ip> with the IP address of the machine running Next.js).
+1. **Fork or clone** this repository.
 
-3. Next.js development server protects requests to /_next/* by origin. You must add the exact console origin (scheme + host + port) to `allowedDevOrigins` in `next.config.ts`. Example entries:
+2. **Update personal data** — Replace all personal content with your own:
+   - `app/layout.tsx` — Update the `metadata` object (title, description, Open Graph fields).
+   - `data/contacts.json` — Update contact links and social handles.
+   - `app/page.tsx` — Update the home page content, timeline data, and skill tags.
+   - `app/projects/page.tsx` — Replace with your own project entries.
+   - `app/experience/page.tsx` and `app/education/page.tsx` — Add your own work and academic history.
 
-```ts
-// next.config.ts
-export default {
-	// ...other options
-	allowedDevOrigins: [
-		'http://localhost:3000',
-		'http://192.168.0.229:3000',
-		'http://11.22.27.67:3000', // example console IP — replace with your console's IP
-	],
-};
-```
+3. **Replace assets** — Swap out any images or public assets in the `public/` directory with your own.
 
-4. After editing `next.config.ts` restart the dev server (stop and run `npm run dev` again).
+4. **Configure deployment**:
+   - For AWS Amplify: connect the repository in the Amplify console and set your environment variables there.
+   - For GitHub Pages: update the `homepage` field in `package.json` and the `basePath`/`assetPrefix` values in `next.config.ts` to match your GitHub username and repository name.
 
-Troubleshooting
-- If the console still shows a blocked `/ _next/*` request, check the console's network logs and ensure the origin exactly matches an entry in `allowedDevOrigins` (including port).
-- If the console rejects non-HTTPS pages, consider using an HTTPS tunnel (ngrok) or test with a device/browser that allows HTTP local connections.
-- If you're unsure what your console IP is, check the console network settings.
+5. **Set up environment variables** — If you want the contact form to work, provision a DynamoDB table and add a `.env.local` file at the root with `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `DYNAMODB_TABLE_NAME`. Do not commit this file. If you do not need a contact form, you can remove the `/api/contact` route and the `EnvelopeCard`/`Contact` components.
 
-If you want, tell me the console's exact IP and port and I'll add it to `next.config.ts` for you.
+6. **Remove or update the license attribution** — You may keep or modify the `LICENSE` file. Attribution is appreciated but not required.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Documentation
+
+Developer notes, known issues, and planned features are tracked in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
