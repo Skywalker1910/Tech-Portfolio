@@ -23,6 +23,54 @@ This document tracks known issues, active investigations, and ideas for future d
 
 ---
 
+## Admin Control Panel
+
+The admin control panel lives at `/admin/*` and is excluded from public navigation, sitemaps, and search engine indexing. It is accessible only to the site owner via a shared-secret key.
+
+### Routes
+
+| Route | Purpose |
+|---|---|
+| `/admin/login` | Login page — validates key against `ADMIN_KEY` via `/api/admin/verify` |
+| `/admin` | Command Center landing — tile grid linking to each panel |
+| `/admin/messages` | Contact messages monitor — full CRUD with filtering, tagging, and read tracking |
+
+### Authentication
+- Key is entered on the login page, verified against `process.env.ADMIN_KEY` via a lightweight `GET /api/admin/verify` endpoint (no DynamoDB call).
+- On success, the key is persisted in `sessionStorage` under `dashboard-admin-key` and sent as the `x-admin-key` header on every subsequent admin API request.
+- `ConditionalLayout` (`components/ConditionalLayout.tsx`) suppresses the public Navbar, Footer, and ChatWidget for all routes matching `/admin/*`.
+- Admin routes set `robots: { index: false, follow: false }` in their metadata.
+
+### API Changes for Admin
+- `GET /api/contact` — protected by `x-admin-key`; returns full message list including `read` and `senderType` fields.
+- `DELETE /api/contact` — protected; removes a message by `id`.
+- `PATCH /api/contact` — protected; updates `read` (boolean) and/or `senderType` (`"recruiter" | "visitor" | "friend" | "test" | null`) on a message. Uses expression alias `#rd` for the DynamoDB reserved word `read`.
+- `POST /api/contact` — public; unchanged, but now stores `read: false` and `senderType: null` on every new submission.
+
+### DynamoDB Schema Addition
+All new contact messages include two new fields:
+```json
+{ "read": false, "senderType": null }
+```
+Older items missing these fields are backfilled in-memory when fetched by the messages page (not written back to DynamoDB).
+
+### Environment Variables
+| Variable | Purpose |
+|---|---|
+| `ADMIN_KEY` | Secret key for admin panel auth (previously `CONTACT_ADMIN_KEY`) |
+| `APP_AWS_ACCESS_KEY_ID` | AWS IAM access key — `APP_AWS_*` prefix required because Amplify reserves `AWS_*` |
+| `APP_AWS_SECRET_ACCESS_KEY` | AWS IAM secret key |
+| `DYNAMODB_CONTACTS_TABLE` | DynamoDB table name (default: `portfolio-contacts`) |
+
+### Planned Admin Panels (not yet built)
+The sidebar and tile landing page already include placeholder entries for these panels. To activate one: set `disabled: false` in both `DashboardShell.tsx` and `app/admin/page.tsx`, then create the corresponding `app/admin/<section>/page.tsx`.
+- `/admin/projects` — Add, update, and remove portfolio projects
+- `/admin/experience` — Edit work history entries
+- `/admin/timeline` — Manage career and education milestones
+- `/admin/skills` — Add and remove skills from the skillset
+
+---
+
 ## Future Ideas and Features in Development
 
 ### Content and Sections
@@ -49,6 +97,7 @@ This document tracks known issues, active investigations, and ideas for future d
 - **CDN cache headers** — Review and tighten cache-control headers for static assets to improve repeat-visit performance.
 - **Error monitoring** — Integrate a lightweight error tracking tool (e.g., Sentry) to surface runtime errors in the production environment.
 - **Contact form spam protection** — Add a CAPTCHA or honeypot field to the contact form to reduce bot submissions to DynamoDB.
+- **Admin panel role-based auth** — The current shared-secret model is sufficient for a single-owner tool. If multi-user access is ever needed, replace with AWS Cognito or a similar identity provider.
 
 ### GitHub Pages Mirror
 - **Automated sync** — Currently the GitHub Pages deployment is manual (`npm run deploy`). Automate it via a GitHub Actions workflow that triggers on every push to `main` after the Amplify deployment succeeds.
@@ -64,6 +113,7 @@ This project is intentionally developed following standard software development 
 - Commit messages follow conventional commit conventions where possible.
 - The `Deployment-3-logs/` directory contains build and deploy logs from production releases for traceability.
 - Environment configuration is separated from source code and managed via `.env.local` locally and via Amplify environment variables in production.
+- The admin control panel was developed on the `feature/admin-dashboard` branch and merged to `main` for production deployment.
 
 ---
 
