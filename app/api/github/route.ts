@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 const USERNAME = "Skywalker1910";
 const GITHUB_API = "https://api.github.com";
 
+export const dynamic = "force-static";
 export const revalidate = 3600; // cache 1 hour
 
 export async function GET() {

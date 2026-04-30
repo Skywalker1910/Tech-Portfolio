@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import ChatWidget from "../components/ChatWidget";
 import CustomCursor from "../components/CustomCursor";
 import BackgroundManager from "../components/BackgroundManager";
+import GhPagesBanner from "../components/GhPagesBanner";
 import { Inter, Space_Grotesk } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Navbar />
         <main id="main" className="flex-1 pt-24">{children}</main>
         <Footer />
+        {process.env.NEXT_PUBLIC_GITHUB_PAGES === "true" && <GhPagesBanner />}
         <ChatWidget hideButton />
         <CustomCursor />
         <script dangerouslySetInnerHTML={{__html:`try{const t=localStorage.getItem('theme');if(['dark','light','batman','clemson'].includes(t)){document.documentElement.classList.add(t)}else{document.documentElement.classList.add('dark')}}catch{document.documentElement.classList.add('dark')}`}} />
