@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { docClient, CONTACTS_TABLE } from "@/lib/dynamodb";
+import { docClient, CONTACTS_TABLE, DeleteCommand } from "@/lib/dynamodb";
 
 // This route must be dynamic so POST requests are handled at request time.
 // The GitHub Pages static export excludes it via a webpack stub in next.config.ts.
@@ -85,5 +85,27 @@ export async function GET(req: NextRequest) {
       { error: "Failed to fetch submissions" },
       { status: 500 }
     );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const adminKey = req.headers.get("x-admin-key");
+  if (!adminKey || adminKey !== process.env.CONTACT_ADMIN_KEY) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await req.json();
+    if (!id || typeof id !== "string") {
+      return NextResponse.json({ error: "Missing or invalid id" }, { status: 400 });
+    }
+
+    await docClient.send(
+      new DeleteCommand({ TableName: CONTACTS_TABLE, Key: { id } })
+    );
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting submission:", error);
+    return NextResponse.json({ error: "Failed to delete submission" }, { status: 500 });
   }
 }
