@@ -7,7 +7,7 @@ import { MessageSquare, LogOut, Shield } from "lucide-react";
 
 const navLinks = [
   {
-    href: "/dashboard/messages",
+    href: "/admin/messages",
     label: "Messages",
     icon: <MessageSquare size={16} />,
   },
@@ -21,11 +21,11 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     try {
       sessionStorage.removeItem("dashboard-admin-key");
     } catch {}
-    router.push("/dashboard/login");
+    router.push("/admin/login");
   };
 
   // Login page: render children without the sidebar chrome
-  if (pathname === "/dashboard/login") {
+  if (pathname === "/admin/login") {
     return <>{children}</>;
   }
 

@@ -11,7 +11,7 @@ const isGhPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
 
 export default function ConditionalLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isDashboard = pathname?.startsWith("/dashboard");
+  const isDashboard = pathname?.startsWith("/admin");
 
   if (isDashboard) {
     return <>{children}</>;

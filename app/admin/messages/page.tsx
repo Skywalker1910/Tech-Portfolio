@@ -204,13 +204,13 @@ export default function MessagesPage() {
       const key = sessionStorage.getItem("dashboard-admin-key");
       if (!key) {
         setPageStatus("unauth");
-        router.replace("/dashboard/login");
+        router.replace("/admin/login");
       } else {
         setAdminKey(key);
       }
     } catch {
       setPageStatus("unauth");
-      router.replace("/dashboard/login");
+      router.replace("/admin/login");
     }
   }, [router]);
 
@@ -230,7 +230,7 @@ export default function MessagesPage() {
 
         if (res.status === 401) {
           setPageStatus("unauth");
-          router.replace("/dashboard/login");
+router.replace("/admin/login");
           return;
         }
 

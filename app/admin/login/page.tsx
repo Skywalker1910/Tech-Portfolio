@@ -16,7 +16,7 @@ export default function DashboardLogin() {
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem("dashboard-admin-key");
-      if (saved) router.replace("/dashboard/messages");
+      if (saved) router.replace("/admin/messages");
     } catch {}
   }, [router]);
 
@@ -34,7 +34,7 @@ export default function DashboardLogin() {
 
       if (res.ok) {
         sessionStorage.setItem("dashboard-admin-key", key.trim());
-        router.push("/dashboard/messages");
+        router.push("/admin/messages");
       } else {
         setStatus("error");
         setErrorMsg("Invalid admin key. Access denied.");
