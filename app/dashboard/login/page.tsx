@@ -28,7 +28,7 @@ export default function DashboardLogin() {
     setErrorMsg("");
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("/api/admin/verify", {
         headers: { "x-admin-key": key.trim() },
       });
 
