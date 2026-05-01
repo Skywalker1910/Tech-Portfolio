@@ -1,0 +1,21 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        # Write Amplify env vars into .env.production so Next.js SSR runtime
+        # can read them at request time (Amplify SSM delivery is unreliable).
+        - env | grep -e ADMIN_KEY -e APP_AWS_ -e DYNAMODB_ -e GITHUB_TOKEN >> .env.production
+        - env | grep -e NEXT_PUBLIC_ >> .env.production
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
