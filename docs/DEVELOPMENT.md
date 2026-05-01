@@ -57,10 +57,25 @@ Older items missing these fields are backfilled in-memory when fetched by the me
 ### Environment Variables
 | Variable | Purpose |
 |---|---|
-| `ADMIN_KEY` | Secret key for admin panel auth (previously `CONTACT_ADMIN_KEY`) |
+| `ADMIN_KEY` | Secret key for admin panel auth |
 | `APP_AWS_ACCESS_KEY_ID` | AWS IAM access key — `APP_AWS_*` prefix required because Amplify reserves `AWS_*` |
 | `APP_AWS_SECRET_ACCESS_KEY` | AWS IAM secret key |
 | `DYNAMODB_CONTACTS_TABLE` | DynamoDB table name (default: `portfolio-contacts`) |
+
+### Amplify SSR Environment Variable Delivery
+Amplify delivers env vars to the SSR runtime via SSM Parameter Store, which requires the `AmplifySSRLoggingRole` to have `ssm:GetParametersByPath` permission. This permission is not granted by default and can be difficult to configure correctly.
+
+**Resolution:** An `amplify.yml` build spec was added that writes all required env vars into `.env.production` during the build phase. Next.js reads `.env.production` at both build time and SSR runtime, so vars are always available without relying on SSM delivery.
+
+The relevant build commands in `amplify.yml`:
+```yaml
+- env | grep -e ADMIN_KEY -e APP_AWS_ -e DYNAMODB_ -e GITHUB_TOKEN >> .env.production || true
+- env | grep -e NEXT_PUBLIC_ >> .env.production || true
+```
+
+The `|| true` prevents `grep` exit code 1 (no matches found) from failing the build.
+
+**Note:** `.env.production` is git-ignored and generated fresh on every build — no secrets are committed to the repository.
 
 ### Planned Admin Panels (not yet built)
 The sidebar and tile landing page already include placeholder entries for these panels. To activate one: set `disabled: false` in both `DashboardShell.tsx` and `app/admin/page.tsx`, then create the corresponding `app/admin/<section>/page.tsx`.
