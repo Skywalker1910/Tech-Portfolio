@@ -43,3 +43,12 @@ next-env.d.ts
 
 # contact form submissions
 /data/contacts.json
+
+# raw resume/CV files in root — use public/resume.pdf for the served asset
+/*.pdf
+
+# LaTeX source files — not part of the web app
+*.tex
+
+# deployment logs — informational only, not part of source
+Deployment-*/
