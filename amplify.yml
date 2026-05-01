@@ -8,8 +8,9 @@ frontend:
       commands:
         # Write Amplify env vars into .env.production so Next.js SSR runtime
         # can read them at request time (Amplify SSM delivery is unreliable).
-        - env | grep -e ADMIN_KEY -e APP_AWS_ -e DYNAMODB_ -e GITHUB_TOKEN >> .env.production
-        - env | grep -e NEXT_PUBLIC_ >> .env.production
+        # || true prevents grep exit code 1 (no matches) from failing the build.
+        - env | grep -e ADMIN_KEY -e APP_AWS_ -e DYNAMODB_ -e GITHUB_TOKEN >> .env.production || true
+        - env | grep -e NEXT_PUBLIC_ >> .env.production || true
         - npm run build
   artifacts:
     baseDirectory: .next
