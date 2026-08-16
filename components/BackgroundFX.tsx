@@ -165,7 +165,6 @@ export default function BackgroundFX() {
     };
 
     return () => stop.current();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

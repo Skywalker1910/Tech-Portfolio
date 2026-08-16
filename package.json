@@ -8,6 +8,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm run rag:evaluate && npm run build",
     "rag:setup": "tsx --env-file-if-exists=.env.local scripts/setup-rag.ts",
     "rag:index": "tsx --env-file-if-exists=.env.local scripts/index-rag.ts",
     "rag:evaluate": "tsx --env-file-if-exists=.env.local scripts/evaluate-rag.ts",

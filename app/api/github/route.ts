@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 const USERNAME = "Skywalker1910";
 const GITHUB_API = "https://api.github.com";
 
-export const dynamic = "force-static";
+// Keep external GitHub availability out of the deployment build. The fetches
+// below still use Next.js' one-hour data cache at runtime.
+export const dynamic = "force-dynamic";
 export const revalidate = 3600; // cache 1 hour
 
 export async function GET() {
@@ -15,10 +17,20 @@ export async function GET() {
     headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
 
-  const [userRes, reposRes] = await Promise.all([
-    fetch(`${GITHUB_API}/users/${USERNAME}`, { headers, next: { revalidate: 3600 } }),
-    fetch(`${GITHUB_API}/users/${USERNAME}/repos?per_page=100&sort=pushed`, { headers, next: { revalidate: 3600 } }),
-  ]);
+  let userRes: Response;
+  let reposRes: Response;
+
+  try {
+    [userRes, reposRes] = await Promise.all([
+      fetch(`${GITHUB_API}/users/${USERNAME}`, { headers, next: { revalidate: 3600 } }),
+      fetch(`${GITHUB_API}/users/${USERNAME}/repos?per_page=100&sort=pushed`, { headers, next: { revalidate: 3600 } }),
+    ]);
+  } catch {
+    return NextResponse.json(
+      { error: "GitHub data is temporarily unavailable" },
+      { status: 503 },
+    );
+  }
 
   if (!userRes.ok) {
     return NextResponse.json({ error: "GitHub API error" }, { status: userRes.status });

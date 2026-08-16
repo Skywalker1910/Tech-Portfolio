@@ -59,11 +59,10 @@ Amplify’s runtime environment delivery previously caused missing-variable fail
 Before committing a feature that touches server behavior:
 
 ```powershell
-npm run lint
-npx tsc --noEmit
-npm run rag:evaluate
-npm run build
+npm run check
 ```
+
+The same lint, TypeScript, local RAG, and production-build steps run as the GitHub Actions `Quality gate` for every pull request into `main`. See [Pull Requests and Release Checks](PULL_REQUESTS.md) for branch protection and release verification.
 
 Also verify proportionate user flows:
 
@@ -75,7 +74,7 @@ Also verify proportionate user flows:
 - Contact draft review and explicit visitor submission.
 - Notice and Privacy statements after any data-flow change.
 
-The local Windows environment may report `UNABLE_TO_VERIFY_LEAF_SIGNATURE` when prerendering `/api/github`. This is a local certificate-chain issue, not an application TypeScript error; validate the GitHub route and production build again in an environment with a correct trust store.
+The GitHub API route is rendered dynamically and cached for one hour, so temporary GitHub or local certificate failures do not block a production build. The route returns a safe unavailable response when the upstream request cannot be completed.
 
 ## Documentation maintenance
 
