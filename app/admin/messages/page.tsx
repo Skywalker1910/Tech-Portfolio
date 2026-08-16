@@ -343,18 +343,10 @@ export default function MessagesPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    try {
-      const key = sessionStorage.getItem("dashboard-admin-key");
-      if (!key) {
-        setPageStatus("unauth");
-        router.replace("/admin/login");
-      } else {
-        setAdminKey(key);
-      }
-    } catch {
-      setPageStatus("unauth");
-      router.replace("/admin/login");
-    }
+    fetch("/api/admin/session").then((response) => {
+      if (!response.ok) { setPageStatus("unauth"); router.replace("/admin/login"); }
+      else setAdminKey("session");
+    }).catch(() => { setPageStatus("unauth"); router.replace("/admin/login"); });
   }, [router]);
 
   const fetchMessages = useCallback(
@@ -446,24 +438,24 @@ export default function MessagesPage() {
   if (pageStatus === "unauth") return null;
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-5 md:p-8 max-w-5xl mx-auto">
+      <div className="mb-7 flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
         <div>
-          <h1 className="text-xl font-semibold text-white flex items-center gap-2">
-            <MessageSquare size={19} className="text-violet-400" />
+          <h1 className="flex items-center gap-2 text-xl font-semibold text-[var(--text)]">
+            <MessageSquare size={19} className="text-orange-500" />
             Messages
             {unreadCount > 0 && (
-              <span className="text-xs font-bold bg-violet-500 text-white px-1.5 py-0.5 rounded-full">
+              <span className="rounded-full bg-orange-500 px-1.5 py-0.5 text-xs font-bold text-white">
                 {unreadCount}
               </span>
             )}
           </h1>
-          <p className="text-sm text-zinc-500 mt-0.5">Contact form submissions</p>
+          <p className="mt-0.5 text-sm text-[var(--muted)]">Contact form submissions</p>
         </div>
         <button
           onClick={() => fetchMessages(true)}
           disabled={pageStatus === "loading" || refreshing}
-          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--tag-bg)] px-3 py-2 text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)] disabled:opacity-50"
         >
           <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
           Refresh

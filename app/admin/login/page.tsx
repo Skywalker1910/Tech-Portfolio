@@ -12,12 +12,9 @@ export default function DashboardLogin() {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Redirect if already authenticated
+  // Redirect if the HttpOnly admin session is already valid.
   useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem("dashboard-admin-key");
-      if (saved) router.replace("/admin");
-    } catch {}
+    fetch("/api/admin/session").then((response) => { if (response.ok) router.replace("/admin"); }).catch(() => {});
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,12 +25,13 @@ export default function DashboardLogin() {
     setErrorMsg("");
 
     try {
-      const res = await fetch("/api/admin/verify", {
-        headers: { "x-admin-key": key.trim() },
+      const res = await fetch("/api/admin/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: key.trim() }),
       });
 
       if (res.ok) {
-        sessionStorage.setItem("dashboard-admin-key", key.trim());
         router.push("/admin");
       } else {
         setStatus("error");
@@ -46,20 +44,21 @@ export default function DashboardLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg)] p-4">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(249,115,22,0.13),transparent_35%)]" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className="w-full max-w-sm"
+        className="relative w-full max-w-sm rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] p-7 shadow-2xl"
       >
         {/* Logo mark */}
         <div className="flex flex-col items-center mb-8">
-          <div className="h-14 w-14 rounded-2xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center mb-4">
-            <Shield size={26} className="text-violet-400" />
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-orange-500/25 bg-orange-500/10">
+            <Shield size={26} className="text-orange-500" />
           </div>
-          <h1 className="text-xl font-semibold text-white">Admin Access</h1>
-          <p className="text-sm text-zinc-500 mt-1 text-center">
+          <h1 className="text-xl font-semibold text-[var(--text)]">Admin Access</h1>
+          <p className="mt-1 text-center text-sm text-[var(--muted)]">
             Enter your admin key to access the dashboard
           </p>
         </div>
@@ -72,12 +71,12 @@ export default function DashboardLogin() {
               onChange={(e) => setKey(e.target.value)}
               placeholder="Admin key"
               autoComplete="current-password"
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 pr-12 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all"
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3 pr-12 text-sm text-[var(--text)] placeholder:text-[var(--sub-muted)] transition-all focus:border-orange-500/50 focus:outline-none focus:ring-1 focus:ring-orange-500/20"
             />
             <button
               type="button"
               onClick={() => setShowKey((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] transition-colors hover:text-[var(--text)]"
               aria-label={showKey ? "Hide key" : "Show key"}
             >
               {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -93,7 +92,7 @@ export default function DashboardLogin() {
           <button
             type="submit"
             disabled={!key.trim() || status === "loading"}
-            className="w-full py-3 rounded-xl text-sm font-medium bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors flex items-center justify-center gap-2"
+            className="cta-primary flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
           >
             {status === "loading" ? (
               <>

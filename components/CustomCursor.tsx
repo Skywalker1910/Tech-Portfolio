@@ -57,15 +57,15 @@ export default function CustomCursor() {
         const pull = 1 - target.dist / MAGNETIC_RADIUS; // 0→1 as it gets closer
         const scale = 1 + pull * 0.7;
         ring.style.transform = `translate(-50%, -50%) scale(${scale})`;
-        ring.style.borderColor = `rgba(167,139,250,${0.5 + pull * 0.5})`;
-        ring.style.boxShadow = `0 0 ${8 + pull * 16}px rgba(139,92,246,${0.3 + pull * 0.5})`;
-        ring.style.background = `rgba(139,92,246,${pull * 0.12})`;
+        ring.style.borderColor = `rgba(249,115,22,${0.5 + pull * 0.5})`;
+        ring.style.boxShadow = `0 0 ${8 + pull * 16}px rgba(249,115,22,${0.3 + pull * 0.5})`;
+        ring.style.background = `rgba(249,115,22,${pull * 0.1})`;
       } else {
         rx += (mx - rx) * 0.12;
         ry += (my - ry) * 0.12;
         ring.style.transform = "translate(-50%, -50%) scale(1)";
-        ring.style.borderColor = "rgba(139,92,246,0.55)";
-        ring.style.boxShadow = "0 0 8px rgba(139,92,246,0.25)";
+        ring.style.borderColor = "rgba(249,115,22,0.45)";
+        ring.style.boxShadow = "0 0 8px rgba(249,115,22,0.2)";
         ring.style.background = "transparent";
       }
 
@@ -94,8 +94,8 @@ export default function CustomCursor() {
         style={{
           width: 36, height: 36,
           borderWidth: "1.5px",
-          borderColor: "rgba(139,92,246,0.55)",
-          boxShadow: "0 0 8px rgba(139,92,246,0.25)",
+          borderColor: "rgba(249,115,22,0.45)",
+          boxShadow: "0 0 8px rgba(249,115,22,0.2)",
           transition: "border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, width 0.2s ease, height 0.2s ease",
           transform: "translate(-50%, -50%)",
         }}
@@ -105,8 +105,8 @@ export default function CustomCursor() {
         ref={dotRef}
         className="pointer-events-none fixed z-[9999] w-1.5 h-1.5 rounded-full -translate-x-1/2 -translate-y-1/2 will-change-transform"
         style={{
-          background: "rgba(167,139,250,1)",
-          boxShadow: "0 0 6px rgba(139,92,246,1)",
+          background: "rgba(249,115,22,0.9)",
+          boxShadow: "0 0 6px rgba(249,115,22,0.8)",
         }}
       />
     </>

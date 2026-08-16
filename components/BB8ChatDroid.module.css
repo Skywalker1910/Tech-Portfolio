@@ -1,0 +1,492 @@
+/* Standalone droid adapted from Galahhad's UIverse BB-8 toggle. */
+
+.toggle {
+  --toggle-size: 16px;
+  --toggle-width: 5.5em;
+  --toggle-height: 6.5em;
+  --bb8-diameter: 4.375em;
+  --radius: 99em;
+  --accent: #de7d2f;
+  --bb8-bg: #fff;
+  --eye-y: 0em;
+  --sensor-y: 0em;
+  --head-x: 0em;
+  --head-y: 0em;
+  --eye-surface-x: 0em;
+  --eye-surface-scale: 1;
+  --sensor-surface-x: 0.38em;
+  --sensor-surface-scale: 0.88;
+  --antenna-one-x: 0.22em;
+  --antenna-two-x: 0em;
+
+  display: block;
+  width: var(--toggle-width);
+  height: var(--toggle-height);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font-size: var(--toggle-size);
+  position: relative;
+  cursor: pointer;
+  transform: translateX(0);
+  transition: filter 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggle,
+.bannerVisual,
+.toggle *,
+.bannerVisual *,
+.toggle *::before,
+.toggle *::after,
+.bannerVisual *::before,
+.bannerVisual *::after {
+  box-sizing: border-box;
+}
+
+.bannerVisual {
+  --toggle-size: 18px;
+  --toggle-width: 5.5em;
+  --toggle-height: 6.5em;
+  --bb8-diameter: 4.375em;
+  --radius: 99em;
+  --accent: #de7d2f;
+  --bb8-bg: #fff;
+  --eye-y: 0em;
+  --sensor-y: 0em;
+  --head-x: 0em;
+  --head-y: 0em;
+  --eye-surface-x: 0em;
+  --eye-surface-scale: 1;
+  --sensor-surface-x: 0.38em;
+  --sensor-surface-scale: 0.88;
+  --antenna-one-x: 0.22em;
+  --antenna-two-x: 0em;
+  display: block;
+  width: var(--toggle-width);
+  height: var(--toggle-height);
+  position: relative;
+  flex: 0 0 auto;
+  font-size: var(--toggle-size);
+  filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.24));
+}
+
+.bannerVisual .bodyPattern {
+  animation: bb8-banner-roll 12s linear infinite;
+}
+
+.toggle:hover {
+  filter: drop-shadow(0 7px 9px rgba(0, 0, 0, 0.24));
+  translate: 0 -2px;
+}
+
+.toggle:active {
+  translate: 0 1px;
+  scale: 0.985;
+}
+
+.toggle:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.toggle[data-side="left"] {
+  transform: translateX(calc(-100vw + 100% + 48px));
+}
+
+.toggle[data-moving="true"] {
+  transition: filter 180ms ease,
+    transform 5.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+
+.greeting {
+  position: absolute;
+  right: 50%;
+  top: -2.25em;
+  z-index: 5;
+  width: max-content;
+  padding: 0.5em 0.75em;
+  border: 1px solid var(--border);
+  border-radius: 0.85em 0.85em 0.15em 0.85em;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  transform-origin: bottom right;
+  animation: bb8-greeting-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.greeting::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -0.42em;
+  width: 0.65em;
+  height: 0.65em;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+.container {
+  display: block;
+  width: var(--toggle-width);
+  height: var(--toggle-height);
+  overflow: visible;
+  position: relative;
+}
+
+.droid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  top: 0.95em;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  perspective: 8em;
+}
+
+.headContainer {
+  display: block;
+  position: relative;
+  z-index: 2;
+  transform: translate(var(--head-x), var(--head-y));
+  transition: transform 120ms ease-out;
+}
+
+.headShell {
+  display: block;
+  margin-bottom: -0.188em;
+  width: 2.5em;
+  height: 1.688em;
+  overflow: hidden;
+  position: relative;
+  border: 0.055em solid #aeb1b3;
+  border-bottom: 0.16em solid #898d90;
+  border-radius: 50% 50% 4% 4% / 100% 100% 4% 4%;
+  background: #f4f4f2;
+  box-shadow:
+    inset 0.2em 0.08em 0.28em rgba(255, 255, 255, 0.95),
+    inset -0.28em -0.08em 0.32em rgba(72, 78, 82, 0.34),
+    0 0.063em 0.125em rgba(40, 40, 40, 0.55);
+}
+
+.headDome {
+  display: block;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 30% 16%, rgba(255, 255, 255, 0.95), transparent 34%),
+    radial-gradient(ellipse at 52% 118%, transparent 55%, rgba(52, 58, 62, 0.3) 82%),
+    linear-gradient(90deg, rgba(185, 190, 193, 0.35), transparent 22% 68%, rgba(61, 66, 70, 0.28));
+}
+
+.headBand {
+  display: block;
+  position: absolute;
+  top: 0.34em;
+  left: -0.1em;
+  width: 2.7em;
+  height: 0.16em;
+  border-top: 0.035em solid rgba(123, 61, 19, 0.42);
+  border-bottom: 0.035em solid rgba(123, 61, 19, 0.4);
+  background: linear-gradient(90deg, #cf6921, #ef8d38 48%, #c85e1b);
+  box-shadow: inset 0 0.04em 0.06em rgba(255, 255, 255, 0.45);
+}
+
+.headLowerBand {
+  display: block;
+  position: absolute;
+  left: -0.08em;
+  bottom: 0.17em;
+  width: 2.66em;
+  height: 0.22em;
+  border-top: 0.035em solid rgba(123, 61, 19, 0.32);
+  border-bottom: 0.035em solid rgba(123, 61, 19, 0.28);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0 0.12em,
+    #f4f4f2 0.12em 0.18em,
+    var(--accent) 0.18em 0.32em,
+    #f4f4f2 0.32em 0.42em
+  );
+  box-shadow: inset 0 0.04em 0.05em rgba(255, 255, 255, 0.5);
+}
+
+.headEye {
+  display: block;
+  position: absolute;
+  top: 0.48em;
+  left: 50%;
+  z-index: 3;
+  width: 0.66em;
+  height: 0.66em;
+  border: 0.085em solid #b9bdc0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 63% 31%, #fff 0 0.055em, transparent 0.065em),
+    radial-gradient(circle at 47% 52%, #111 0 42%, #363b3e 44% 65%, #090909 68%);
+  box-shadow:
+    0 0 0 0.045em #73787b,
+    inset -0.07em -0.06em 0.09em rgba(0, 0, 0, 0.7);
+  transform: translateX(calc(-50% + var(--eye-surface-x)))
+    translateY(var(--eye-y)) scaleX(var(--eye-surface-scale));
+  transition: transform 110ms ease-out;
+}
+
+.headEye::after {
+  content: "";
+  position: absolute;
+  right: 0.06em;
+  bottom: 0.07em;
+  width: 0.11em;
+  height: 0.11em;
+  border-radius: 50%;
+  background: #ef3d24;
+  box-shadow: 0 0 0.08em rgba(239, 61, 36, 0.85);
+}
+
+.headSensor {
+  display: block;
+  position: absolute;
+  top: 0.76em;
+  left: 50%;
+  z-index: 2;
+  width: 0.3em;
+  height: 0.3em;
+  border: 0.045em solid #b7bbbe;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #e9eef0, #24282b 45% 100%);
+  box-shadow: 0 0 0 0.025em #74797c;
+  transform: translateX(calc(-50% + var(--sensor-surface-x)))
+    translateY(var(--sensor-y)) scaleX(var(--sensor-surface-scale));
+  transition: transform 110ms ease-out;
+}
+
+.antenna {
+  display: block;
+  position: absolute;
+  width: 0.07em;
+  border-radius: var(--radius) var(--radius) 0 0;
+  z-index: 4;
+  transition: left 110ms ease-out, transform 110ms ease-out;
+}
+
+.antenna:nth-child(1) {
+  height: 1.08em;
+  left: calc(50% + var(--antenna-one-x));
+  transform: translate(-50%, -90%);
+  background: linear-gradient(#050505 0 0.48em, #bfc3c5 0.48em 100%);
+  box-shadow: 0 0 0.035em rgba(0, 0, 0, 0.55);
+}
+
+.antenna:nth-child(2) {
+  height: 0.48em;
+  left: calc(50% + var(--antenna-two-x));
+  transform: translate(-50%, -90%);
+  background: linear-gradient(#d9dcde, #858a8d);
+  box-shadow: 0 0 0.035em rgba(0, 0, 0, 0.38);
+}
+
+.body {
+  display: block;
+  width: 4.375em;
+  height: 4.375em;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  border-radius: var(--radius);
+  background:
+    radial-gradient(
+      circle at 27% 20%,
+      rgba(255, 255, 255, 0.98) 0 8%,
+      rgba(255, 255, 255, 0.5) 18%,
+      transparent 37%
+    ),
+    radial-gradient(
+      circle at 68% 74%,
+      transparent 0 42%,
+      rgba(85, 89, 92, 0.16) 70%,
+      rgba(36, 40, 43, 0.38) 100%
+    ),
+    linear-gradient(135deg, #fff 0 52%, #d9dcde 100%);
+  box-shadow:
+    inset 0.18em 0.12em 0.25em rgba(255, 255, 255, 0.95),
+    inset -0.36em -0.3em 0.52em rgba(50, 55, 59, 0.28);
+  filter:
+    drop-shadow(1px 0 0 rgba(249, 115, 22, 0.92))
+    drop-shadow(-1px 0 0 rgba(249, 115, 22, 0.92))
+    drop-shadow(0 1px 0 rgba(249, 115, 22, 0.92))
+    drop-shadow(0 -1px 0 rgba(249, 115, 22, 0.92))
+    drop-shadow(0 0 5px rgba(249, 115, 22, 0.42));
+}
+
+.bodyPattern {
+  display: block;
+  position: absolute;
+  inset: 0.06em;
+  overflow: hidden;
+  border-radius: inherit;
+  transform: rotate(225deg);
+  background:
+    linear-gradient(
+      -90deg,
+      transparent 4%,
+      var(--accent) 4% 10%,
+      transparent 10% 90%,
+      var(--accent) 90% 96%,
+      transparent 96%
+    ),
+    linear-gradient(
+      transparent 4%,
+      var(--accent) 4% 10%,
+      transparent 10% 90%,
+      var(--accent) 90% 96%,
+      transparent 96%
+    ),
+    linear-gradient(
+      to right,
+      transparent 2.156em,
+      silver 2.156em 2.219em,
+      transparent 2.188em
+    ),
+    linear-gradient(
+      transparent 2.156em,
+      silver 2.156em 2.219em,
+      transparent 2.188em
+  );
+}
+
+.toggle[data-moving="true"] .droid {
+  animation: bb8-travel-bob 620ms ease-in-out infinite alternate;
+}
+
+.toggle[data-moving="true"] .bodyPattern {
+  animation: bb8-body-roll 1.4s linear infinite;
+}
+
+.toggle[data-moving="true"][data-side="right"] .bodyPattern {
+  animation-direction: reverse;
+}
+
+.bodyPattern::after {
+  content: "";
+  position: absolute;
+  bottom: 1.5em;
+  left: 0.563em;
+  width: 0.188em;
+  height: 0.188em;
+  border-radius: 50%;
+  color: rgb(236, 236, 236);
+  background: rgb(236, 236, 236);
+  box-shadow: 0.875em 0.938em, 0 -1.25em, 0.875em -2.125em,
+    2.125em -2.125em, 3.063em -1.25em, 3.063em 0, 2.125em 0.938em;
+}
+
+.bodyPattern::before {
+  content: "";
+  width: 2.625em;
+  height: 2.625em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+  border: 0.313em solid var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(
+      1em circle at center,
+      rgb(236, 236, 236) 50%,
+      transparent 51%
+    ),
+    radial-gradient(1.25em circle at center, var(--bb8-bg) 50%, transparent 51%),
+    linear-gradient(
+      -90deg,
+      transparent 42%,
+      var(--accent) 42% 58%,
+      transparent 58%
+    ),
+    linear-gradient(
+      var(--bb8-bg) 42%,
+      var(--accent) 42% 58%,
+      var(--bb8-bg) 58%
+    );
+  box-shadow:
+    inset 0.12em 0.1em 0.16em rgba(255, 255, 255, 0.8),
+    inset -0.18em -0.16em 0.22em rgba(56, 61, 64, 0.24);
+}
+
+.shadow {
+  display: block;
+  width: 4.25em;
+  height: 0.65em;
+  position: absolute;
+  bottom: 0.05em;
+  left: 50%;
+  z-index: 1;
+  border-radius: 50%;
+  opacity: 0.2;
+  transform: translateX(-50%);
+  background: #3a271c;
+  filter: blur(0.18em);
+}
+
+@media (max-width: 639px) {
+  .toggle {
+    --toggle-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .headContainer,
+  .headEye,
+  .headSensor,
+  .antenna {
+    transition: none;
+  }
+}
+
+@keyframes bb8-body-roll {
+  from {
+    transform: rotate(225deg);
+  }
+  to {
+    transform: rotate(585deg);
+  }
+}
+
+@keyframes bb8-travel-bob {
+  from {
+    margin-top: 0;
+  }
+  to {
+    margin-top: -0.12em;
+  }
+}
+
+@keyframes bb8-greeting-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.4em) scale(0.72) rotate(4deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
+  }
+}
+
+@keyframes bb8-banner-roll {
+  from { transform: rotate(225deg); }
+  to { transform: rotate(585deg); }
+}

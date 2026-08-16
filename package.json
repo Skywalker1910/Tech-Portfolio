@@ -8,18 +8,26 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "rag:setup": "tsx --env-file-if-exists=.env.local scripts/setup-rag.ts",
+    "rag:index": "tsx --env-file-if-exists=.env.local scripts/index-rag.ts",
+    "rag:evaluate": "tsx --env-file-if-exists=.env.local scripts/evaluate-rag.ts",
+    "rag:evaluate:s3": "tsx --env-file-if-exists=.env.local scripts/evaluate-rag.ts --s3",
+    "content:setup": "tsx --env-file-if-exists=.env.local scripts/setup-content.ts",
+    "content:seed": "tsx --env-file-if-exists=.env.local scripts/seed-content.ts",
     "build:ghpages": "cross-env NEXT_PUBLIC_GITHUB_PAGES=true next build --turbopack",
     "predeploy": "npm run build:ghpages",
     "deploy": "gh-pages -b gh-pages -d out --dotfiles"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1027.0",
+    "@aws-sdk/client-s3vectors": "^3.1110.0",
     "@aws-sdk/lib-dynamodb": "^3.1027.0",
     "clsx": "^2.1.1",
     "cobe": "^2.0.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.0.1",
     "next": "^16.2.3",
+    "openai": "^7.4.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-icons": "^5.6.0",
@@ -37,6 +45,7 @@
     "gh-pages": "^6.3.0",
     "null-loader": "^4.0.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5"
   }
 }

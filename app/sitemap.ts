@@ -2,12 +2,14 @@ import type { MetadataRoute } from "next";
 export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
-    { url: "https://example.com/", lastModified: new Date() },
-    { url: "https://example.com/projects", lastModified: new Date() },
-    { url: "https://example.com/education", lastModified: new Date() },
-    { url: "https://example.com/experience", lastModified: new Date() },
-    { url: "https://example.com/skills", lastModified: new Date() },
-    { url: "https://example.com/socials", lastModified: new Date() },
-    { url: "https://example.com/contact", lastModified: new Date() },
+    { url: "https://adityamore.dev/", lastModified: new Date() },
+    { url: "https://adityamore.dev/projects", lastModified: new Date() },
+    { url: "https://adityamore.dev/education", lastModified: new Date() },
+    { url: "https://adityamore.dev/experience", lastModified: new Date() },
+    { url: "https://adityamore.dev/skills", lastModified: new Date() },
+    { url: "https://adityamore.dev/socials", lastModified: new Date() },
+    { url: "https://adityamore.dev/contact", lastModified: new Date() },
+    { url: "https://adityamore.dev/notice", lastModified: new Date() },
+    { url: "https://adityamore.dev/privacy", lastModified: new Date() },
   ];
 }

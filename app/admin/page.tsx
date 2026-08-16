@@ -12,6 +12,8 @@ import {
   Wrench,
   ArrowRight,
   ShieldCheck,
+  BrainCircuit,
+  Activity,
 } from "lucide-react";
 
 type Tile = {
@@ -30,8 +32,8 @@ const tiles: Tile[] = [
     label: "Messages",
     description: "Read and manage contact form submissions.",
     icon: <MessageSquare size={22} />,
-    accent: "hover:border-violet-500/40 hover:shadow-violet-500/10",
-    iconBg: "bg-violet-500/15 text-violet-400 border-violet-500/20",
+    accent: "hover:border-orange-500/40 hover:shadow-orange-500/10",
+    iconBg: "bg-orange-500/10 text-orange-500 border-orange-500/20",
     available: true,
   },
   {
@@ -41,7 +43,7 @@ const tiles: Tile[] = [
     icon: <FolderKanban size={22} />,
     accent: "hover:border-sky-500/40 hover:shadow-sky-500/10",
     iconBg: "bg-sky-500/15 text-sky-400 border-sky-500/20",
-    available: false,
+    available: true,
   },
   {
     href: "/admin/experience",
@@ -50,7 +52,25 @@ const tiles: Tile[] = [
     icon: <Briefcase size={22} />,
     accent: "hover:border-emerald-500/40 hover:shadow-emerald-500/10",
     iconBg: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
-    available: false,
+    available: true,
+  },
+  {
+    href: "/admin/rag",
+    label: "RAG Control",
+    description: "Tune retrieval, inspect vector health, and sync BB-8 knowledge.",
+    icon: <BrainCircuit size={22} />,
+    accent: "hover:border-violet-500/40 hover:shadow-violet-500/10",
+    iconBg: "bg-violet-500/10 text-violet-500 border-violet-500/20",
+    available: true,
+  },
+  {
+    href: "/admin/traffic",
+    label: "Traffic",
+    description: "Monitor anonymous page views and popular routes.",
+    icon: <Activity size={22} />,
+    accent: "hover:border-cyan-500/40 hover:shadow-cyan-500/10",
+    iconBg: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
+    available: true,
   },
   {
     href: "/admin/timeline",
@@ -77,13 +97,7 @@ export default function AdminHome() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    try {
-      const key = sessionStorage.getItem("dashboard-admin-key");
-      if (!key) router.replace("/admin/login");
-      else setReady(true);
-    } catch {
-      router.replace("/admin/login");
-    }
+    fetch("/api/admin/session").then((response) => response.ok ? setReady(true) : router.replace("/admin/login")).catch(() => router.replace("/admin/login"));
   }, [router]);
 
   if (!ready) return null;
@@ -100,20 +114,20 @@ export default function AdminHome() {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className="mb-10"
+      className="mb-12 rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm"
       >
         <div className="flex items-center gap-2.5 mb-3">
-          <div className="h-9 w-9 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center">
-            <ShieldCheck size={18} className="text-violet-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-orange-500/25 bg-orange-500/10">
+            <ShieldCheck size={18} className="text-orange-500" />
           </div>
           <div>
-            <p className="text-xs text-zinc-500 leading-none mb-0.5">Command Center</p>
-            <h1 className="text-lg font-semibold text-white leading-none">
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--sub-muted)]">Command Center</p>
+            <h1 className="text-xl font-semibold leading-none text-[var(--text)]">
               {greeting}, Aditya
             </h1>
           </div>
         </div>
-        <p className="text-sm text-zinc-500 ml-0.5">
+        <p className="ml-0.5 mt-4 text-sm text-[var(--muted)]">
           {now.toLocaleDateString("en-US", {
             weekday: "long",
             year: "numeric",
@@ -124,7 +138,7 @@ export default function AdminHome() {
       </motion.div>
 
       {/* Section label */}
-      <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-4">
+      <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--sub-muted)]">
         Control Panels
       </p>
 
@@ -136,7 +150,7 @@ export default function AdminHome() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: i * 0.06 }}
-              className={`group relative bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-4 transition-all duration-200 shadow-lg ${
+              className={`group relative flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm transition-all duration-200 ${
                 tile.available
                   ? `cursor-pointer ${tile.accent} hover:shadow-xl hover:-translate-y-0.5`
                   : "opacity-50 cursor-not-allowed"
@@ -144,7 +158,7 @@ export default function AdminHome() {
             >
               {/* Coming soon badge */}
               {!tile.available && (
-                <span className="absolute top-3.5 right-3.5 text-[10px] font-semibold bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded-full border border-zinc-700">
+                <span className="absolute right-3.5 top-3.5 rounded-full border border-[var(--border)] bg-[var(--tag-bg)] px-2 py-0.5 text-[10px] font-semibold text-[var(--sub-muted)]">
                   Soon
                 </span>
               )}
@@ -158,13 +172,13 @@ export default function AdminHome() {
 
               {/* Text */}
               <div className="flex-1">
-                <p className="text-sm font-semibold text-white mb-1">{tile.label}</p>
-                <p className="text-xs text-zinc-500 leading-relaxed">{tile.description}</p>
+                <p className="mb-1 text-sm font-semibold text-[var(--text)]">{tile.label}</p>
+                <p className="text-xs leading-relaxed text-[var(--muted)]">{tile.description}</p>
               </div>
 
               {/* Arrow — only on available */}
               {tile.available && (
-                <div className="flex items-center gap-1 text-xs text-zinc-500 group-hover:text-violet-400 transition-colors">
+                <div className="flex items-center gap-1 text-xs text-[var(--muted)] transition-colors group-hover:text-orange-500">
                   Open
                   <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                 </div>

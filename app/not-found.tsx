@@ -74,7 +74,7 @@ export default function NotFound() {
       <div className="flex flex-col sm:flex-row items-center gap-4 mt-8 z-10">
         <Link
           href="/"
-          className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-all"
+          className="cta-primary group flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold"
         >
           <Home size={16} />
           Go Home

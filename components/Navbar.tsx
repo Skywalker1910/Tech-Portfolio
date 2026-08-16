@@ -1,277 +1,263 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sun, Moon, ChevronDown, Sparkles, Orbit } from "lucide-react";
+import {
+  Sun, Moon, Home, Briefcase, Layers, Zap, Mail,
+  GraduationCap, Globe, FileText, Info, Shield, ArrowUpRight,
+} from "lucide-react";
 import CareerStatus from "./CareerStatus";
 
-function BackgroundToggle() {
-  const [bg, setBg] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("bg-mode");
-      setBg(saved && ["neural", "interstellar"].includes(saved) ? saved : "neural");
-    } catch {
-      setBg("neural");
-    }
-  }, []);
-
-  const BG_ORDER = ["neural", "interstellar"] as const;
-
-  const toggle = () => {
-    const idx = BG_ORDER.indexOf((bg ?? "neural") as typeof BG_ORDER[number]);
-    const next = BG_ORDER[(idx + 1) % BG_ORDER.length];
-    setBg(next);
-    try {
-      localStorage.setItem("bg-mode", next);
-      window.dispatchEvent(new CustomEvent("bg-change", { detail: next }));
-    } catch {}
+interface NavItem {
+  href: string;
+  label: string;
+  external?: boolean;
+  preview: {
+    icon: React.ElementType;
+    title: string;
+    description: string;
+    tags: string[];
   };
-
-  const icons: Record<string, React.ReactNode> = {
-    neural: <Sparkles size={16} />,
-    interstellar: <Orbit size={16} />,
-  };
-
-  const resolved = bg ?? "neural";
-
-  return (
-    <button
-      onClick={toggle}
-      aria-label="Toggle background animation"
-      className="flex items-center justify-center h-8 w-8 rounded-full text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors"
-    >
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={resolved}
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -10, opacity: 0 }}
-          transition={{ duration: 0.18 }}
-          className="flex items-center justify-center"
-        >
-          {icons[resolved]}
-        </motion.span>
-      </AnimatePresence>
-    </button>
-  );
 }
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const pathname = usePathname();
-  const active = pathname === href;
-  return (
-    <Link
-      href={href}
-      aria-current={active ? "page" : undefined}
-      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-        active ? "bg-white text-black" : "text-zinc-300 hover:text-white"
-      }`}
-    >
-      {children}
-    </Link>
-  );
-}
+const NAV_ITEMS: NavItem[] = [
+  { href: "/", label: "About", preview: { icon: Home, title: "About Aditya", description: "An introduction to Aditya, his career journey, core skills, and featured ML/AI work.", tags: ["Introduction", "Career Timeline", "Featured Work"] } },
+  { href: "/experience", label: "Experience", preview: { icon: Briefcase, title: "Work & Research", description: "Graduate research at Clemson, internships, and teaching assistant roles.", tags: ["Clemson Research", "Internships", "TA"] } },
+  { href: "/projects", label: "Projects", preview: { icon: Layers, title: "ML/AI Projects", description: "Movie recommendation (26M ratings), NASA air quality pipeline, adversarial ML.", tags: ["PyTorch", "scikit-learn", "OpenCV"] } },
+  { href: "/skills", label: "Skills", preview: { icon: Zap, title: "Technical Skills", description: "Python, deep learning, NLP, data engineering, and MLOps toolchain.", tags: ["Python", "PyTorch", "Docker"] } },
+  { href: "/contact", label: "Contact", preview: { icon: Mail, title: "Get in Touch", description: "Available for ML/AI and Data Science roles — reach out directly.", tags: ["Open to Work", "Form", "Email"] } },
+  { href: "/education", label: "Education", preview: { icon: GraduationCap, title: "Academic Background", description: "MS Computer Science at Clemson (2025) and BE from DYPCET.", tags: ["Clemson MS", "DYPCET BE"] } },
+  { href: "/socials", label: "Socials", preview: { icon: Globe, title: "Find Me Online", description: "GitHub repos, LinkedIn profile, and other professional networks.", tags: ["GitHub", "LinkedIn"] } },
+  { href: "/resume.pdf", label: "Resume ↗", external: true, preview: { icon: FileText, title: "Download Resume", description: "A concise overview of Aditya's experience, education, projects, and technical strengths.", tags: ["Experience", "Education", "PDF Download"] } },
+  { href: "/notice", label: "Notice", preview: { icon: Info, title: "Product Notice", description: "Current feature status, AI limitations, deployment behavior, and the public roadmap.", tags: ["Live Status", "AI Disclosures", "Roadmap"] } },
+  { href: "/privacy", label: "Privacy", preview: { icon: Shield, title: "Privacy Policy", description: "How anonymous traffic, contact submissions, BB-8 prompts, and browser-session data are handled.", tags: ["Anonymous Analytics", "Contact Data", "BB-8"] } },
+];
 
 function ThemeToggle() {
-  const [theme, setTheme] = useState<string | null>(null);
+  const [dark, setDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("theme");
-      const t = saved && ["dark", "light"].includes(saved) ? saved : "dark";
-      setTheme(t);
-      applyTheme(t);
-    } catch {
-      setTheme("dark");
-    }
+    setMounted(true);
+    // Every full app launch starts in light mode; the toggle lasts for this visit.
+    setDark(document.documentElement.classList.contains("dark"));
   }, []);
 
-  const applyTheme = (t: string) => {
-    try {
-      document.documentElement.classList.remove("dark", "light");
-      document.documentElement.classList.add(t);
-      localStorage.setItem("theme", t);
-    } catch {}
-  };
-
   const toggle = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    applyTheme(next);
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
   };
 
-  const resolved = theme ?? "dark";
+  if (!mounted) return <div className="w-7 h-7" />;
 
   return (
     <button
       onClick={toggle}
       aria-label="Toggle theme"
-      className="flex items-center justify-center h-8 w-8 rounded-full text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors"
+      className="flex items-center justify-center w-7 h-7 rounded-full transition-colors"
+      style={{ color: "var(--navbar-muted)" }}
     >
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={resolved}
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -10, opacity: 0 }}
-          transition={{ duration: 0.18 }}
-          className="flex items-center justify-center"
-        >
-          {resolved === "dark" ? <Moon size={16} /> : <Sun size={16} />}
-        </motion.span>
-      </AnimatePresence>
+      {dark ? <Sun size={14} /> : <Moon size={14} />}
     </button>
   );
 }
 
-const MORE_LINKS: { href: string; label: string; external?: boolean }[] = [
-  { href: "/skills", label: "Skills" },
-  { href: "/socials", label: "Socials" },
-  { href: "/contact", label: "Contact" },
-  { href: "/resume.pdf", label: "Resume ↗", external: true },
-  { href: "/notice", label: "Notice" },
-  { href: "/privacy", label: "Privacy" },
-];
+
 
 export default function Navbar() {
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [activeKey, setActiveKey] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [careerOpen, setCareerOpen] = useState(false);
-  const moreRef = useRef<HTMLDivElement>(null);
+  const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const careerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
-  const allMobileLinks: { href: string; label: string; external?: boolean }[] = [
-    { href: "/", label: "Home" },
-    { href: "/education", label: "Education" },
-    { href: "/experience", label: "Experience" },
-    { href: "/projects", label: "Projects" },
-    ...MORE_LINKS,
-  ];
+  const showPreview = useCallback((href: string) => {
+    if (hideTimeout.current) clearTimeout(hideTimeout.current);
+    setActiveKey(href);
+  }, []);
+
+  const hidePreview = useCallback(() => {
+    hideTimeout.current = setTimeout(() => setActiveKey(null), 120);
+  }, []);
+
+  const keepPreview = useCallback(() => {
+    if (hideTimeout.current) clearTimeout(hideTimeout.current);
+  }, []);
 
   useEffect(() => {
     setMobileOpen(false);
-    setMoreOpen(false);
+    setActiveKey(null);
     setCareerOpen(false);
   }, [pathname]);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
-        setMoreOpen(false);
-      }
-      if (careerRef.current && !careerRef.current.contains(e.target as Node)) {
-        setCareerOpen(false);
-      }
+      if (careerRef.current && !careerRef.current.contains(e.target as Node)) setCareerOpen(false);
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  useEffect(() => () => { if (hideTimeout.current) clearTimeout(hideTimeout.current); }, []);
+
+  const activeItem = NAV_ITEMS.find(i => i.href === activeKey);
+
   return (
     <>
-      {/* Top-left wordmark */}
-      <Link
-        href="/"
-        className="fixed top-5 left-5 z-50 hidden md:flex items-center font-semibold text-sm text-zinc-200 hover:text-white tracking-tight whitespace-nowrap transition-colors"
+      {/* Theme-aware navbar: white in light mode, dark in dark mode */}
+      <header
+        className="fixed top-0 inset-x-0 z-50 h-11 backdrop-blur-xl"
+        style={{
+          background: "var(--navbar-bg)",
+          borderBottom: "1px solid var(--navbar-border)",
+        }}
       >
-        Aditya More&nbsp;<span className="text-zinc-500">•</span>&nbsp;Tech Portfolio
-      </Link>
+        {/* Full-width: name at extreme left, Open to Work at extreme right */}
+        <div className="w-full px-5 md:px-8 h-full flex items-center gap-4">
 
-      {/* Top-right open to work badge — clickable to show career status */}
-      <div className="fixed top-5 right-5 z-50 hidden md:flex" ref={careerRef}>
-        <button
-          onClick={() => setCareerOpen((o) => !o)}
-          className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-1 rounded-full hover:bg-emerald-500/20 transition-colors cursor-pointer"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-          Open to Work
-        </button>
-        <AnimatePresence>
-          {careerOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute top-full mt-3 right-0 w-[400px]"
-            >
-              <CareerStatus />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          {/* Wordmark — extreme left */}
+          <Link
+            href="/"
+            className="text-[13px] font-semibold whitespace-nowrap shrink-0 transition-opacity hover:opacity-70"
+            style={{ color: "var(--navbar-text)" }}
+          >
+            Aditya More
+          </Link>
 
-      {/* Floating pill navbar */}
-      <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-auto">
-        <nav className="flex items-center gap-0.5 px-2 py-1.5 rounded-full bg-zinc-900/85 backdrop-blur-md border border-zinc-800 shadow-2xl shadow-black/60 text-sm">
-          <NavLink href="/">Home</NavLink>
-          <NavLink href="/education">Education</NavLink>
-          <NavLink href="/experience">Experience</NavLink>
-          <NavLink href="/projects">Projects</NavLink>
-
-          {/* More dropdown */}
-          <div className="relative" ref={moreRef}>
-            <button
-              onClick={() => setMoreOpen((o) => !o)}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                moreOpen ? "text-white bg-zinc-700" : "text-zinc-300 hover:text-white"
-              }`}
-            >
-              More
-              <ChevronDown
-                size={13}
-                className={`transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-            <AnimatePresence>
-              {moreOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute top-full mt-2 left-1/2 -translate-x-1/2 min-w-[130px] bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl overflow-hidden"
-                >
-                  {MORE_LINKS.map((l) =>
-                    l.external ? (
+          {/* Desktop nav — centered, all links flat */}
+          <nav className="hidden md:flex items-center flex-1 justify-center">
+            <div className="relative flex items-center" onMouseLeave={hidePreview}>
+              {NAV_ITEMS.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <div
+                    key={item.href}
+                    onMouseEnter={() => showPreview(item.href)}
+                  >
+                    {item.external ? (
                       <a
-                        key={l.href}
-                        href={l.href}
+                        href={item.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() => setMoreOpen(false)}
-                        className="block px-4 py-2.5 text-zinc-300 hover:text-white hover:bg-zinc-800 text-sm transition-colors"
+                        className="px-2 py-1 text-[12px] whitespace-nowrap transition-opacity hover:opacity-100"
+                        style={{ color: isActive ? "var(--navbar-text)" : "var(--navbar-muted)", fontWeight: isActive ? 600 : 400 }}
                       >
-                        {l.label}
+                        {item.label}
                       </a>
                     ) : (
                       <Link
-                        key={l.href}
-                        href={l.href}
-                        onClick={() => setMoreOpen(false)}
-                        className="block px-4 py-2.5 text-zinc-300 hover:text-white hover:bg-zinc-800 text-sm transition-colors"
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                        className="px-2 py-1 text-[12px] whitespace-nowrap transition-opacity hover:opacity-100"
+                        style={{ color: isActive ? "var(--navbar-text)" : "var(--navbar-muted)", fontWeight: isActive ? 600 : 400 }}
                       >
-                        {l.label}
+                        {item.label}
                       </Link>
-                    )
-                  )}
+                    )}
+                  </div>
+                );
+              })}
+
+              <AnimatePresence mode="wait">
+                {activeKey && activeItem && (
+                  <motion.div
+                    key={activeKey}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.16, ease: "easeOut" }}
+                    className="absolute left-0 top-[calc(100%+12px)] z-50 w-full min-w-[620px] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]/95 p-5 shadow-2xl backdrop-blur-2xl"
+                    style={{ boxShadow: "0 24px 70px color-mix(in srgb, var(--text) 17%, transparent)" }}
+                    onMouseEnter={keepPreview}
+                    onMouseLeave={hidePreview}
+                  >
+                    <div className="grid grid-cols-[1.15fr_1fr] gap-6">
+                      <div className="flex min-w-0 flex-col justify-between border-r border-[var(--border)] pr-6">
+                        <div>
+                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--tag-bg)] text-[var(--text)]">
+                            <activeItem.preview.icon size={17} />
+                          </div>
+                          <p className="mb-1 text-[9px] font-bold uppercase tracking-[0.26em] text-[var(--sub-muted)]">
+                            Page preview
+                          </p>
+                          <p className="text-xl font-semibold text-[var(--text)]">{activeItem.preview.title}</p>
+                          <p className="mt-2 max-w-sm text-xs leading-relaxed text-[var(--muted)]">
+                            {activeItem.preview.description}
+                          </p>
+                        </div>
+                        {activeItem.external ? (
+                          <a href={activeItem.href} target="_blank" rel="noopener noreferrer" className="cta-primary mt-5 inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold">
+                            Open page <ArrowUpRight size={12} />
+                          </a>
+                        ) : (
+                          <Link href={activeItem.href} className="cta-primary mt-5 inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold">
+                            Open page <ArrowUpRight size={12} />
+                          </Link>
+                        )}
+                      </div>
+
+                      <div>
+                        <p className="mb-3 text-[9px] font-bold uppercase tracking-[0.24em] text-[var(--sub-muted)]">Inside this page</p>
+                        <div className="space-y-2">
+                          {activeItem.preview.tags.map((tag, index) => (
+                            <div key={tag} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg)]/55 px-3 py-2.5">
+                              <span className="font-mono text-[10px] text-[var(--sub-muted)]">0{index + 1}</span>
+                              <span className="text-xs font-medium text-[var(--text)]">{tag}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </nav>
+
+          {/* Right: theme toggle + Open to Work — extreme right */}
+          <div className="hidden md:flex items-center gap-2 shrink-0 ml-auto" ref={careerRef}>
+            <ThemeToggle />
+            <button
+              onClick={() => setCareerOpen(o => !o)}
+              className="inline-flex items-center gap-1 text-[11px] font-medium tracking-wide text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-full hover:bg-emerald-500/20 transition-colors"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shrink-0" />
+              Open to Work
+            </button>
+            <AnimatePresence>
+              {careerOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-full mt-1 right-8 w-[400px]"
+                >
+                  <CareerStatus />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Separator */}
-          <div className="h-5 w-px bg-zinc-700 mx-1.5" />
+          {/* Mobile hamburger */}
+          <button
+            className="flex md:hidden items-center justify-center h-8 w-8 ml-auto transition-opacity hover:opacity-70"
+            style={{ color: "var(--navbar-muted)" }}
+            onClick={() => setMobileOpen(o => !o)}
+            aria-label="Toggle menu"
+          >
+            <span className="flex flex-col gap-[5px] items-center justify-center w-4">
+              <span className={`block h-px w-full bg-current transition-all ${mobileOpen ? "rotate-45 translate-y-[6px]" : ""}`} />
+              <span className={`block h-px w-full bg-current transition-all ${mobileOpen ? "opacity-0" : ""}`} />
+              <span className={`block h-px w-full bg-current transition-all ${mobileOpen ? "-rotate-45 -translate-y-[6px]" : ""}`} />
+            </span>
+          </button>
+        </div>
 
-          <BackgroundToggle />
-          <ThemeToggle />
-        </nav>
-
-        {/* Mobile menu */}
+        {/* Mobile menu — always dark as an overlay */}
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
@@ -279,46 +265,36 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="mt-2 rounded-2xl bg-zinc-900/95 backdrop-blur-md border border-zinc-800 shadow-2xl overflow-hidden flex flex-col"
+              className="md:hidden bg-[#0d1117]/98 backdrop-blur-xl border-b border-white/10 flex flex-col"
             >
-              {allMobileLinks.map((l) =>
-                l.external ? (
+              {NAV_ITEMS.map(item =>
+                item.external ? (
                   <a
-                    key={l.href}
-                    href={l.href}
+                    key={item.href}
+                    href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-5 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800 text-sm transition-colors"
+                    className="px-6 py-3.5 text-[14px] text-white/60 hover:text-white border-b border-white/5 transition-colors"
                   >
-                    {l.label}
+                    {item.label}
                   </a>
                 ) : (
                   <Link
-                    key={l.href}
-                    href={l.href}
-                    className="px-5 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800 text-sm transition-colors"
+                    key={item.href}
+                    href={item.href}
+                    className="px-6 py-3.5 text-[14px] text-white/60 hover:text-white border-b border-white/5 transition-colors"
                   >
-                    {l.label}
+                    {item.label}
                   </Link>
                 )
               )}
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </header>
 
-      {/* Mobile hamburger — visible only on small screens, outside the pill */}
-      <button
-        className="fixed top-5 right-5 z-50 flex md:hidden items-center justify-center h-9 w-9 rounded-full bg-zinc-900/85 backdrop-blur-md border border-zinc-800 text-zinc-300 hover:text-white"
-        onClick={() => setMobileOpen((o) => !o)}
-        aria-label="Toggle menu"
-      >
-        <span className="flex flex-col gap-[5px] items-center justify-center w-4">
-          <span className={`block h-px w-full bg-current transition-all ${mobileOpen ? "rotate-45 translate-y-[6px]" : ""}`} />
-          <span className={`block h-px w-full bg-current transition-all ${mobileOpen ? "opacity-0" : ""}`} />
-          <span className={`block h-px w-full bg-current transition-all ${mobileOpen ? "-rotate-45 -translate-y-[6px]" : ""}`} />
-        </span>
-      </button>
+      {/* Spacer so content doesn't hide under fixed navbar */}
+      <div className="h-11" />
     </>
   );
 }

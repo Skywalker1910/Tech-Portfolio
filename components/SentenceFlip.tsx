@@ -6,9 +6,11 @@ import { useEffect, useRef, useState } from "react";
 export default function SentenceFlip({
   lines,
   interval = 2500,
+  className = "text-[var(--accent)]",
 }: {
   lines: string[];
   interval?: number;
+  className?: string;
 }) {
   const [index, setIndex] = useState(0);
   const measureRef = useRef<HTMLDivElement>(null);
@@ -51,7 +53,7 @@ export default function SentenceFlip({
           animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           exit={{ opacity: 0, filter: "blur(8px)", y: -14 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-violet-300 py-0.5"
+          className={`text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold py-0.5 ${className}`}
         >
           {lines[index]}
         </motion.div>

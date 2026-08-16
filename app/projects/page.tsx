@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useMemo, useState, useEffect, type ComponentType } from "react";
 import Link from "next/link";
 import { FlaskConical, ExternalLink, FolderOpen, Brain, ShieldAlert, Languages, Eye, BookOpen, Phone, Workflow, TestTube2, Cpu, Bot, Swords, Car, Star, ClipboardList, Shield, Database, Layers, GitBranch, Search, X, ChevronDown, SlidersHorizontal, MessageSquare, Zap, CheckCircle2 } from "lucide-react";
@@ -64,6 +64,8 @@ const TAG_ICONS: Record<string, ComponentType<{ size?: number; className?: strin
   "RAG":                      MessageSquare,
   "Embeddings":               Zap,
   "Vector DB":                Database,
+  "Amazon S3 Vectors":        Database,
+  "OpenAI API":               SiOpenai,
   "FastAPI":                  SiFastapi,
   "React":                    SiReact,
 };
@@ -128,16 +130,16 @@ const ALL: Project[] = [
   // ⭐ Featured Projects
   {
     title: "AI-Powered Portfolio Assistant (RAG-based System)",
-    blurb: "LLM-powered assistant using RAG to enable interactive exploration of my projects and experience.",
-    description: "Built an AI-powered portfolio assistant using LLMs and Retrieval-Augmented Generation (RAG) to enable users to interactively explore my projects, experience, and technical work. Designed RAG pipeline for retrieving structured portfolio data. Integrated LLM APIs for context-aware responses. Implemented semantic search using embeddings and built real-time chat interface for user interaction.",
+    blurb: "BB-8 retrieves verified portfolio knowledge, grounds OpenAI responses, and links every answer back to relevant pages.",
+    description: "Built BB-8, an AI portfolio co-pilot with a Retrieval-Augmented Generation pipeline over structured, verified portfolio data. The system creates OpenAI embeddings, stores and queries them with Amazon S3 Vectors, injects only relevant chunks into the Responses API, and displays source-page links in a persistent chat overlay. It includes deterministic local fallback retrieval and a 25-question retrieval evaluation suite for quality and latency measurement.",
     highlights: [
-      "Designed RAG pipeline for retrieving structured portfolio data",
-      "Integrated LLM APIs for context-aware responses",
-      "Implemented semantic search using embeddings",
-      "Built real-time chat interface for user interaction",
-      "Optimized response latency and quality",
+      "Designed section-aware chunking over a verified structured knowledge corpus",
+      "Implemented OpenAI embedding generation and Amazon S3 Vectors semantic search",
+      "Grounded Responses API prompts with only the top matching portfolio chunks",
+      "Added source-page links, persistent overlay navigation, and graceful local fallback",
+      "Created a 25-question Hit@3 and retrieval-latency evaluation suite",
     ],
-    tags: ["LLM", "RAG", "NLP", "Embeddings", "Vector DB", "Python", "FastAPI", "React"],
+    tags: ["LLM", "RAG", "OpenAI API", "Embeddings", "Amazon S3 Vectors", "Next.js", "TypeScript", "React"],
     year: 2025,
     status: "in-progress",
     featured: true,
@@ -246,16 +248,23 @@ const ALL: Project[] = [
 ];
 
 export default function Projects() {
+  const [projects, setProjects] = useState<Project[]>(ALL);
   const [q, setQ] = useState("");
   const [tag, setTag] = useState<string | undefined>();
   const [status, setStatus] = useState<string | undefined>();
   const [showFeatured, setShowFeatured] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   
-  const tags = useMemo(() => Array.from(new Set(ALL.flatMap(p => p.tags))).sort(), []);
-  const statuses = useMemo(() => Array.from(new Set(ALL.map(p => p.status))), []);
+  useEffect(() => {
+    fetch("/api/content/projects").then((response) => response.ok ? response.json() : Promise.reject()).then((items) => {
+      if (Array.isArray(items) && items.length) setProjects(items);
+    }).catch(() => {});
+  }, []);
+
+  const tags = useMemo(() => Array.from(new Set(projects.flatMap(p => p.tags))).sort(), [projects]);
+  const statuses = useMemo(() => Array.from(new Set(projects.map(p => p.status))), [projects]);
   
-  const filtered = ALL.filter(p => {
+  const filtered = projects.filter(p => {
     const searchHit = !q || (p.title + p.blurb + p.description + p.tags.join(" ")).toLowerCase().includes(q.toLowerCase());
     const tagHit = !tag || p.tags.includes(tag);
     const statusHit = !status || p.status === status;
@@ -295,10 +304,10 @@ export default function Projects() {
       <div className="mb-10">
         <div className="flex items-center gap-2 mb-3">
           <FolderOpen size={15} className="text-violet-400" />
-          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">Work &amp; Projects</p>
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--muted)]">Work &amp; Projects</p>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white">Projects</h1>
-        <p className="mt-3 text-zinc-500 max-w-lg text-sm leading-relaxed">
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--text)]">Projects</h1>
+        <p className="mt-3 text-[var(--muted)] max-w-lg text-sm leading-relaxed">
           A collection of my work in machine learning, security research, and educational tools.
         </p>
       </div>
@@ -308,21 +317,21 @@ export default function Projects() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.12 }}
-        className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm overflow-hidden"
+        className="mb-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] card-elevated backdrop-blur-sm overflow-hidden"
       >
         {/* Search input row */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-800/80">
-          <Search size={14} className="text-zinc-500 shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--border)]/80">
+          <Search size={14} className="text-[var(--muted)] shrink-0" />
           <input
             value={q}
             onChange={e => setQ(e.target.value)}
             placeholder="Search projects, tags, descriptions…"
-            className="flex-1 bg-transparent text-sm text-zinc-200 placeholder-zinc-600 outline-none caret-violet-400"
+            className="flex-1 bg-transparent text-sm text-[var(--tag-text)] placeholder:text-[var(--sub-muted)] outline-none caret-violet-400"
           />
           {q && (
             <button
               onClick={() => setQ("")}
-              className="text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="text-[var(--muted)] hover:text-[var(--tag-text)] transition-colors"
             >
               <X size={13} />
             </button>
@@ -331,23 +340,23 @@ export default function Projects() {
 
         {/* Filter chips row */}
         <div className="flex flex-wrap items-center gap-2 px-4 py-3">
-          <SlidersHorizontal size={11} className="text-zinc-600 shrink-0" />
+          <SlidersHorizontal size={11} className="text-[var(--sub-muted)] shrink-0" />
 
           {/* Tag filter */}
           <div className="relative">
             <select
               value={tag || ""}
               onChange={e => setTag(e.target.value || undefined)}
-              className={`appearance-none text-[11px] font-medium pl-3 pr-6 py-1.5 rounded-full border transition-colors cursor-pointer bg-zinc-900 outline-none ${
+              className={`appearance-none text-[11px] font-medium pl-3 pr-6 py-1.5 rounded-full border transition-colors cursor-pointer bg-[var(--surface)] outline-none ${
                 tag
                   ? "border-violet-500/50 text-violet-300 bg-violet-500/10"
-                  : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-300"
+                  : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--border)] hover:text-[var(--tag-text)]"
               }`}
             >
               <option value="">All Technologies</option>
               {tags.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
-            <ChevronDown size={9} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500" />
+            <ChevronDown size={9} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--muted)]" />
           </div>
 
           {/* Status filter */}
@@ -355,16 +364,16 @@ export default function Projects() {
             <select
               value={status || ""}
               onChange={e => setStatus(e.target.value || undefined)}
-              className={`appearance-none text-[11px] font-medium pl-3 pr-6 py-1.5 rounded-full border transition-colors cursor-pointer bg-zinc-900 outline-none ${
+              className={`appearance-none text-[11px] font-medium pl-3 pr-6 py-1.5 rounded-full border transition-colors cursor-pointer bg-[var(--surface)] outline-none ${
                 status
                   ? "border-teal-500/50 text-teal-300 bg-teal-500/10"
-                  : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-300"
+                  : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--border)] hover:text-[var(--tag-text)]"
               }`}
             >
               <option value="">All Statuses</option>
               {statuses.map(s => <option key={s} value={s}>{s.replace("-", " ")}</option>)}
             </select>
-            <ChevronDown size={9} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500" />
+            <ChevronDown size={9} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--muted)]" />
           </div>
 
           {/* Featured toggle */}
@@ -373,7 +382,7 @@ export default function Projects() {
             className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-full border transition-colors ${
               showFeatured
                 ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
-                : "border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600"
+                : "border-[var(--border)] text-[var(--muted)] hover:text-[var(--tag-text)] hover:border-[var(--border)]"
             }`}
           >
             <Star size={10} />
@@ -381,7 +390,7 @@ export default function Projects() {
           </button>
 
           {/* Result count */}
-          <span className="ml-auto text-[11px] font-mono text-zinc-600">
+          <span className="ml-auto text-[11px] font-mono text-[var(--sub-muted)]">
             {filtered.length}&thinsp;/&thinsp;{ALL.length} projects
           </span>
 
@@ -389,7 +398,7 @@ export default function Projects() {
           {(q || tag || status || showFeatured) && (
             <button
               onClick={clearFilters}
-              className="inline-flex items-center gap-1 text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors px-2 py-1.5 rounded-full border border-zinc-700/60 hover:border-zinc-600"
+              className="inline-flex items-center gap-1 text-[11px] text-[var(--muted)] hover:text-[var(--tag-text)] transition-colors px-2 py-1.5 rounded-full border border-[var(--border)] hover:border-[var(--border)]"
             >
               <X size={10} />
               Clear
@@ -428,14 +437,14 @@ export default function Projects() {
       <div className="mt-20">
         <div className="flex items-center gap-3 mb-2">
           <FlaskConical size={18} className="text-violet-400" />
-          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--muted)]">
             Research & Experimentation
           </p>
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+        <h2 className="text-2xl md:text-3xl font-bold text-[var(--text)] mb-2">
           Experimentation &amp; Case Studies
         </h2>
-        <p className="text-sm text-zinc-500 max-w-xl mb-10 leading-relaxed">
+        <p className="text-sm text-[var(--muted)] max-w-xl mb-10 leading-relaxed">
           Hands-on experiments, security research, and applied ML case studies — work that lives at the boundary of exploration and engineering.
         </p>
 
@@ -458,7 +467,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
   const a = accentMap[cs.accent] ?? accentMap.violet;
 
   return (
-    <article className={`group border-b border-zinc-800/60 first:border-t py-8 flex flex-col md:flex-row gap-6 md:gap-10 transition-colors`}>
+    <article className={`group border-b border-[var(--border)] first:border-t py-8 flex flex-col md:flex-row gap-6 md:gap-10 transition-colors`}>
       {/* Number */}
       <span className={`text-6xl md:text-7xl font-black leading-none font-mono select-none shrink-0 ${a.num} group-hover:opacity-60 transition-opacity`}>
         {cs.num}
@@ -468,21 +477,21 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
       <div className="flex-1 min-w-0">
         {/* Context + period */}
         <div className="flex flex-wrap items-center gap-3 mb-2">
-          <span className={`text-[10px] font-bold tracking-[0.25em] uppercase border border-zinc-700/70 bg-zinc-800/60 text-zinc-400 px-2 py-0.5 rounded`}>
+          <span className={`text-[10px] font-bold tracking-[0.25em] uppercase border border-[var(--border)]/70 bg-[var(--tag-bg)] text-[var(--muted)] px-2 py-0.5 rounded`}>
             {cs.context}
           </span>
-          <span className="text-[11px] font-mono text-zinc-600">{cs.period}</span>
+          <span className="text-[11px] font-mono text-[var(--sub-muted)]">{cs.period}</span>
         </div>
 
         {/* Title */}
-        <h3 className="text-xl md:text-2xl font-bold text-white mb-4 leading-snug group-hover:text-zinc-200 transition-colors">
+        <h3 className="text-xl md:text-2xl font-bold text-[var(--text)] mb-4 leading-snug group-hover:text-[var(--tag-text)] transition-colors">
           {cs.title}
         </h3>
 
         {/* Bullets */}
         <ul className="space-y-2 mb-5">
           {cs.bullets.map((b, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-sm text-zinc-400 leading-relaxed">
+            <li key={i} className="flex items-start gap-2.5 text-sm text-[var(--muted)] leading-relaxed">
               <span className={`mt-2 w-1 h-1 rounded-full shrink-0 ${a.bullet} opacity-60`} />
               {b}
             </li>
@@ -504,7 +513,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
             href={cs.github}
             target="_blank"
             rel="noopener noreferrer"
-            className={`inline-flex items-center gap-1.5 mt-4 text-xs ${a.badge} hover:text-white transition-colors`}
+            className={`inline-flex items-center gap-1.5 mt-4 text-xs ${a.badge} hover:text-[var(--text)] transition-colors`}
           >
             View on GitHub <ExternalLink size={11} />
           </a>
@@ -551,7 +560,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, ease: "easeOut", delay: (index % 3) * 0.07 }}
       onClick={onClick}
-      className={`group relative rounded-2xl border ${a.border} bg-zinc-900/70 overflow-hidden flex flex-col shadow-lg hover:shadow-xl ${a.glow} transition-all duration-300 hover:-translate-y-1 cursor-pointer`}
+      className={`group relative rounded-2xl border ${a.border} bg-[var(--surface)] overflow-hidden flex flex-col shadow-lg hover:shadow-xl ${a.glow} card-elevated transition-all duration-300 hover:-translate-y-1 cursor-pointer`}
     >
       {/* ── Gradient preview header ── */}
       <div className="relative h-36 overflow-hidden shrink-0">
@@ -597,10 +606,10 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
 
       {/* ── Card body ── */}
       <div className="flex flex-col flex-1 p-5">
-        <h3 className="text-base font-bold text-white leading-snug mb-2 group-hover:text-zinc-100 transition-colors">
+        <h3 className="text-base font-bold text-[var(--text)] leading-snug mb-2 group-hover:text-[var(--text)] transition-colors">
           {project.title}
         </h3>
-        <p className="text-xs text-zinc-400 leading-relaxed mb-4 flex-1">
+        <p className="text-xs text-[var(--muted)] leading-relaxed mb-4 flex-1">
           {project.blurb}
         </p>
 
@@ -616,21 +625,21 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
             );
           })}
           {project.tags.length > 5 && (
-            <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700/50">
+            <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-[var(--tag-bg)] text-[var(--muted)] border border-[var(--border)]">
               +{project.tags.length - 5}
             </span>
           )}
         </div>
 
         {/* Footer links */}
-        <div className="flex items-center gap-3 pt-3 border-t border-zinc-800/60">
+        <div className="flex items-center gap-3 pt-3 border-t border-[var(--border)]">
           {project.github ? (
             <a
               href={project.github}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className={`inline-flex items-center gap-1.5 text-sm font-medium ${a.badge} hover:text-white transition-colors`}
+              className={`inline-flex items-center gap-1.5 text-sm font-medium ${a.badge} hover:text-[var(--text)] transition-colors`}
             >
               <SiGithub size={14} /> GitHub
             </a>
@@ -640,7 +649,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className={`inline-flex items-center gap-1.5 text-sm font-medium ${a.badge} opacity-50 hover:opacity-100 hover:text-white transition-all`}
+              className={`inline-flex items-center gap-1.5 text-sm font-medium ${a.badge} opacity-50 hover:opacity-100 hover:text-[var(--text)] transition-all`}
             >
               <SiGithub size={14} /> GitHub
             </a>
@@ -648,14 +657,14 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
           {project.demo && (
             <a href={project.demo} target="_blank" rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors ml-auto">
+              className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors ml-auto">
               Demo <ExternalLink size={10} />
             </a>
           )}
           {project.link && (
             <a href={project.link} target="_blank" rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors ml-auto">
+              className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors ml-auto">
               View <ExternalLink size={10} />
             </a>
           )}
@@ -715,7 +724,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-[101] md:w-full md:max-w-2xl md:max-h-[85vh] overflow-hidden"
       >
-        <div className={`relative h-full bg-zinc-900 rounded-2xl border ${a.border} shadow-2xl ${a.glow} flex flex-col overflow-hidden`}>
+        <div className={`relative h-full bg-[var(--surface)] rounded-2xl border ${a.border} shadow-2xl card-elevated ${a.glow} flex flex-col overflow-hidden`}>
           {/* ── Gradient header ── */}
           <div className="relative h-40 md:h-44 overflow-hidden shrink-0">
             <div className={`absolute inset-0 bg-gradient-to-br ${a.bg}`} />
@@ -741,7 +750,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-all"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-[var(--text)] hover:bg-black/60 transition-all"
             >
               <X size={16} />
             </button>
@@ -763,12 +772,12 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
           {/* ── Scrollable content ── */}
           <div className="flex-1 overflow-y-auto p-6 md:p-8">
             {/* Title */}
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 leading-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-[var(--text)] mb-3 leading-tight">
               {project.title}
             </h2>
             
             {/* Description */}
-            <p className="text-sm md:text-base text-zinc-400 leading-relaxed mb-6">
+            <p className="text-sm md:text-base text-[var(--muted)] leading-relaxed mb-6">
               {project.description}
             </p>
 
@@ -785,7 +794,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + i * 0.05 }}
-                      className="flex items-start gap-2.5 text-sm text-zinc-300 leading-relaxed"
+                      className="flex items-start gap-2.5 text-sm text-[var(--tag-text)] leading-relaxed"
                     >
                       <CheckCircle2 size={14} className={`mt-0.5 shrink-0 ${a.highlight}`} />
                       {h}
@@ -820,13 +829,13 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-4 pt-4 border-t border-zinc-800/60">
+            <div className="flex items-center gap-4 pt-4 border-t border-[var(--border)]">
               {project.github ? (
                 <a
                   href={project.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-800 border border-zinc-700/50 text-sm font-medium text-white hover:bg-zinc-700 transition-colors`}
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--tag-bg)] border border-[var(--border)] text-sm font-medium text-[var(--text)] hover:bg-[var(--tag-bg)] transition-colors`}
                 >
                   <SiGithub size={16} /> View on GitHub
                 </a>
@@ -835,7 +844,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                   href="https://github.com/Skywalker1910"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-800 border border-zinc-700/50 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors`}
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--tag-bg)] border border-[var(--border)] text-sm font-medium text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--tag-bg)] transition-colors`}
                 >
                   <SiGithub size={16} /> GitHub Profile
                 </a>
@@ -845,7 +854,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                   href={project.demo}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-white transition-colors`}
+                  className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
                 >
                   Demo <ExternalLink size={12} />
                 </a>
@@ -855,7 +864,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                   href={project.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-white transition-colors`}
+                  className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
                 >
                   View <ExternalLink size={12} />
                 </a>
