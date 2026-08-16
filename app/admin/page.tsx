@@ -66,7 +66,7 @@ const tiles: Tile[] = [
   {
     href: "/admin/traffic",
     label: "Traffic",
-    description: "Monitor anonymous page views and popular routes.",
+    description: "Compare engagement, devices, viewports, locations, sources, returning visits, and visitor journeys.",
     icon: <Activity size={22} />,
     accent: "hover:border-cyan-500/40 hover:shadow-cyan-500/10",
     iconBg: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",

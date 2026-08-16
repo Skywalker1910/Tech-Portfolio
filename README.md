@@ -12,7 +12,7 @@ An interactive Next.js portfolio for presenting Aditya More’s AI/ML engineerin
 - Hybrid retrieval with deterministic local fallback, source-page links, a short context window, and a 27-question evaluation suite.
 - Validated agent actions for in-app navigation, resume download, and reviewable contact-form drafts.
 - Private Admin Command Center for project and experience CRUD, contact-message management, RAG configuration/status, vector reindexing, and traffic monitoring.
-- First-party analytics without geolocation, fingerprinting, advertising identifiers, or third-party analytics SDKs.
+- Tiered first-party analytics: opt-out cookieless UX measurement plus optional pseudonymous return-visit journeys, with no raw-IP storage or third-party analytics SDK.
 - AWS Amplify SSR production deployment plus an optional GitHub Pages static mirror.
 
 See [Implemented Features](docs/FEATURES.md) for the full shipped-feature inventory.
@@ -66,7 +66,7 @@ components/
   admin/                 Shared administration components
   BB8ChatDroid.tsx       Interactive BB-8 visual
   ChatWidget.tsx         Persistent chat and agent-action UI
-  TrafficTracker.tsx     Anonymous first-party page views
+  TrafficTracker.tsx     Tiered measurement, engagement, and journeys
 data/                    Verified static knowledge and contact links
 lib/
   content/               Content models, validation, defaults, repository
@@ -168,8 +168,10 @@ The GitHub Pages mirror is a static export. API-backed functionality—including
 - Admin access uses a signed `HttpOnly`, `SameSite=Strict` cookie.
 - APIs validate lengths, enums, paths, and URLs.
 - BB-8 cannot send a contact message for a visitor.
+- Basic first-party UX measurement is cookieless and opt-out; persistent journey analytics requires opt-in. Both honor Do Not Track and Global Privacy Control.
+- Analytics stores a one-way pseudonymous visitor key rather than the browser UUID or raw IP address.
 - Chat requests set `store: false`; the app does not persist chat transcripts server-side.
-- Analytics store only path-level counters and hashed per-tab deduplication records with TTL.
+- Analytics stores page/engagement aggregates and coarse UX context; enhanced mode adds hashed visitor/visit identifiers and journeys. Raw IP addresses are never persisted.
 - Contact submissions are visible only through protected admin APIs.
 
 Read the public [Privacy Policy](https://adityamore.dev/privacy) and the implementation details in [System Architecture](docs/ARCHITECTURE.md).

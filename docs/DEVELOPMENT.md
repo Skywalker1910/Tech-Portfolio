@@ -85,7 +85,11 @@ Update documentation in the same change whenever behavior moves between “plann
 - Endpoint contract: `docs/API.md`
 - Admin/AWS operations: `docs/COMMAND_CENTER.md`
 - Retrieval or indexing: `docs/RAG.md`
-- Public data handling: `/privacy` and `/notice`
+- Public data handling and analytics consent: `/privacy` and `/notice`
+
+## Local analytics behavior
+
+The analytics panel appears on the primary Next.js build. Basic cookieless measurement begins unless the visitor selects **Disable all**; **Allow enhanced** adds persistent browser/visit identifiers and journey/source data. Local requests do not have CloudFront location headers, so the dashboard correctly shows location as unavailable. Device classification still uses the request user agent plus coarse touch/platform/viewport hints. Use **Analytics choices** in the footer to switch tiers while testing.
 - Historical incident: `docs/CHANGELOG.md`
 
 The README should remain an accurate entry point and link to the focused document rather than duplicating every implementation detail.

@@ -31,7 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/socials", label: "Socials", preview: { icon: Globe, title: "Find Me Online", description: "GitHub repos, LinkedIn profile, and other professional networks.", tags: ["GitHub", "LinkedIn"] } },
   { href: "/resume.pdf", label: "Resume ↗", external: true, preview: { icon: FileText, title: "Download Resume", description: "A concise overview of Aditya's experience, education, projects, and technical strengths.", tags: ["Experience", "Education", "PDF Download"] } },
   { href: "/notice", label: "Notice", preview: { icon: Info, title: "Product Notice", description: "Current feature status, AI limitations, deployment behavior, and the public roadmap.", tags: ["Live Status", "AI Disclosures", "Roadmap"] } },
-  { href: "/privacy", label: "Privacy", preview: { icon: Shield, title: "Privacy Policy", description: "How anonymous traffic, contact submissions, BB-8 prompts, and browser-session data are handled.", tags: ["Anonymous Analytics", "Contact Data", "BB-8"] } },
+  { href: "/privacy", label: "Privacy", preview: { icon: Shield, title: "Privacy Policy", description: "How tiered visitor analytics, contact submissions, BB-8 prompts, and browser data are handled.", tags: ["Analytics Choices", "Contact Data", "BB-8"] } },
 ];
 
 function ThemeToggle() {
