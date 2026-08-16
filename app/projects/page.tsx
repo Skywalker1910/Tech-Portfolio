@@ -1,6 +1,5 @@
 ﻿"use client";
 import { useMemo, useState, useEffect, type ComponentType } from "react";
-import Link from "next/link";
 import { FlaskConical, ExternalLink, FolderOpen, Brain, ShieldAlert, Languages, Eye, BookOpen, Phone, Workflow, TestTube2, Cpu, Bot, Swords, Car, Star, ClipboardList, Shield, Database, Layers, GitBranch, Search, X, ChevronDown, SlidersHorizontal, MessageSquare, Zap, CheckCircle2 } from "lucide-react";
 import { SiGithub, SiPython, SiTensorflow, SiOpencv, SiJupyter, SiCoursera, SiSelenium, SiPytorch, SiOpenai, SiScikitlearn, SiPandas, SiNumpy, SiDocker, SiPostman, SiNasa, SiFastapi, SiReact } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
@@ -676,8 +675,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
 
 // ─── Expanded Project Modal ─────────────────────────────────────────────────
 function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
-  const accentCycle = ["violet", "teal", "orange", "pink", "sky", "emerald"] as const;
-  type AccentKey = typeof accentCycle[number];
+  type AccentKey = "violet" | "teal" | "orange" | "pink" | "sky" | "emerald";
 
   const deriveAccent = (): AccentKey => {
     const t = project.tags.join(" ").toLowerCase();

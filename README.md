@@ -143,6 +143,8 @@ The contacts table is intentionally separate because contact submissions have a 
 | `npm run dev` | Start local development |
 | `npm run build` | Build the Amplify/SSR application |
 | `npm run lint` | Run ESLint |
+| `npm run typecheck` | Check TypeScript without emitting files |
+| `npm run check` | Run the complete local pull-request quality gate |
 | `npm run content:setup` | Create the portfolio operations table |
 | `npm run content:seed` | Seed projects and experience |
 | `npm run rag:setup` | Create/validate S3 Vector resources |
@@ -155,6 +157,8 @@ The contacts table is intentionally separate because contact submissions have a 
 ## Deployment
 
 Pushes to `main` trigger the AWS Amplify build. `amplify.yml` writes an allow-listed set of server variables into `.env.production` for the Next.js SSR runtime. Route 53 provides the custom domain.
+
+Pull requests targeting `main` run the GitHub Actions `Quality gate`: lint, TypeScript, local RAG evaluation, and a production build. See [Pull Requests and Release Checks](docs/PULL_REQUESTS.md) for the review checklist and recommended `main` branch protection.
 
 The GitHub Pages mirror is a static export. API-backed functionality—including BB-8 responses, live admin content, analytics, and contact submission—is unavailable or reduced on that mirror by design.
 
@@ -180,6 +184,7 @@ Read the public [Privacy Policy](https://adityamore.dev/privacy) and the impleme
 | [Command Center](docs/COMMAND_CENTER.md) | DynamoDB setup, IAM, publishing, auth, analytics |
 | [BB-8 Portfolio RAG](docs/RAG.md) | Indexing, retrieval, evaluation, permissions, tuning |
 | [Developer Notes](docs/DEVELOPMENT.md) | Development workflow, fallbacks, deployment caveats |
+| [Pull Requests and Release Checks](docs/PULL_REQUESTS.md) | CI, review checklist, branch protection, and release verification |
 | [Issue & Fix Changelog](docs/CHANGELOG.md) | Historical production incidents and fixes |
 | [Code Citations](docs/%23%20Code%20Citations.md) | Third-party code and license attributions |
 
