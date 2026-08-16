@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, MessageSquare, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { Mail, MessageSquare, Send, CheckCircle2, Loader2, Bot, X } from "lucide-react";
 import { FaLinkedin } from "react-icons/fa";
+import { CONTACT_DRAFT_KEY } from "@/lib/bb8-actions";
 
 const contacts = [
   {
@@ -30,6 +31,26 @@ export default function Contact() {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", message: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [draftPrepared, setDraftPrepared] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = window.sessionStorage.getItem(CONTACT_DRAFT_KEY);
+      if (!saved) return;
+      const draft = JSON.parse(saved) as Partial<typeof form>;
+      setForm((current) => ({
+        firstName: typeof draft.firstName === "string" ? draft.firstName : current.firstName,
+        lastName: typeof draft.lastName === "string" ? draft.lastName : current.lastName,
+        email: typeof draft.email === "string" ? draft.email : current.email,
+        message: typeof draft.message === "string" ? draft.message : current.message,
+      }));
+      setDraftPrepared(true);
+      window.sessionStorage.removeItem(CONTACT_DRAFT_KEY);
+      window.setTimeout(() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+    } catch {
+      window.sessionStorage.removeItem(CONTACT_DRAFT_KEY);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +78,7 @@ export default function Contact() {
   };
 
   const inputCls =
-    "w-full bg-zinc-900/60 border border-zinc-700/60 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all";
+    "w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all";
 
   return (
     <section className="container-max py-16 relative z-[1]">
@@ -70,10 +91,10 @@ export default function Contact() {
       >
         <div className="flex items-center gap-2 mb-3">
           <MessageSquare size={15} className="text-orange-400" />
-          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">Contact</p>
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--muted)]">Contact</p>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white">Get in Touch</h1>
-        <p className="mt-3 text-zinc-500 max-w-lg text-sm leading-relaxed">
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--text)]">Get in Touch</h1>
+        <p className="mt-3 text-[var(--muted)] max-w-lg text-sm leading-relaxed">
           I&apos;m actively looking for AI Engineer, ML Engineer, and Data Scientist roles.
           Have an opportunity or just want to say hi? Drop me a message!
         </p>
@@ -92,7 +113,7 @@ export default function Contact() {
               <p className="text-amber-300 text-sm font-semibold">
                 Contact form unavailable in this version
               </p>
-              <p className="text-zinc-400 text-sm leading-relaxed">
+              <p className="text-[var(--muted)] text-sm leading-relaxed">
                 This is a static mirror hosted on GitHub Pages. The contact form
                 requires a backend that isn&apos;t available here. Please use the
                 direct links on the right, or visit the full site to send a
@@ -108,11 +129,23 @@ export default function Contact() {
               </a>
             </div>
           ) : (
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form id="contact-form" onSubmit={handleSubmit} className="space-y-5">
+            {draftPrepared && (
+              <div className="flex items-start gap-3 rounded-xl border border-orange-500/25 bg-orange-500/10 px-4 py-3 text-sm text-[var(--muted)]">
+                <Bot size={17} className="mt-0.5 shrink-0 text-orange-500" />
+                <div className="flex-1">
+                  <p className="font-semibold text-[var(--text)]">BB-8 prepared this draft</p>
+                  <p className="mt-0.5 text-xs leading-relaxed">Review every field, complete any missing details, then send it when you&apos;re ready.</p>
+                </div>
+                <button type="button" onClick={() => setDraftPrepared(false)} aria-label="Dismiss draft notice" className="text-[var(--muted)] hover:text-[var(--text)]">
+                  <X size={14} />
+                </button>
+              </div>
+            )}
             {/* Name row */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-xs font-medium text-zinc-400 mb-2">
+                <label htmlFor="firstName" className="block text-xs font-medium text-[var(--muted)] mb-2">
                   First Name
                 </label>
                 <input
@@ -126,7 +159,7 @@ export default function Contact() {
                 />
               </div>
               <div>
-                <label htmlFor="lastName" className="block text-xs font-medium text-zinc-400 mb-2">
+                <label htmlFor="lastName" className="block text-xs font-medium text-[var(--muted)] mb-2">
                   Last Name
                 </label>
                 <input
@@ -143,7 +176,7 @@ export default function Contact() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-xs font-medium text-zinc-400 mb-2">
+              <label htmlFor="email" className="block text-xs font-medium text-[var(--muted)] mb-2">
                 Email Address
               </label>
               <input
@@ -159,7 +192,7 @@ export default function Contact() {
 
             {/* Message */}
             <div>
-              <label htmlFor="message" className="block text-xs font-medium text-zinc-400 mb-2">
+              <label htmlFor="message" className="block text-xs font-medium text-[var(--muted)] mb-2">
                 Message
               </label>
               <textarea
@@ -177,7 +210,7 @@ export default function Contact() {
             <button
               type="submit"
               disabled={status === "loading"}
-              className="group flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              className="cta-primary group flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
               {status === "loading" ? (
                 <>
@@ -220,7 +253,7 @@ export default function Contact() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="lg:col-span-2 space-y-4"
         >
-          <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
+          <p className="text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-4">
             Or reach out directly
           </p>
           {contacts.map((c) => (
@@ -229,14 +262,14 @@ export default function Contact() {
               href={c.href}
               target={c.href.startsWith("mailto") ? undefined : "_blank"}
               rel={c.href.startsWith("mailto") ? undefined : "noopener noreferrer"}
-              className={`flex items-center gap-4 p-4 rounded-xl border border-zinc-800/80 bg-zinc-900/40 hover:bg-zinc-900/70 transition-all ${c.accent}`}
+              className={`flex items-center gap-4 p-4 rounded-xl border border-[var(--border)]/80 bg-[var(--surface)]/40 hover:bg-[var(--surface)] transition-all ${c.accent}`}
             >
               <span className={`shrink-0 w-10 h-10 rounded-lg ${c.bg} flex items-center justify-center ${c.iconColor}`}>
                 {c.icon}
               </span>
               <div>
-                <p className="font-semibold text-sm text-white">{c.label}</p>
-                <p className="text-xs text-zinc-400 mt-0.5">{c.value}</p>
+                <p className="font-semibold text-sm text-[var(--text)]">{c.label}</p>
+                <p className="text-xs text-[var(--muted)] mt-0.5">{c.value}</p>
               </div>
             </a>
           ))}

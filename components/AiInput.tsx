@@ -36,7 +36,7 @@ const Placeholder = ({ placeholder }: { placeholder: string }) => (
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: i * 0.01, type: "spring" }}
-          className="text-white/50 font-extralight text-sm"
+          className="text-[var(--muted)] font-extralight text-sm"
         >
           {char}
         </motion.span>
@@ -62,8 +62,8 @@ export default function AiInput({
   className,
   placeholder = "Ask about my work...",
   style,
-  mainColor = "#7c3aed",
-  backgroundColor = "#09090b",
+  mainColor = "var(--hero-accent)",
+  backgroundColor = "var(--surface)",
   rows = 1,
   onSubmit,
   animationStyle = "orbit",
@@ -170,7 +170,10 @@ export default function AiInput({
   return (
     <div style={{ width }} className="relative flex items-center justify-center">
       <span
-        style={{ clipPath, backgroundColor: `${backgroundColor}a5` }}
+        style={{
+          clipPath,
+          backgroundColor: `color-mix(in srgb, ${backgroundColor} 65%, transparent)`,
+        }}
         className="absolute inset-[-80px] z-[1]"
       />
       <motion.span
@@ -188,12 +191,11 @@ export default function AiInput({
 
       <div
         ref={containerRef}
-        style={{ width }}
+        style={{ width, backgroundColor }}
         className={cn(
-          "border border-white/10 hover:border-white/20 focus-within:border-violet-500/40",
+          "border border-[var(--border)] hover:border-[var(--muted)] focus-within:border-orange-500/60",
           "rounded-xl relative z-20 transition-all duration-200",
-          isLoading && "!border-transparent",
-          "bg-zinc-950"
+          isLoading && "!border-transparent"
         )}
       >
         {!value && (
@@ -209,7 +211,7 @@ export default function AiInput({
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); textareaRef.current?.focus(); }}
           style={{ resize: "none", ...style }}
           rows={rows}
-          className={cn("w-full px-3 py-2.5 text-white/80 bg-transparent outline-none text-sm", className)}
+          className={cn("w-full px-3 py-2.5 text-[var(--text)] bg-transparent outline-none text-sm", className)}
         />
         <div className="flex items-center justify-end p-1.5 gap-1">
           <ActionButton

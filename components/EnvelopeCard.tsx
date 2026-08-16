@@ -14,14 +14,13 @@ export default function EnvelopeCard() {
         >
           {/* Message at top */}
           <p className="px-4 text-[10px] text-zinc-700 leading-[1.5] text-center w-full font-medium">
-            I reply faster than<br />
-            my models converge.
+            Let&apos;s connect.
           </p>
           {/* Divider */}
           <div className="w-12 h-px bg-orange-300/60 my-2" />
           {/* Subtext */}
           <p className="px-4 text-[8px] text-zinc-500 text-center">
-            Let's build something cool.
+            Drop me a message anytime.
           </p>
           {/* Signature */}
           <div className="mt-3 pt-1.5 px-4 w-full flex items-center justify-center">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Award, GraduationCap, Languages, MapPin, BookOpen, Shield, Database, FlaskConical } from "lucide-react";
@@ -61,7 +61,7 @@ const degrees = [
       "Applied **software engineering** principles including object-oriented design, testing, and system implementation.",
     ],
     tags: [{ label: "Python", Icon: SiPython }, { label: "TensorFlow", Icon: SiTensorflow }, { label: "OpenCV", Icon: SiOpencv }],
-    logoFilter: "brightness(0) invert(1)",
+    isDypcet: true,
   },
 ];
 
@@ -91,10 +91,10 @@ export default function Education() {
       >
         <div className="flex items-center gap-2 mb-3">
           <GraduationCap size={15} className="text-orange-400" />
-          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">Academic Background</p>
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--muted)]">Academic Background</p>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white">Education</h1>
-        <p className="mt-3 text-zinc-500 max-w-lg text-sm leading-relaxed">
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--text)]">Education</h1>
+        <p className="mt-3 text-[var(--muted)] max-w-lg text-sm leading-relaxed">
           Academic milestones from undergraduate engineering to graduate-level machine learning research.
         </p>
       </motion.div>
@@ -107,7 +107,7 @@ export default function Education() {
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: "easeOut", delay: i * 0.1 }}
-            className={`group relative rounded-2xl border ${d.border} bg-zinc-900/70 overflow-hidden flex flex-col shadow-lg hover:shadow-xl ${d.glow} transition-all duration-300 hover:-translate-y-1`}
+            className={`group relative rounded-2xl border ${d.border} bg-[var(--surface)] overflow-hidden flex flex-col shadow-lg hover:shadow-xl ${d.glow} card-elevated transition-all duration-300 hover:-translate-y-1`}
           >
             {/* Gradient header */}
             <div className={`relative h-40 overflow-hidden bg-gradient-to-br ${d.gradient}`}>
@@ -137,8 +137,7 @@ export default function Education() {
                   alt={d.org}
                   width={d.logoSize}
                   height={d.logoSize}
-                  className="object-contain opacity-90 drop-shadow-lg"
-                  style={d.logoFilter ? { filter: d.logoFilter } : undefined}
+                  className={`object-contain opacity-90 drop-shadow-lg${d.isDypcet ? " dypcet-logo" : ""}`}
                 />
               </div>
               {/* Period badge */}
@@ -151,7 +150,7 @@ export default function Education() {
             <div className="flex flex-col flex-1 p-5">
               {/* Degree + GPA row */}
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
-                <h2 className="text-lg font-bold text-white leading-snug">{d.degree}</h2>
+                <h2 className="text-lg font-bold text-[var(--text)] leading-snug">{d.degree}</h2>
                 <span className={`self-start sm:self-auto text-[11px] font-semibold px-2.5 py-1 rounded-full border ${d.gpaBg} whitespace-nowrap`}>
                   GPA: {d.gpa}
                 </span>
@@ -159,38 +158,38 @@ export default function Education() {
 
               {/* University + Location */}
               <p className={`text-xs font-semibold ${d.accent} mb-0.5`}>{d.org}</p>
-              <div className="flex items-center gap-1 text-[11px] text-zinc-500 mb-3">
+              <div className="flex items-center gap-1 text-[11px] text-[var(--muted)] mb-3">
                 <MapPin size={10} />
                 {d.location}
               </div>
 
               {/* Degree Awarded + Concentration */}
               <div className="mb-4 space-y-1">
-                <p className="text-[11px] text-zinc-400">
-                  <span className="text-zinc-500">Degree Awarded:</span>{" "}
-                  <span className="text-zinc-300">{d.degreeAwarded}</span>
+                <p className="text-[11px] text-[var(--muted)]">
+                  <span className="text-[var(--muted)]">Degree Awarded:</span>{" "}
+                  <span className="text-[var(--tag-text)]">{d.degreeAwarded}</span>
                 </p>
-                <p className="text-[11px] text-zinc-400">
-                  <span className="text-zinc-500">Concentration:</span>{" "}
-                  <span className="text-zinc-300">{d.concentration}</span>
+                <p className="text-[11px] text-[var(--muted)]">
+                  <span className="text-[var(--muted)]">Concentration:</span>{" "}
+                  <span className="text-[var(--tag-text)]">{d.concentration}</span>
                 </p>
               </div>
 
               {/* Key Highlights */}
-              <p className="text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-2 flex items-center gap-1.5">
+              <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--sub-muted)] mb-2 flex items-center gap-1.5">
                 Key Highlights
               </p>
               <ul className="space-y-1.5 mb-4">
                 {d.bullets.map((b, j) => (
-                  <li key={j} className="flex items-start gap-2 text-xs text-zinc-400 leading-relaxed">
+                  <li key={j} className="flex items-start gap-2 text-xs text-[var(--muted)] leading-relaxed">
                     <span className={`mt-[5px] w-1 h-1 rounded-full shrink-0 ${d.orb1.replace("bg-", "bg-")}`} />
-                    <span dangerouslySetInnerHTML={{ __html: b.replace(/\*\*(.*?)\*\*/g, '<strong class="text-zinc-200">$1</strong>') }} />
+                    <span dangerouslySetInnerHTML={{ __html: b.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[var(--tag-text)]">$1</strong>') }} />
                   </li>
                 ))}
               </ul>
 
               {/* Coursework */}
-              <p className="text-[10px] font-bold tracking-widest uppercase text-zinc-600 mb-2 flex items-center gap-1.5">
+              <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--sub-muted)] mb-2 flex items-center gap-1.5">
                 <BookOpen size={9} /> Key Coursework
               </p>
               <div className="flex flex-wrap gap-1.5 mb-4">
@@ -200,9 +199,9 @@ export default function Education() {
               </div>
 
               {/* Tech tags */}
-              <div className="flex flex-wrap gap-1.5 pt-3 border-t border-zinc-800/60">
+              <div className="flex flex-wrap gap-1.5 pt-3 border-t border-[var(--border)]">
                 {d.tags.map(({ label, Icon }) => (
-                  <span key={label} className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-zinc-800/80 text-zinc-300 border border-zinc-700/50`}>
+                  <span key={label} className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--tag-bg)] text-[var(--tag-text)] border border-[var(--border)]`}>
                     <Icon size={9} /> {label}
                   </span>
                 ))}
@@ -222,9 +221,9 @@ export default function Education() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Award size={15} className="text-orange-400" />
-          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">Credentials</p>
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--muted)]">Credentials</p>
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">Certifications</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-[var(--text)] mb-8">Certifications</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {certifications.map((cert, i) => (
             <motion.div
@@ -233,14 +232,14 @@ export default function Education() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.07 }}
-              className="flex items-start gap-3 p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/50 hover:border-orange-500/30 hover:bg-zinc-900/80 transition-all duration-200 group"
+              className="flex items-start gap-3 p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-orange-500/30 hover:bg-[var(--surface)]/80 transition-all duration-200 group"
             >
               <span className="mt-0.5 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 shrink-0">
                 <cert.Icon size={14} className="text-orange-400" />
               </span>
               <div>
-                <p className="text-sm font-medium text-zinc-200 leading-snug group-hover:text-white transition-colors">{cert.name}</p>
-                <p className="text-[11px] text-zinc-500 mt-0.5">{cert.area}</p>
+                <p className="text-sm font-medium text-[var(--tag-text)] leading-snug group-hover:text-[var(--text)] transition-colors">{cert.name}</p>
+                <p className="text-[11px] text-[var(--muted)] mt-0.5">{cert.area}</p>
               </div>
             </motion.div>
           ))}
@@ -256,14 +255,14 @@ export default function Education() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Languages size={15} className="text-sky-400" />
-          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">Communication</p>
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--muted)]">Communication</p>
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Languages</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-[var(--text)] mb-6">Languages</h2>
         <div className="flex flex-wrap gap-3">
           {languages.map((l) => (
-            <div key={l.lang} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:border-sky-500/30 transition-colors">
-              <span className="font-semibold text-white text-sm">{l.lang}</span>
-              <span className="text-xs text-zinc-500">· {l.level}</span>
+            <div key={l.lang} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-sky-500/30 transition-colors">
+              <span className="font-semibold text-[var(--text)] text-sm">{l.lang}</span>
+              <span className="text-xs text-[var(--muted)]">· {l.level}</span>
             </div>
           ))}
         </div>

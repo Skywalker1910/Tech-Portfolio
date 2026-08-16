@@ -23,3 +23,4 @@ const client = new DynamoDBClient({
 export const docClient = DynamoDBDocumentClient.from(client);
 
 export const CONTACTS_TABLE = process.env.DYNAMODB_CONTACTS_TABLE ?? "portfolio-contacts";
+export const PORTFOLIO_TABLE = process.env.DYNAMODB_PORTFOLIO_TABLE ?? "portfolio-content";

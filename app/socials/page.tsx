@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { Mail, Globe, ArrowUpRight } from "lucide-react";
@@ -34,7 +34,7 @@ const socials: Social[] = [
     color: "#e5e7eb",
     glow: "rgba(229,231,235,0.15)",
     gradient: "from-zinc-800 via-zinc-700/60 to-zinc-800",
-    accentText: "text-zinc-200",
+    accentText: "text-[var(--tag-text)]",
   },
   {
     Icon: FaLinkedin,
@@ -115,10 +115,10 @@ export default function Socials() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Globe size={15} className="text-sky-400" />
-          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">Connect Online</p>
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--muted)]">Connect Online</p>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white">Socials</h1>
-        <p className="mt-3 text-zinc-500 max-w-lg text-sm leading-relaxed">
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--text)]">Socials</h1>
+        <p className="mt-3 text-[var(--muted)] max-w-lg text-sm leading-relaxed">
           Reach out or follow along — across code, career, and everything in between.
         </p>
       </motion.div>
@@ -131,7 +131,7 @@ export default function Socials() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: i * 0.08 }}
-            className="group border-b border-zinc-800/70 first:border-t py-8 flex flex-col md:flex-row gap-6 md:gap-10 transition-colors hover:bg-zinc-900/30 px-2 -mx-2 rounded-lg"
+            className="group border-b border-[var(--border)] first:border-t py-8 flex flex-col md:flex-row gap-6 md:gap-10 transition-colors hover:bg-[var(--surface)] px-2 -mx-2 rounded-lg"
           >
             {/* Left — large brand icon (replaces number) */}
             <div className="shrink-0 flex items-start pt-1">
@@ -146,21 +146,21 @@ export default function Socials() {
             <div className="flex-1 min-w-0">
               {/* Category badge + handle row */}
               <div className="flex flex-wrap items-center gap-3 mb-2">
-                <span className="text-[10px] font-bold tracking-[0.25em] uppercase border border-zinc-700/70 bg-zinc-800/60 text-zinc-400 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-bold tracking-[0.25em] uppercase border border-[var(--border)]/70 bg-[var(--tag-bg)] text-[var(--muted)] px-2 py-0.5 rounded">
                   {s.category}
                 </span>
-                <span className="text-[11px] font-mono text-zinc-600">{s.handle}</span>
+                <span className="text-[11px] font-mono text-[var(--sub-muted)]">{s.handle}</span>
               </div>
 
               {/* Platform name */}
               <h2
-                className="text-xl md:text-2xl font-bold text-white mb-3 leading-snug group-hover:opacity-90 transition-colors"
+                className="text-xl md:text-2xl font-bold text-[var(--text)] mb-3 leading-snug group-hover:opacity-90 transition-colors"
               >
                 {s.label}
               </h2>
 
               {/* Description */}
-              <p className="text-sm text-zinc-400 leading-relaxed mb-5 max-w-xl">
+              <p className="text-sm text-[var(--muted)] leading-relaxed mb-5 max-w-xl">
                 {s.desc}
               </p>
 
@@ -169,7 +169,7 @@ export default function Socials() {
                 {s.tags.map((t) => (
                   <span
                     key={t}
-                    className="text-[10px] font-medium px-2.5 py-0.5 rounded-full border border-zinc-700/60 bg-zinc-800/50 text-zinc-400"
+                    className="text-[10px] font-medium px-2.5 py-0.5 rounded-full border border-[var(--border)] bg-[var(--tag-bg)]/50 text-[var(--muted)]"
                   >
                     {t}
                   </span>

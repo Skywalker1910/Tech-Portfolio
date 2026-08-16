@@ -1,0 +1,167 @@
+[
+  {
+    "id": "about",
+    "title": "About Aditya More",
+    "route": "/",
+    "sections": [
+      {
+        "heading": "Professional summary",
+        "content": "Aditya More is a Data Scientist and Machine Learning Engineer with an M.S. in Computer Science from Clemson University. He builds end-to-end data science and machine learning systems, from data preprocessing and model development through evaluation and deployment. His interests include machine learning, deep learning, large language models, computer vision, AI security, MLOps, and retrieval-augmented generation."
+      },
+      {
+        "heading": "Career goals and availability",
+        "content": "Aditya is based in the United States and is willing to relocate within the United States. He is open to AI Engineer, Machine Learning Engineer, and Data Scientist roles. He is authorized to work in the United States under OPT and does not require immediate sponsorship."
+      },
+      {
+        "heading": "Languages",
+        "content": "Aditya speaks English professionally and is a native or bilingual speaker of Hindi and Marathi."
+      }
+    ]
+  },
+  {
+    "id": "experience",
+    "title": "Professional Experience",
+    "route": "/experience",
+    "sections": [
+      {
+        "heading": "Volunteer Researcher — LLM Agents and Human Behavior at Clemson University",
+        "content": "Aditya has served as a Volunteer Researcher in Clemson University's School of Computing from May 2026 to the present, based in Clemson, South Carolina and working remotely. Under the supervision of Dr. Long Cheng, he investigates whether Large Language Model agents can realistically simulate human behavior and how behavioral fidelity can be systematically evaluated. His research covers LLM agents, multi-agent systems, Generative AI, human behavior simulation, and AI evaluation. He is conducting a literature review of LLM-based human behavior simulation, autonomous agents, multi-agent systems, and AI-generated synthetic populations; investigating AgentSociety, YuLan-OneSim, Generative Agents, and MiroFish; and developing a taxonomy spanning decision-making, social interaction, cooperation, trust, and other behavioral dimensions. He is designing and reproducing behavioral experiments including Trust Games and Dictator Games to compare LLM-agent decisions with established human behavioral data, and exploring benchmarks for behavioral realism, consistency, and human-agent similarity. The work is building toward a survey of the strengths and limitations of LLM agents for simulating human behavior and whether AI agents can support or partially substitute human participants in early-stage studies. Technologies and research tools include Python, Large Language Models, Multi-Agent Systems, AgentSociety, YuLan-OneSim, Generative Agents, MiroFish, literature review, experimental design, and behavioral evaluation."
+      },
+      {
+        "heading": "Graduate Student Hourly — Clemson University",
+        "content": "Aditya worked as a Graduate Student Hourly in Data Science at Clemson University's School of Computing in Clemson, South Carolina, from August 2024 through December 2025. He designed Jupyter Notebook labs and assignments for a graduate Applied Data Science course; built automated nbgrader pipelines and submission-validation logic; and created exercises covering preprocessing, IQR and Z-score outlier detection, model selection, cross-validation, feature selection, and PCA. He supported students through weekly office hours, collaborated with faculty on curriculum and Coursera deployment, and diagnosed autograder issues reported through Salesforce tickets before validating and deploying corrected notebooks. Technologies included Python, Jupyter, scikit-learn, pandas, NumPy, nbgrader, and Coursera."
+      },
+      {
+        "heading": "Software Test Engineer — Amdocs",
+        "content": "Aditya worked as a Software Test Engineer at Amdocs in Pune, India, from October 2021 through December 2022. He performed end-to-end, regression, and API testing for enterprise telecom systems serving AT&T; designed test cases and validation strategies for production releases; and automated test workflows with Postman and proprietary tools. He collaborated with cross-functional teams in the United States and India in an Agile environment and participated in feature planning, requirements analysis, and validation across multiple releases. Technologies included Postman and Selenium."
+      }
+    ]
+  },
+  {
+    "id": "education",
+    "title": "Education and Credentials",
+    "route": "/education",
+    "sections": [
+      {
+        "heading": "M.S. Computer Science — Clemson University",
+        "content": "Aditya earned a Master of Science in Computer Science from Clemson University in Clemson, South Carolina. He attended from January 2024 through December 2025, graduated in December 2025, concentrated in Data Science and Informatics, and earned a 3.7/4.0 GPA. Coursework included Machine Learning, Deep Learning, Design and Analysis of Algorithms, Data Science, and Statistical Methods. His academic work included ML and deep-learning models, data pipelines, model evaluation, LLM robustness, AI defense mechanisms, and statistical analysis."
+      },
+      {
+        "heading": "B.E. Computer Science and Engineering — D.Y. Patil",
+        "content": "Aditya earned a Bachelor of Engineering in Computer Science and Engineering from D.Y. Patil College of Engineering & Technology in Kolhapur, India. He attended from August 2017 through July 2021 and earned a 3.22/4.0 GPA. Coursework included Data Structures, C and C++ programming labs, Data Analytics, Operating Systems, Advanced Database Systems, and Internet of Things. He led a five-member team that built an automatic license plate recognition system and a real-time COVID-19 safety monitoring system."
+      },
+      {
+        "heading": "Certifications",
+        "content": "Aditya's listed certifications are Cybersecurity Fundamentals, Certified Information Security and Ethical Hacker (CISEH), Introduction to Cybersecurity, Data Science Orientation, and IBM Blockchain Essentials V2."
+      }
+    ]
+  },
+  {
+    "id": "projects",
+    "title": "Projects",
+    "route": "/projects",
+    "sections": [
+      {
+        "heading": "BB-8 AI-Powered Portfolio Assistant",
+        "content": "BB-8 is the active AI co-pilot for Aditya's Tech Portfolio. It uses the OpenAI Responses and Embeddings APIs with a retrieval-augmented generation pipeline over structured, verified portfolio data. Semantic retrieval is backed by Amazon S3 Vectors when configured, with a deterministic local keyword retriever as a development and availability fallback. The system retrieves relevant chunks, supplies only those chunks to the language model, returns source-page links with answers, preserves chat state while navigating, and includes a retrieval evaluation dataset. The application is built with Next.js, TypeScript, React, and the AWS SDK. BB-8 Local is a separate experimental personal language-model project and is not the model serving the live assistant."
+      },
+      {
+        "heading": "Personalized Movie Recommendation System",
+        "content": "Completed in 2024, this end-to-end recommendation system combined MovieLens, TMDB, and IMDb data: more than 26 million ratings, 270,000 users, and 45,000 movies. Aditya implemented collaborative filtering, content-based models, matrix factorization with FunkSVD, and neural methods. FunkSVD achieved RMSE 0.76, approximately a 21 percent improvement over baseline. He designed ETL pipelines and optimized sparse-matrix computations. Technologies included Python, scikit-learn, PyTorch, Flask, PostgreSQL, Docker, and recommender-system methods."
+      },
+      {
+        "heading": "Skynet — AQI Prediction System",
+        "content": "Completed in 2025, Skynet is an end-to-end machine-learning pipeline for forecasting Air Quality Index. It integrated NASA TEMPO, OpenAQ, weather, and traffic APIs; implemented ingestion and preprocessing pipelines; engineered environmental and traffic features; and modeled temporal and spatial AQI patterns. Technologies included Python, scikit-learn, pandas, and NumPy."
+      },
+      {
+        "heading": "R2D2 — Experimental Transformer-based LLM",
+        "content": "R2D2 is an in-progress 2025 research project that builds transformer architectures from scratch to study language-model internals and training dynamics. It implements tokenization, embeddings, and attention mechanisms; trains small-scale transformer models; and explores LLM behavior and optimization. Technologies include Python, PyTorch, Transformers, NLP, and deep learning. R2D2 is distinct from the active BB-8 portfolio co-pilot."
+      },
+      {
+        "heading": "Adversarial Attacks — Experimentation and Case Study",
+        "content": "This 2024 Clemson AI-security case study examined data poisoning, adversarial patches, and evasion attacks on computer-vision models. Aditya experimented with monocular depth-estimation systems used in autonomous-vehicle perception, analyzed effects on scene understanding and depth pipelines, and evaluated attack transferability across models and threat settings. Technologies and areas included Python, computer vision, deep learning, adversarial machine learning, and AI security."
+      },
+      {
+        "heading": "LLM Defense Evaluation Framework",
+        "content": "From September through December 2024, Aditya built automated pipelines for jailbreak testing and defense evaluation of large language models. The framework evaluated token-level patterns, semantic behavior, refusal mechanisms, response consistency, latency, and attack success rates, and benchmarked multiple models under diverse jailbreak strategies. Technologies and areas included Python, LLM evaluation, adversarial AI, and AI security."
+      },
+      {
+        "heading": "NeuralLog — Intelligent Activity Tracking System",
+        "content": "Completed in 2025, NeuralLog is a personal machine-learning system that tracks tasks, routines, and habits; analyzes behavioral patterns; and generates personalized productivity insights. Technologies included Python, machine learning, and data analysis."
+      },
+      {
+        "heading": "Automatic License Plate Recognition",
+        "content": "Completed in 2021, the Automatic License Plate Recognition system detects vehicle plates and extracts text. It uses OpenCV contour analysis, Tesseract OCR, noise reduction, edge detection, and perspective correction to improve recognition. The source repository is https://github.com/Skywalker1910/License-Plate-Detection."
+      },
+      {
+        "heading": "COVID-19 Safeguard System",
+        "content": "Completed in 2021, this real-time computer-vision system monitors face-mask compliance and social-distancing violations in live video and can alert facility managers. Technologies included TensorFlow and OpenCV. The source repository is https://github.com/Skywalker1910/Covid-19-Safeguard."
+      },
+      {
+        "heading": "Alien Invasion",
+        "content": "Completed in 2020, Alien Invasion is a 2D arcade-style space shooter built with Python and Pygame while Aditya was learning Python fundamentals. It includes player controls, enemy waves, scoring, and game-state management."
+      },
+      {
+        "heading": "Tech Portfolio Website",
+        "content": "This portfolio is built with Next.js 16, TypeScript, Tailwind CSS v4, React, and Framer Motion. It is deployed on AWS Amplify with CI/CD, uses Amazon DynamoDB for contact messages, and includes the animated BB-8 AI co-pilot. The site also has a GitHub Pages static mirror, live GitHub profile integration, responsive design, theme support, and an owner-only administration panel."
+      }
+    ]
+  },
+  {
+    "id": "skills",
+    "title": "Technical Skills",
+    "route": "/skills",
+    "sections": [
+      {
+        "heading": "Programming and machine learning",
+        "content": "Aditya's programming and machine-learning stack includes Python, C++, SQL, scikit-learn, PyTorch, and TensorFlow."
+      },
+      {
+        "heading": "Data visualization and analytics",
+        "content": "Aditya works with pandas, NumPy, matplotlib, seaborn, statistical modeling, data preprocessing, feature engineering, and model evaluation."
+      },
+      {
+        "heading": "Cloud, infrastructure, and developer tools",
+        "content": "Aditya's tools and infrastructure experience includes AWS, Git, Docker, Jupyter, PostgreSQL, Flask, FastAPI, React, Next.js, Postman, Selenium, nbgrader, OpenCV, Tesseract, Pygame, and the OpenAI API."
+      },
+      {
+        "heading": "Core technical areas",
+        "content": "Aditya's core areas include Machine Learning, Deep Learning, Computer Vision, Large Language Models, Natural Language Processing, MLOps, Retrieval-Augmented Generation systems, recommender systems, AI evaluation, and Adversarial Machine Learning."
+      }
+    ]
+  },
+  {
+    "id": "contact",
+    "title": "Contact Aditya",
+    "route": "/contact",
+    "sections": [
+      {
+        "heading": "Direct contact",
+        "content": "The fastest way to reach Aditya is by email at aditya.more@outlook.in. Visitors can also open the portfolio's Contact page and submit the contact form. For a call or meeting, contact him through email or LinkedIn to coordinate a time."
+      },
+      {
+        "heading": "Professional opportunities",
+        "content": "Aditya welcomes messages about AI Engineer, Machine Learning Engineer, and Data Scientist roles, as well as project collaborations and research discussions. He is based in the United States and willing to relocate within the United States."
+      }
+    ]
+  },
+  {
+    "id": "socials",
+    "title": "Social Profiles",
+    "route": "/socials",
+    "sections": [
+      {
+        "heading": "GitHub",
+        "content": "Aditya's GitHub profile is https://github.com/Skywalker1910 with the handle @Skywalker1910. It contains public repositories, personal projects, and work in progress."
+      },
+      {
+        "heading": "LinkedIn",
+        "content": "Aditya's LinkedIn profile is https://www.linkedin.com/in/more-aditya. LinkedIn is the best social channel for professional networking, recruiting, career history, and career updates."
+      },
+      {
+        "heading": "Other social channels",
+        "content": "Aditya's Instagram handle is @_aditya.more_ and his Discord handle is adityamore. For professional communication, email, LinkedIn, or the portfolio contact form are preferred."
+      }
+    ]
+  }
+]

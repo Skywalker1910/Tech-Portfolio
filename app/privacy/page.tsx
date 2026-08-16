@@ -1,166 +1,35 @@
 "use client";
 
-import { motion, Easing } from "framer-motion";
+import { motion, type Easing } from "framer-motion";
 import Link from "next/link";
-import { ShieldCheck, ShieldAlert, Database, Globe, BarChart2, Lock, EyeOff, Sparkles } from "lucide-react";
+import { Bot, Clock3, Cookie, Database, EyeOff, FilePenLine, LockKeyhole, Mail, Server, ShieldCheck } from "lucide-react";
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.55, ease: "easeOut" as Easing, delay },
-});
+const fadeUp = (delay=0)=>({initial:{opacity:0,y:20},whileInView:{opacity:1,y:0},viewport:{once:true},transition:{duration:0.5,ease:"easeOut" as Easing,delay}});
 
-const CURRENT_PRACTICES = [
-  { label: "No cookies or local storage tracking" },
-  { label: "No personal identifiers collected or stored" },
-  { label: "Chat interactions with R2D2 are not logged or retained" },
-  { label: "No third-party analytics or advertising SDKs" },
+const dataCategories = [
+  { icon:EyeOff, title:"Anonymous page activity", accent:"text-sky-500", description:"When the operations table is enabled, the primary site records the public path visited, calendar date, total view count, and an anonymous random identifier for per-tab, per-path daily deduplication. It does not store your IP address, user agent, referrer, location, keystrokes, form values, or chat text as analytics data." },
+  { icon:Mail, title:"Contact submissions", accent:"text-orange-500", description:"If you choose to send the contact form, the submitted first name, last name, email address, message, submission time, read state, and an optional owner-assigned sender category are stored in AWS DynamoDB so Aditya can review and respond." },
+  { icon:Bot, title:"BB-8 conversations", accent:"text-violet-500", description:"When you use OpenAI mode, the latest short conversation window and relevant portfolio context are sent through this site’s server to OpenAI to generate a response. The application requests store: false and does not persist chat transcripts in its database. Your visible transcript is kept in this tab’s session storage." },
+  { icon:Server, title:"Standard service processing", accent:"text-emerald-500", description:"AWS Amplify and ordinary internet infrastructure may process request metadata such as IP addresses as necessary to deliver, secure, and operate the site. The application uses an IP value only in volatile memory for chat/login rate limiting and does not write it to the portfolio databases." },
 ];
 
-const FUTURE_PLANS = [
-  {
-    icon: Globe,
-    color: "teal",
-    title: "High-Level Geolocation",
-    desc: "City and country-level location inferred from your IP address — no precise GPS or street-level data, ever. This will power a live globe visualization showcasing where visitors come from around the world.",
-  },
-  {
-    icon: BarChart2,
-    color: "violet",
-    title: "Page Activity & Engagement",
-    desc: "Pages visited, time spent, navigation patterns, and most-visited sections will be tracked to understand how people engage with the portfolio. No form inputs, keystrokes, or sensitive content will be captured.",
-  },
-  {
-    icon: Database,
-    color: "blue",
-    title: "Secure & Anonymized Storage",
-    desc: "All collected data will be stored securely, anonymized where possible, and never sold or shared with third parties. Data will be used solely for portfolio analytics and UX improvement.",
-  },
-  {
-    icon: Sparkles,
-    color: "pink",
-    title: "ML-Driven UX Analysis",
-    desc: "As a data scientist and ML engineer, I plan to analyze visit patterns and engagement signals to continuously improve content, layout, and overall user experience — this portfolio is also a living data project.",
-  },
-];
+export default function PrivacyPage(){return <div className="container-max mx-auto max-w-4xl py-12 md:py-20">
+  <motion.header {...fadeUp()} className="mb-14"><p className="mb-3 text-[11px] font-bold uppercase tracking-[0.3em] text-orange-500">Transparency & data</p><h1 className="text-4xl font-bold text-[var(--text)] md:text-5xl">Privacy Policy</h1><p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--muted)]">This policy explains the information the portfolio currently processes, why it is needed, where it is stored, and the choices available to visitors.</p><p className="mt-3 text-xs text-[var(--sub-muted)]">Effective and last updated: August 14, 2026</p></motion.header>
 
-const colorStyles: Record<string, { border: string; icon: string }> = {
-  teal:   { border: "border-teal-500/20 bg-teal-500/5",     icon: "text-teal-400"   },
-  violet: { border: "border-violet-500/20 bg-violet-500/5", icon: "text-violet-400" },
-  blue:   { border: "border-blue-500/20 bg-blue-500/5",     icon: "text-blue-400"   },
-  pink:   { border: "border-pink-500/20 bg-pink-500/5",     icon: "text-pink-400"   },
-};
+  <motion.section {...fadeUp(0.05)} className="mb-14"><div className="rounded-[1.5rem] border border-emerald-500/25 bg-emerald-500/10 p-6"><div className="flex gap-4"><ShieldCheck size={20} className="mt-0.5 shrink-0 text-emerald-500"/><div><h2 className="font-semibold text-[var(--text)]">Privacy summary</h2><p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">There is no advertising, cross-site tracking, visitor geolocation, fingerprinting, or third-party analytics SDK. When enabled, anonymous path counters help the owner understand which portfolio sections are useful. Personal information is collected only when you submit the contact form or include it in a BB-8 prompt.</p></div></div></div></motion.section>
 
-export default function PrivacyPage() {
-  return (
-    <div className="container-max py-12 md:py-20 max-w-3xl mx-auto">
+  <motion.section {...fadeUp(0.08)} className="mb-14" aria-labelledby="collected-heading"><div className="mb-6 flex items-center gap-3"><span className="h-px flex-1 bg-[var(--border)]"/><h2 id="collected-heading" className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--sub-muted)]">What is processed</h2><span className="h-px flex-1 bg-[var(--border)]"/></div><div className="grid gap-4 md:grid-cols-2">{dataCategories.map(({icon:Icon,title,accent,description},index)=><motion.article key={title} {...fadeUp(0.08+index*0.04)} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm"><div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--tag-bg)]"><Icon size={17} className={accent}/></div><h3 className="mt-4 text-sm font-semibold text-[var(--text)]">{title}</h3><p className="mt-2 text-xs leading-relaxed text-[var(--muted)]">{description}</p></motion.article>)}</div></motion.section>
 
-      {/* ── Header ── */}
-      <motion.div {...fadeUp()} className="mb-14">
-        <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-600 mb-3">Transparency & Data</p>
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Privacy Policy</h1>
-        <p className="text-zinc-500 text-sm leading-relaxed max-w-xl">
-          A transparent overview of what data this portfolio currently collects, what is planned in a future release, and how your information will always be handled responsibly.
-        </p>
-        <p className="text-zinc-700 text-xs mt-3">Last updated: April 8, 2026</p>
-      </motion.div>
+  <motion.section {...fadeUp(0.12)} className="mb-14" aria-labelledby="storage-heading"><div className="mb-6 flex items-center gap-3"><span className="h-px flex-1 bg-[var(--border)]"/><h2 id="storage-heading" className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--sub-muted)]">Storage & retention</h2><span className="h-px flex-1 bg-[var(--border)]"/></div><div className="space-y-4 text-sm leading-relaxed text-[var(--muted)]">
+    <div className="flex gap-3"><Clock3 size={16} className="mt-0.5 shrink-0 text-orange-500"/><p><strong className="font-semibold text-[var(--text)]">Analytics:</strong> daily counters and anonymous deduplication records are stored in the portfolio DynamoDB table and configured to expire after approximately 400 days using DynamoDB TTL.</p></div>
+    <div className="flex gap-3"><Database size={16} className="mt-0.5 shrink-0 text-orange-500"/><p><strong className="font-semibold text-[var(--text)]">Contact messages:</strong> retained in the private contacts table until the owner deletes them or they are no longer reasonably needed for communication.</p></div>
+    <div className="flex gap-3"><Cookie size={16} className="mt-0.5 shrink-0 text-orange-500"/><p><strong className="font-semibold text-[var(--text)]">Browser storage:</strong> `sessionStorage` keeps the BB-8 transcript, chat state, anonymous analytics identifier, visited-path markers, and temporary contact drafts for the current browsing session.</p></div>
+    <div className="flex gap-3"><LockKeyhole size={16} className="mt-0.5 shrink-0 text-orange-500"/><p><strong className="font-semibold text-[var(--text)]">Cookies:</strong> public visitors do not receive an advertising or analytics cookie. A signed, essential admin-session cookie is used only when the private site owner signs into the Command Center.</p></div>
+  </div></motion.section>
 
-      {/* ── Current Practices ── */}
-      <motion.section {...fadeUp(0.05)} className="mb-14">
-        <div className="flex items-center gap-2 mb-6">
-          <div className="h-px flex-1 bg-zinc-800" />
-          <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-zinc-600">Today</span>
-          <div className="h-px flex-1 bg-zinc-800" />
-        </div>
+  <motion.section {...fadeUp(0.16)} className="mb-14" aria-labelledby="sharing-heading"><div className="mb-6 flex items-center gap-3"><span className="h-px flex-1 bg-[var(--border)]"/><h2 id="sharing-heading" className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--sub-muted)]">Service providers & use</h2><span className="h-px flex-1 bg-[var(--border)]"/></div><div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-sm leading-relaxed text-[var(--muted)]"><p>Information is used only to operate the portfolio, answer BB-8 questions, respond to contact submissions, secure the application, maintain live content, and understand aggregate page interest.</p><ul className="mt-4 space-y-2 text-xs"><li><strong className="text-[var(--text)]">AWS</strong> provides hosting, request processing, DynamoDB storage, and vector retrieval.</li><li><strong className="text-[var(--text)]">OpenAI</strong> processes BB-8 prompts and portfolio context when OpenAI chat or embedding features are used.</li><li><strong className="text-[var(--text)]">GitHub</strong> provides public profile and repository information requested by the server-side GitHub proxy.</li></ul><p className="mt-4">Data is not sold, rented, used for advertising, or intentionally shared for unrelated commercial purposes. Avoid including sensitive personal information in chat or the contact form.</p></div></motion.section>
 
-        <div className="flex gap-4 p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 mb-6">
-          <EyeOff size={16} className="text-emerald-400 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-white mb-1">No tracking — as of now</p>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              This portfolio does not currently collect, store, or track any personal data. No cookies are set, no analytics scripts are running, and no identifying information is retained from your visit.
-            </p>
-          </div>
-        </div>
+  <motion.section {...fadeUp(0.2)} className="mb-14" aria-labelledby="choices-heading"><div className="mb-6 flex items-center gap-3"><span className="h-px flex-1 bg-[var(--border)]"/><h2 id="choices-heading" className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--sub-muted)]">Your choices</h2><span className="h-px flex-1 bg-[var(--border)]"/></div><div className="space-y-4 text-sm leading-relaxed text-[var(--muted)]"><div className="flex gap-3"><EyeOff size={16} className="mt-0.5 shrink-0 text-orange-500"/><p>You can browse without using BB-8 or submitting the contact form. Closing the tab ends the browser session and clears session-scoped storage according to your browser&apos;s behavior.</p></div><div className="flex gap-3"><FilePenLine size={16} className="mt-0.5 shrink-0 text-orange-500"/><p>You may ask what contact information is held about you and request correction or deletion by emailing <a href="mailto:aditya.more@outlook.in" className="font-semibold text-[var(--text)] underline decoration-orange-500/50 underline-offset-4">aditya.more@outlook.in</a>. Anonymous analytics records cannot generally be linked back to a named individual.</p></div></div></motion.section>
 
-        <div className="space-y-3">
-          {CURRENT_PRACTICES.map((item, i) => (
-            <motion.div key={i} {...fadeUp(0.05 + i * 0.04)} className="flex items-center gap-3 text-xs text-zinc-400">
-              <ShieldCheck size={13} className="text-emerald-500 shrink-0" />
-              <span>{item.label}</span>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      {/* ── Future Plans ── */}
-      <motion.section {...fadeUp(0.1)} className="mb-14">
-        <div className="flex items-center gap-2 mb-6">
-          <div className="h-px flex-1 bg-zinc-800" />
-          <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-zinc-600">Planned</span>
-          <div className="h-px flex-1 bg-zinc-800" />
-        </div>
-
-        <p className="text-xs text-zinc-500 leading-relaxed mb-6">
-          A future release will introduce an opt-in visitor analytics system. The goal is to build an interactive, data-driven dashboard — both as a professional showcase and as a data science project. The following is a full account of what will be collected and why.
-        </p>
-
-        <div className="space-y-4">
-          {FUTURE_PLANS.map((item, i) => {
-            const Icon = item.icon;
-            const s = colorStyles[item.color];
-            return (
-              <motion.div key={i} {...fadeUp(0.1 + i * 0.05)} className={`flex gap-4 p-4 rounded-xl border ${s.border}`}>
-                <div className="shrink-0 w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700/60 flex items-center justify-center">
-                  <Icon size={16} className={s.icon} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white mb-1">{item.title}</p>
-                  <p className="text-xs text-zinc-400 leading-relaxed">{item.desc}</p>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </motion.section>
-
-      {/* ── Your Rights ── */}
-      <motion.section {...fadeUp(0.15)} className="mb-14">
-        <div className="flex items-center gap-2 mb-6">
-          <div className="h-px flex-1 bg-zinc-800" />
-          <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-zinc-600">Your Rights</span>
-          <div className="h-px flex-1 bg-zinc-800" />
-        </div>
-
-        <div className="space-y-5 text-sm text-zinc-400 leading-relaxed">
-          <div className="flex gap-3">
-            <Lock size={15} className="text-zinc-600 mt-0.5 shrink-0" />
-            <p>
-              <span className="text-white font-semibold">Transparency before collection</span> — This Privacy Policy will be updated before any data collection begins. You will be clearly informed of what is collected, why, and how it is stored.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <ShieldAlert size={15} className="text-zinc-600 mt-0.5 shrink-0" />
-            <p>
-              <span className="text-white font-semibold">No selling or sharing</span> — Your data will never be sold, rented, or shared with advertisers or third-party platforms for commercial purposes.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <ShieldCheck size={15} className="text-zinc-600 mt-0.5 shrink-0" />
-            <p>
-              <span className="text-white font-semibold">Right to inquire</span> — You can ask about what data (if any) has been associated with your visit and request its removal. I will respond promptly.
-            </p>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* ── Footer ── */}
-      <motion.div {...fadeUp(0.2)} className="border-t border-zinc-800 pt-8 text-xs text-zinc-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <span>Questions? <a href="mailto:aditya.more@outlook.in" className="text-zinc-400 hover:text-white transition-colors">aditya.more@outlook.in</a></span>
-        <Link href="/notice" className="text-zinc-600 hover:text-zinc-400 transition-colors">See also: Notice page →</Link>
-      </motion.div>
-
-    </div>
-  );
-}
+  <motion.footer {...fadeUp(0.22)} className="flex flex-col gap-3 border-t border-[var(--border)] pt-8 text-xs text-[var(--sub-muted)] sm:flex-row sm:items-center sm:justify-between"><span>This policy will be updated when data practices materially change.</span><Link href="/notice" className="font-medium text-[var(--muted)] transition hover:text-[var(--text)]">Read the product notice →</Link></motion.footer>
+</div>}

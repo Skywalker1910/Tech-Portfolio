@@ -1,4 +1,4 @@
-
+﻿
 "use client";
 import { motion } from "framer-motion";
 import {
@@ -135,10 +135,10 @@ export default function Skills() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Cpu size={15} className="text-teal-400" />
-          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-zinc-500">Technical Proficiency</p>
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--muted)]">Technical Proficiency</p>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white">Skills &amp; Expertise</h1>
-        <p className="mt-3 text-zinc-500 max-w-lg text-sm leading-relaxed">
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--text)]">Skills &amp; Expertise</h1>
+        <p className="mt-3 text-[var(--muted)] max-w-lg text-sm leading-relaxed">
           Technical skills developed through academic coursework, professional experience, and hands-on projects.
         </p>
       </motion.div>
@@ -151,7 +151,7 @@ export default function Skills() {
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: "easeOut", delay: i * 0.1 }}
-            className={`group relative rounded-2xl border ${cat.border} bg-zinc-900/70 overflow-hidden shadow-lg hover:shadow-xl ${cat.glow} transition-all duration-300 hover:-translate-y-0.5`}
+            className={`group relative rounded-2xl border ${cat.border} bg-[var(--surface)] overflow-hidden shadow-lg hover:shadow-xl ${cat.glow} card-elevated transition-all duration-300 hover:-translate-y-0.5`}
           >
             {/* Gradient header */}
             <div className={`relative h-20 overflow-hidden bg-gradient-to-br ${cat.gradient}`}>
@@ -186,7 +186,7 @@ export default function Skills() {
                   <p className={`text-[9px] font-bold tracking-[0.3em] uppercase ${cat.accent} opacity-70`}>
                     {cat.eyebrow}
                   </p>
-                  <h2 className="text-sm font-bold text-white leading-snug">{cat.title}</h2>
+                  <h2 className="text-sm font-bold text-[var(--text)] leading-snug">{cat.title}</h2>
                 </div>
                 <span
                   className={`ml-auto text-[10px] font-mono ${cat.accent} ${cat.accentBg} border ${cat.accentBorder} px-2 py-0.5 rounded-full`}

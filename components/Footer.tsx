@@ -42,8 +42,9 @@ export default function Footer() {
           </li>
         </ul>
 
-        <div className="flex items-center gap-4 text-sm text-slate-500">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500">
           <span>© {new Date().getFullYear()} Aditya More</span>
+          <a href="/notice" className="hover:text-slate-400 transition-colors">Notice</a>
           <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</a>
         </div>
       </div>

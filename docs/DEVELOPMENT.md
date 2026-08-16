@@ -1,139 +1,102 @@
-# Developer Notes — Tech Portfolio
+# Developer Notes
 
-This document tracks known issues, active investigations, and ideas for future development. It is intended as a running log for the project maintainer and any contributors.
+## Development model
 
----
+The repository supports two targets:
 
-## Known Issues
+1. AWS Amplify runs the full Next.js SSR application, route handlers, live content, contact storage, BB-8, and analytics.
+2. GitHub Pages serves an optional static mirror. It cannot execute route handlers, so server-backed features display fallbacks or notices.
 
-### GitHub Pages Static Export
-- Server-side API routes (`/api/contact`, `/api/github`) are not available in the GitHub Pages static build. The contact form and GitHub data fetching are silently disabled on the Pages mirror. A client-side fallback or static data file should be considered to gracefully handle this gap rather than silently failing.
-- The `next/image` component requires `unoptimized: true` in the static export configuration. This means images on the GitHub Pages mirror are not optimized and may affect load performance on slower connections.
+Run `npm run dev` for local development and `npm run build` before deployment. Use `npm run build:ghpages` only when validating the static mirror.
 
-### Environment-Dependent Behavior
-- The `NEXT_PUBLIC_GITHUB_PAGES` environment variable controls which build configuration is used. If this variable is accidentally set in a non-Pages environment, the build will produce a static export instead of a server build. This should be guarded more explicitly.
+## Source-of-truth boundaries
 
-### Metadata Base URL
-- `metadataBase` in `app/layout.tsx` currently points to the GitHub repository URL rather than the live domain. This can affect how Open Graph previews are resolved. It should be updated to `https://adityamore.dev`.
+- Stable profile facts, education, skills, contact details, and source-controlled case studies remain in application files and `data/portfolio-knowledge.json`.
+- Projects and experience use DynamoDB as their live source after the operations table is seeded.
+- `lib/content/defaults.ts` is the resilience fallback and initial seed source.
+- RAG indexing combines stable knowledge with the currently published project and experience records.
+- Content publication does not automatically embed every change; reindex once after an edit batch.
 
-### Amplify Infrastructure Notes
-- The `AmplifySSRLoggingRole` is the actual execution role for Amplify's managed SSR compute (despite the misleading name). Any AWS service the SSR runtime needs to access (DynamoDB, SSM, etc.) requires permissions on this role.
-- Amplify reserves the `AWS_` env var prefix. Custom credentials must use a different prefix (e.g. `APP_AWS_*`) and be passed explicitly to the SDK client.
-- Amplify delivers env vars to the SSR runtime via SSM Parameter Store. The execution role must have `ssm:GetParametersByPath` on `arn:aws:ssm:*:*:parameter/amplify/{appId}/*` or env vars will silently fail to inject at runtime.
+## Expected fallback behavior
 
----
-
-## Admin Control Panel
-
-The admin control panel lives at `/admin/*` and is excluded from public navigation, sitemaps, and search engine indexing. It is accessible only to the site owner via a shared-secret key.
-
-### Routes
-
-| Route | Purpose |
+| Missing dependency | Expected behavior |
 |---|---|
-| `/admin/login` | Login page — validates key against `ADMIN_KEY` via `/api/admin/verify` |
-| `/admin` | Command Center landing — tile grid linking to each panel |
-| `/admin/messages` | Contact messages monitor — full CRUD with filtering, tagging, and read tracking |
+| `portfolio-content` table | Public content and local retrieval use bundled defaults |
+| OpenAI key | BB-8 returns a configuration/service error |
+| S3 Vector configuration | BB-8 uses deterministic local retrieval |
+| GitHub token | Public GitHub requests use the lower anonymous API allowance |
+| GitHub API | GitHub cards display an unavailable state |
+| Static GitHub Pages build | API-backed features are disabled or point visitors to the primary site |
 
-### Authentication
-- Key is entered on the login page, verified against `process.env.ADMIN_KEY` via a lightweight `GET /api/admin/verify` endpoint (no DynamoDB call).
-- On success, the key is persisted in `sessionStorage` under `dashboard-admin-key` and sent as the `x-admin-key` header on every subsequent admin API request.
-- `ConditionalLayout` (`components/ConditionalLayout.tsx`) suppresses the public Navbar, Footer, and ChatWidget for all routes matching `/admin/*`.
-- Admin routes set `robots: { index: false, follow: false }` in their metadata.
+Fallbacks must never block rendering or navigation.
 
-### API Changes for Admin
-- `GET /api/contact` — protected by `x-admin-key`; returns full message list including `read` and `senderType` fields.
-- `DELETE /api/contact` — protected; removes a message by `id`.
-- `PATCH /api/contact` — protected; updates `read` (boolean) and/or `senderType` (`"recruiter" | "visitor" | "friend" | "test" | null`) on a message. Uses expression alias `#rd` for the DynamoDB reserved word `read`.
-- `POST /api/contact` — public; unchanged, but now stores `read: false` and `senderType: null` on every new submission.
+## Admin development
 
-### DynamoDB Schema Addition
-All new contact messages include two new fields:
-```json
-{ "read": false, "senderType": null }
-```
-Older items missing these fields are backfilled in-memory when fetched by the messages page (not written back to DynamoDB).
+Admin pages live below `/admin`; public chrome and BB-8 are suppressed by `ConditionalLayout`. API authorization is the security boundary—never rely on a hidden link or client redirect.
 
-### Environment Variables
-| Variable | Purpose |
-|---|---|
-| `ADMIN_KEY` | Secret key for admin panel auth |
-| `APP_AWS_ACCESS_KEY_ID` | AWS IAM access key — `APP_AWS_*` prefix required because Amplify reserves `AWS_*` |
-| `APP_AWS_SECRET_ACCESS_KEY` | AWS IAM secret key |
-| `DYNAMODB_CONTACTS_TABLE` | DynamoDB table name (default: `portfolio-contacts`) |
+Authentication flow:
 
-### Amplify SSR Environment Variable Delivery
-Amplify delivers env vars to the SSR runtime via SSM Parameter Store, which requires the `AmplifySSRLoggingRole` to have `ssm:GetParametersByPath` permission. This permission is not granted by default and can be difficult to configure correctly.
+1. `POST /api/admin/session` validates `ADMIN_KEY` using constant-time comparison.
+2. The server issues an eight-hour signed cookie.
+3. Protected route handlers call `isValidAdminRequest`.
+4. `DELETE /api/admin/session` clears the cookie.
 
-**Resolution:** An `amplify.yml` build spec was added that writes all required env vars into `.env.production` during the build phase. Next.js reads `.env.production` at both build time and SSR runtime, so vars are always available without relying on SSM delivery.
+The legacy `x-admin-key` header exists for local automation and compatibility. New browser code should use the cookie session.
 
-The relevant build commands in `amplify.yml`:
+## Environment delivery on Amplify
+
+Amplify’s runtime environment delivery previously caused missing-variable failures. `amplify.yml` therefore writes only allow-listed prefixes and names to `.env.production` during the build:
+
 ```yaml
-- env | grep -e ADMIN_KEY -e APP_AWS_ -e DYNAMODB_ -e GITHUB_TOKEN >> .env.production || true
+- env | grep -e ADMIN_KEY -e ADMIN_SESSION_SECRET -e APP_AWS_ -e DYNAMODB_ -e GITHUB_TOKEN -e OPENAI_ -e RAG_ >> .env.production || true
 - env | grep -e NEXT_PUBLIC_ >> .env.production || true
 ```
 
-The `|| true` prevents `grep` exit code 1 (no matches found) from failing the build.
+`.env.production` and `.env.local` must remain ignored. Never add a secret to a `NEXT_PUBLIC_` variable.
 
-**Note:** `.env.production` is git-ignored and generated fresh on every build — no secrets are committed to the repository.
+## Verification checklist
 
-### Planned Admin Panels (not yet built)
-The sidebar and tile landing page already include placeholder entries for these panels. To activate one: set `disabled: false` in both `DashboardShell.tsx` and `app/admin/page.tsx`, then create the corresponding `app/admin/<section>/page.tsx`.
-- `/admin/projects` — Add, update, and remove portfolio projects
-- `/admin/experience` — Edit work history entries
-- `/admin/timeline` — Manage career and education milestones
-- `/admin/skills` — Add and remove skills from the skillset
+Before committing a feature that touches server behavior:
 
----
+```powershell
+npm run lint
+npx tsc --noEmit
+npm run rag:evaluate
+npm run build
+```
 
-## Future Ideas and Features in Development
+Also verify proportionate user flows:
 
-### Content and Sections
-- **Blog / Writing section** — A dedicated section for technical write-ups, research notes, or long-form posts. This would further extend the "beyond a resume" goal of the project and demonstrate written communication skills.
-- **Certifications section** — A visual display of completed certifications with badges, issue dates, and verification links.
-- **Testimonials / Recommendations section** — Quotes or references from colleagues, professors, or managers to add social proof.
-- **Publications / Research section** — Dedicated display for academic papers, preprints, or research contributions with abstracts and links.
+- Public navigation and both themes.
+- BB-8 overlay persistence across route changes.
+- Project/experience fallback and live content states.
+- Admin login, logout, and unauthorized API responses.
+- Draft, publish, edit, and delete behavior without exposing unpublished records.
+- Contact draft review and explicit visitor submission.
+- Notice and Privacy statements after any data-flow change.
 
-### Interactive Features
-- **AI assistant improvements** — The BB-8 droid assistant currently opens a chat interface. Future work includes expanding the assistant's knowledge base to accurately answer questions about the portfolio content, and potentially integrating a retrieval-augmented generation (RAG) pipeline over project and experience data.
-- **Project detail pages** — Each project in the gallery currently shows a summary. Individual project pages with deeper write-ups, architecture diagrams, and demo links would add significant value.
-- **Search across the site** — A global search feature that indexes skills, projects, and experience content.
-- **Visitor analytics dashboard** — A simple, privacy-respecting page view counter or heatmap to understand which sections visitors engage with most.
+The local Windows environment may report `UNABLE_TO_VERIFY_LEAF_SIGNATURE` when prerendering `/api/github`. This is a local certificate-chain issue, not an application TypeScript error; validate the GitHub route and production build again in an environment with a correct trust store.
 
-### Technical Improvements
-- **End-to-end testing** — Add Playwright or Cypress tests covering critical user flows: contact form submission, project filtering, and navigation.
-- **Performance audit** — Run Lighthouse CI on every PR to catch performance regressions early.
-- **Storybook or component catalog** — Document and visually test components like `Badge`, `Timeline`, `OrbitalDivider`, and `SentenceFlip` in isolation.
-- **RSS feed** — If a blog section is added, generate an RSS feed from the content.
-- **Improved mobile navigation** — The dock-style navigation works well on desktop. A more refined mobile navigation pattern (bottom sheet or slide-over) could improve the mobile experience.
+## Documentation maintenance
 
-### Deployment and Infrastructure
-- **Preview deployments** — Configure AWS Amplify to spin up preview environments for pull requests, enabling visual review before merging.
-- **CDN cache headers** — Review and tighten cache-control headers for static assets to improve repeat-visit performance.
-- **Error monitoring** — Integrate a lightweight error tracking tool (e.g., Sentry) to surface runtime errors in the production environment.
-- **Contact form spam protection** — Add a CAPTCHA or honeypot field to the contact form to reduce bot submissions to DynamoDB.
-- **Admin panel role-based auth** — The current shared-secret model is sufficient for a single-owner tool. If multi-user access is ever needed, replace with AWS Cognito or a similar identity provider.
+Update documentation in the same change whenever behavior moves between “planned” and “implemented.”
 
-### GitHub Pages Mirror
-- **Automated sync** — Currently the GitHub Pages deployment is manual (`npm run deploy`). Automate it via a GitHub Actions workflow that triggers on every push to `main` after the Amplify deployment succeeds.
-- **Feature parity indicators** — Add a visible banner or note on the Pages mirror that links users to the full version on `adityamore.dev` for features that require the server (contact form, live GitHub data).
+- Feature behavior: `docs/FEATURES.md`
+- Architecture or data flow: `docs/ARCHITECTURE.md`
+- Endpoint contract: `docs/API.md`
+- Admin/AWS operations: `docs/COMMAND_CENTER.md`
+- Retrieval or indexing: `docs/RAG.md`
+- Public data handling: `/privacy` and `/notice`
+- Historical incident: `docs/CHANGELOG.md`
 
----
+The README should remain an accurate entry point and link to the focused document rather than duplicating every implementation detail.
 
-## Notes on SDLC Practices
+## Roadmap
 
-This project is intentionally developed following standard software development practices to serve as a demonstration of professional engineering habits:
-
-- All features are developed on separate branches and merged via pull requests.
-- Commit messages follow conventional commit conventions where possible.
-- The `Deployment-3-logs/` directory contains build and deploy logs from production releases for traceability.
-- Environment configuration is separated from source code and managed via `.env.local` locally and via Amplify environment variables in production.
-- The admin control panel was developed on the `feature/admin-dashboard` branch and merged to `main` for production deployment.
-
----
-
-## Contributing
-
-If you are using this repository as a template and discover a bug or have a suggestion that would benefit the template broadly, feel free to open an issue or submit a pull request. All contributions are welcome.
-
-Please see the [LICENSE](../LICENSE) file before contributing.
+- Blog and technical writing.
+- Interactive ML demonstrations.
+- Project-detail routes and richer case studies.
+- Automated end-to-end tests and Lighthouse CI.
+- Preview deployments for pull requests.
+- Error monitoring and contact-form spam protection.
+- Cognito or equivalent if administration expands beyond one owner.

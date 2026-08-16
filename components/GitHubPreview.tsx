@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Star, GitFork, BookMarked, Users, UserCheck, ExternalLink } from "lucide-react";
+import { Star, GitFork, BookMarked, Users, UserCheck, ExternalLink, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 type Repo = {
@@ -51,55 +51,62 @@ export default function GitHubPreview() {
 
   if (loading) {
     return (
-      <div className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5 animate-pulse">
+      <div className="mt-6 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-zinc-800" />
+          <div className="h-10 w-10 rounded-full bg-[var(--tag-bg)]" />
           <div className="flex-1 space-y-1.5">
-            <div className="h-3 w-32 rounded bg-zinc-800" />
-            <div className="h-2.5 w-48 rounded bg-zinc-800" />
+            <div className="h-3 w-32 rounded bg-[var(--tag-bg)]" />
+            <div className="h-2.5 w-48 rounded bg-[var(--tag-bg)]" />
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3 mb-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-10 rounded-xl bg-zinc-800" />
+            <div key={i} className="h-10 rounded-xl bg-[var(--tag-bg)]" />
           ))}
         </div>
         <div className="space-y-2">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-14 rounded-xl bg-zinc-800" />
+            <div key={i} className="h-14 rounded-xl bg-[var(--tag-bg)]" />
           ))}
         </div>
       </div>
     );
   }
 
-  if (error || !data) return null;
+  if (error || !data) {
+    return (
+      <div className="mt-6 flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-xs text-[var(--muted)] shadow-sm">
+        <AlertCircle size={14} className="shrink-0 text-[var(--sub-muted)]" />
+        GitHub statistics are temporarily unavailable.
+      </div>
+    );
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="mt-6 rounded-2xl border border-zinc-700/50 bg-zinc-900/60 overflow-hidden"
+      className="mt-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm"
     >
       {/* Profile header */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-zinc-800">
+      <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-4">
         <Image
           src={data.avatar}
           alt={data.name ?? data.login}
           width={40}
           height={40}
-          className="rounded-full ring-2 ring-zinc-700"
+          className="rounded-full ring-2 ring-[var(--border)]"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-white leading-tight truncate">{data.name ?? data.login}</p>
-          <p className="text-[11px] text-zinc-500 font-mono truncate">@{data.login}</p>
+          <p className="truncate text-sm font-bold leading-tight text-[var(--text)]">{data.name ?? data.login}</p>
+          <p className="truncate font-mono text-[11px] text-[var(--sub-muted)]">@{data.login}</p>
         </div>
         <a
           href={data.profileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold text-zinc-400 hover:text-zinc-200 border border-zinc-700 hover:border-zinc-500 px-2.5 py-1 rounded-full transition-colors"
+          className="cta-primary inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold"
         >
           View <ExternalLink size={9} />
         </a>
@@ -107,22 +114,22 @@ export default function GitHubPreview() {
 
       {/* Bio */}
       {data.bio && (
-        <p className="px-4 pt-3 pb-1 text-[12px] text-zinc-400 leading-relaxed">
+        <p className="px-4 pb-1 pt-3 text-[12px] leading-relaxed text-[var(--muted)]">
           {data.bio}
         </p>
       )}
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-px bg-zinc-800 mx-4 mt-3 rounded-xl overflow-hidden text-center">
+      <div className="mx-4 mt-3 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--border)] text-center">
         {[
           { Icon: BookMarked, value: data.publicRepos, label: "Repos" },
           { Icon: Users,      value: data.followers,   label: "Followers" },
           { Icon: UserCheck,  value: data.following,   label: "Following" },
         ].map(({ Icon, value, label }) => (
-          <div key={label} className="bg-zinc-900/80 py-2.5 flex flex-col items-center gap-0.5">
-            <Icon size={12} className="text-zinc-500" />
-            <span className="text-sm font-bold text-white">{value.toLocaleString()}</span>
-            <span className="text-[9px] text-zinc-600 uppercase tracking-wider">{label}</span>
+          <div key={label} className="flex flex-col items-center gap-0.5 bg-[var(--bg)]/70 py-2.5">
+            <Icon size={12} className="text-[var(--muted)]" />
+            <span className="text-sm font-bold text-[var(--text)]">{value.toLocaleString()}</span>
+            <span className="text-[9px] uppercase tracking-wider text-[var(--sub-muted)]">{label}</span>
           </div>
         ))}
       </div>
@@ -130,7 +137,7 @@ export default function GitHubPreview() {
       {/* Top repos */}
       {data.topRepos.length > 0 && (
         <div className="px-4 pt-4 pb-4 space-y-2">
-          <p className="text-[9px] font-bold tracking-[0.25em] uppercase text-zinc-600 mb-2">
+          <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.25em] text-[var(--sub-muted)]">
             Top Repositories
           </p>
           {data.topRepos.map((repo) => (
@@ -139,18 +146,18 @@ export default function GitHubPreview() {
               href={repo.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-start justify-between gap-3 p-3 rounded-xl border border-zinc-800 hover:border-zinc-600 bg-zinc-900/50 hover:bg-zinc-800/50 transition-all"
+              className="group flex items-start justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg)]/55 p-3 transition-all hover:border-[var(--muted)] hover:bg-[var(--tag-bg)]"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-semibold text-zinc-200 group-hover:text-white truncate transition-colors">
+                <p className="truncate text-[12px] font-semibold text-[var(--text)] transition-colors">
                   {repo.name}
                 </p>
                 {repo.description && (
-                  <p className="text-[10px] text-zinc-600 truncate mt-0.5">{repo.description}</p>
+                  <p className="mt-0.5 truncate text-[10px] text-[var(--sub-muted)]">{repo.description}</p>
                 )}
                 <div className="flex items-center gap-3 mt-1.5">
                   {repo.language && (
-                    <span className="flex items-center gap-1 text-[10px] text-zinc-500">
+                    <span className="flex items-center gap-1 text-[10px] text-[var(--muted)]">
                       <span
                         className="w-2 h-2 rounded-full"
                         style={{ background: LANG_COLORS[repo.language] ?? "#888" }}
@@ -159,18 +166,18 @@ export default function GitHubPreview() {
                     </span>
                   )}
                   {repo.stars > 0 && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-zinc-500">
+                    <span className="flex items-center gap-0.5 text-[10px] text-[var(--muted)]">
                       <Star size={9} /> {repo.stars}
                     </span>
                   )}
                   {repo.forks > 0 && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-zinc-500">
+                    <span className="flex items-center gap-0.5 text-[10px] text-[var(--muted)]">
                       <GitFork size={9} /> {repo.forks}
                     </span>
                   )}
                 </div>
               </div>
-              <ExternalLink size={11} className="text-zinc-700 group-hover:text-zinc-400 shrink-0 mt-0.5 transition-colors" />
+              <ExternalLink size={11} className="mt-0.5 shrink-0 text-[var(--sub-muted)] transition-colors group-hover:text-[var(--text)]" />
             </a>
           ))}
         </div>

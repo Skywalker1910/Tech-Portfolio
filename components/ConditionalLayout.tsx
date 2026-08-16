@@ -6,6 +6,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import ChatWidget from "./ChatWidget";
 import GhPagesBanner from "./GhPagesBanner";
+import TrafficTracker from "./TrafficTracker";
 
 const isGhPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
 
@@ -20,12 +21,13 @@ export default function ConditionalLayout({ children }: { children: ReactNode })
   return (
     <>
       <Navbar />
-      <main id="main" className="flex-1 pt-24">
+      {!isGhPages && <TrafficTracker />}
+      <main id="main" className="flex-1">
         {children}
       </main>
       <Footer />
       {isGhPages && <GhPagesBanner />}
-      <ChatWidget hideButton />
+      {pathname !== "/chat" && <ChatWidget />}
     </>
   );
 }

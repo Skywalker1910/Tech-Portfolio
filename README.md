@@ -1,240 +1,188 @@
 # Tech Portfolio — Aditya More
 
-A personal portfolio web application built to go beyond the limitations of a one-page resume. This project serves as a living showcase of my skills, projects, and professional journey, presented through an interactive and polished interface.
+An interactive Next.js portfolio for presenting Aditya More’s AI/ML engineering work, research, experience, and technical skills. The application includes BB-8, a retrieval-augmented portfolio co-pilot; live owner-managed content; a private operations dashboard; and privacy-conscious first-party analytics.
 
-Live (primary): [adityamore.dev](https://adityamore.dev)
-Live (GitHub Pages mirror): [skywalker1910.github.io/Tech-Portfolio](https://skywalker1910.github.io/Tech-Portfolio)
+- Primary site: [adityamore.dev](https://adityamore.dev)
+- Static mirror: [skywalker1910.github.io/Tech-Portfolio](https://skywalker1910.github.io/Tech-Portfolio)
 
----
+## Highlights
 
-## About This Project
+- Polished responsive interface with light-first theming, dark mode, animated navigation previews, project filtering, career timelines, GitHub integration, and accessible interaction states.
+- BB-8 overlay and full-page chat powered by the OpenAI Responses API, verified portfolio knowledge, OpenAI embeddings, and Amazon S3 Vectors.
+- Hybrid retrieval with deterministic local fallback, source-page links, a short context window, and a 27-question evaluation suite.
+- Validated agent actions for in-app navigation, resume download, and reviewable contact-form drafts.
+- Private Admin Command Center for project and experience CRUD, contact-message management, RAG configuration/status, vector reindexing, and traffic monitoring.
+- First-party analytics without geolocation, fingerprinting, advertising identifiers, or third-party analytics SDKs.
+- AWS Amplify SSR production deployment plus an optional GitHub Pages static mirror.
 
-The core idea behind this web application is to create a single, centralized source that accurately represents who I am as a software and AI/ML engineer. A traditional resume is constrained to one page and cannot adequately capture the depth of projects, research, and skills that define a modern engineering career. This portfolio is the answer to that problem.
+See [Implemented Features](docs/FEATURES.md) for the full shipped-feature inventory.
 
-The goals of this project are:
-
-- **Showcase work in depth** — Projects, research, and experience presented with full context, not just a bullet point.
-- **Provide an interactive experience** — Visitors can explore skills, timelines, and projects in an engaging interface rather than reading a static document.
-- **Consolidate everything in one place** — Work history, education, projects, skills, and contact information all accessible under one roof.
-- **Stand out in a competitive job market** — Demonstrate not just what I have built, but how I think about building software.
-- **Practice industry-grade software development** — This project is developed following standard SDLC practices: version control, branching, issue tracking, code review discipline, CI/CD pipelines, and production-grade deployment.
-
----
-
-## Features
-
-### Interactive Interface
-- Animated particle field background with real-time mouse interaction (GPU-optimized canvas rendering)
-- Interstellar background mode as an alternate visual theme
-- BB-8 inspired AI assistant droid — an animated, stateful floating button that opens an AI-powered chat interface
-- Custom cursor with interactive states
-- Dark and light theme toggle with persistent user preference
-
-### Content Sections
-- Home — Introduction with animated sentence flip, scroll-driven animations, and a summary of skills and highlights
-- Projects — Full project gallery with tag-based filtering and categorization
-- Experience — Professional timeline with detailed role descriptions
-- Education — Academic background and certifications
-- Skills — Categorized technical skill set
-- Socials — Links and contact channels
-- Contact — Contact form backed by AWS DynamoDB
-
-### Technical Highlights
-- Server-side API routes for the contact form and GitHub data fetching
-- Interactive 3D globe visualization using the `cobe` library
-- GitHub profile integration via a live API proxy
-- Responsive, mobile-first layout
-- Accessibility considerations including skip-to-content links and reduced-motion support
-- SEO-ready with Open Graph metadata and a generated sitemap
-
-### Admin Control Panel (`/admin`)
-- Password-protected control panel accessible only to the site owner
-- Tile-based landing page (Command Center) with time-aware greeting and per-section navigation
-- Messages Monitor — view, search, sort, and filter all contact form submissions with live stat cards
-- Per-message controls: mark read/unread, tag sender type (Recruiter / Visitor / Friend / Test), delete with 2-click confirmation
-- Lightweight key-based authentication: `ADMIN_KEY` env var validated server-side; key stored in `sessionStorage` client-side
-- Admin routes are fully excluded from public navigation, sitemaps, and search engine indexing
-- Extensible architecture — Projects, Experience, Timeline, and Skills panels planned
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS v4 |
-| Animation | Framer Motion |
-| UI Icons | Lucide React, React Icons |
-| Globe | Cobe |
-| Database | AWS DynamoDB (via AWS SDK v3 `@aws-sdk/lib-dynamodb`) |
-| Hosting & CI/CD | AWS Amplify |
-| DNS | AWS Route 53 |
-| Static Mirror | GitHub Pages |
-| Env Delivery (SSR) | AWS SSM Parameter Store |
-| Fonts | Inter, Space Grotesk (Google Fonts) |
-| Build Tool | Turbopack |
-
----
-
-## Deployment Architecture
-
-This project is deployed across two environments to maximize availability.
-
-### Primary — AWS (adityamore.dev)
-- **AWS Amplify** handles CI/CD, build, and hosting. Every push to the `main` branch triggers an automatic production deployment.
-- **AWS Route 53** manages the DNS for the custom `adityamore.dev` domain.
-- The application runs as a full Next.js server with API routes, image optimization, and server-side rendering enabled.
-
-### Mirror — GitHub Pages (skywalker1910.github.io/Tech-Portfolio)
-- A fully static export of the application is deployed to GitHub Pages via the `gh-pages` branch.
-- This mirror exists specifically for users on restricted networks — such as university campuses — where `.dev` TLD domains may be blocked at the DNS level.
-- The static build is produced with `npm run build:ghpages` which sets `NEXT_PUBLIC_GITHUB_PAGES=true`, enabling the static export configuration in `next.config.ts` (base path, asset prefix, static image handling).
-- Deployment to GitHub Pages is done via `npm run deploy` using the `gh-pages` package.
-
----
-
-## System Architecture
-
-The diagram below shows how all services and components interact with each other in production.
+## Architecture
 
 ```mermaid
-flowchart TD
-    Dev(["🧑‍💻 Developer"])
-    Visitor(["👤 Visitor"])
-    AdminUser(["🔐 Admin"])
+flowchart LR
+    Visitor([Visitor]) --> DNS[Route 53]
+    DNS --> App[AWS Amplify\nNext.js SSR]
+    Admin([Admin]) --> App
 
-    subgraph GitHub["GitHub"]
-        Repo["Repository\n(main branch)"]
-        GHPages["GitHub Pages\n(gh-pages branch)"]
-        GHApi["GitHub REST API"]
-    end
+    App --> Contacts[(DynamoDB\ncontacts)]
+    App --> Content[(DynamoDB\ncontent + settings + analytics)]
+    App --> Vectors[(Amazon S3 Vectors)]
+    App --> OpenAI[OpenAI API]
+    App --> GitHub[GitHub API]
 
-    subgraph AWS["AWS"]
-        Route53["Route 53\nDNS — adityamore.dev"]
-        Amplify["Amplify\nCI/CD · Build · SSR Hosting"]
-        SSM["SSM Parameter Store\nEnv var delivery to SSR runtime"]
-        DynamoDB[("DynamoDB\nportfolio-contacts")]
-    end
-
-    subgraph App["Next.js App  —  adityamore.dev"]
-        Pages["Public Pages\n/ · /projects · /experience · /skills · …"]
-        ContactAPI["API: /api/contact\nPOST · GET · DELETE · PATCH"]
-        VerifyAPI["API: /api/admin/verify\nGET — key check only"]
-        GHProxyAPI["API: /api/github\nGET — profile proxy"]
-        AdminPanel["Admin Panel\n/admin · /admin/login · /admin/messages"]
-    end
-
-    Dev -->|"git push main"| Repo
-    Repo -->|"webhook triggers build"| Amplify
-    Amplify -->|"reads env vars at runtime"| SSM
-    Amplify -->|"serves SSR app"| App
-
-    Route53 -->|"HTTPS → adityamore.dev"| Amplify
-    Visitor -->|"HTTPS"| Route53
-    Visitor -->|"submits contact form"| ContactAPI
-    ContactAPI -->|"PutItem · Scan · DeleteItem · UpdateItem"| DynamoDB
-
-    AdminUser -->|"POST key → /admin/login"| VerifyAPI
-    AdminUser -->|"reads & manages messages"| ContactAPI
-    ContactAPI -->|"Scan · DeleteItem · UpdateItem"| DynamoDB
-    AdminPanel -->|"sessionStorage auth + x-admin-key header"| VerifyAPI
-
-    Pages -->|"fetches GitHub profile"| GHProxyAPI
-    GHProxyAPI -->|"REST calls"| GHApi
-
-    Dev -->|"npm run deploy"| GHPages
-    Visitor -. "static fallback\n(restricted networks)" .-> GHPages
+    Repo[(GitHub main)] -->|CI/CD| App
+    Repo -. static export .-> Mirror[GitHub Pages]
 ```
 
-### Service Responsibilities
+The application keeps browser interactions, server-side trust boundaries, public data, operational data, and third-party AI calls separate. The complete diagrams, request flows, failure behavior, and DynamoDB key design are documented in [System Architecture](docs/ARCHITECTURE.md).
 
-| Service | Role |
+## Technology stack
+
+| Layer | Technology |
 |---|---|
-| **AWS Amplify** | CI/CD pipeline triggered on every `main` push; builds and hosts the Next.js SSR application; manages TLS certificates |
-| **AWS Route 53** | DNS hosting for `adityamore.dev`; routes traffic to the Amplify CloudFront distribution |
-| **AWS DynamoDB** | Stores all contact form submissions; table name configured via `DYNAMODB_CONTACTS_TABLE` |
-| **AWS SSM Parameter Store** | Delivers environment variables (DynamoDB credentials, `ADMIN_KEY`) to the Amplify SSR runtime at request time |
-| **Next.js API Routes** | `/api/contact` — full CRUD for contact messages; `/api/admin/verify` — stateless admin key validation; `/api/github` — GitHub profile proxy to avoid CORS and rate limits |
-| **Admin Control Panel** | Private `/admin/*` routes for managing contact messages; auth via `ADMIN_KEY` env var checked on every protected API call |
-| **GitHub Pages** | Static export mirror at `skywalker1910.github.io/Tech-Portfolio`; deployed manually via `npm run deploy` using the `gh-pages` package |
-| **GitHub API** | Public REST API proxied through `/api/github` to serve live repository and profile data on the portfolio |
+| Application | Next.js 16 App Router, React 19, TypeScript |
+| Styling | Tailwind CSS v4, CSS Modules |
+| Animation | Framer Motion |
+| Visualizations | Cobe, Canvas, custom CSS 3D transforms |
+| AI | OpenAI Responses API and Embeddings API |
+| Retrieval | Amazon S3 Vectors plus local keyword fallback |
+| Data | AWS DynamoDB via AWS SDK v3 |
+| Hosting | AWS Amplify SSR and Route 53 |
+| Static mirror | GitHub Pages |
+| Build | Turbopack |
 
-### Authentication Flow
+## Project structure
 
-The admin panel uses a simple shared-secret pattern appropriate for a single-owner tool:
-
-1. Admin navigates to `/admin/login` and enters the secret key.
-2. The login page calls `GET /api/admin/verify` with the key in the `x-admin-key` request header.
-3. The server compares it against `process.env.ADMIN_KEY` — no database involved in this check.
-4. On success, the key is stored in `sessionStorage` under `dashboard-admin-key`.
-5. All subsequent admin API calls attach the key as the `x-admin-key` header. The server re-validates it on every request.
-6. Sign-out clears `sessionStorage` and redirects to `/admin/login`.
-
-### Data Model — Contact Message
-
-Each contact form submission is stored as a DynamoDB item with the following shape:
-
-```json
-{
-  "id": "uuid-v4",
-  "name": "string",
-  "email": "string",
-  "message": "string",
-  "timestamp": "ISO-8601 string",
-  "read": false,
-  "senderType": "recruiter | visitor | friend | test | null"
-}
+```text
+app/
+  admin/                 Private Command Center pages
+  api/                   Public and protected route handlers
+  chat/                  Full-page BB-8 experience
+  projects/              Filterable project gallery
+  experience/            Detailed professional experience
+  notice/ privacy/       Product status and data disclosures
+components/
+  admin/                 Shared administration components
+  BB8ChatDroid.tsx       Interactive BB-8 visual
+  ChatWidget.tsx         Persistent chat and agent-action UI
+  TrafficTracker.tsx     Anonymous first-party page views
+data/                    Verified static knowledge and contact links
+lib/
+  content/               Content models, validation, defaults, repository
+  rag/                   Chunking, indexing, retrieval, and types
+scripts/                 AWS setup, content seed, indexing, evaluation
+docs/                    Architecture and operating documentation
+evals/                   RAG evaluation cases
 ```
 
----
+## Local development
 
-## Using This as a Template
+Requirements: Node.js 20 or newer, npm, and optional AWS/OpenAI credentials for server-backed features.
 
-This repository is open source under the MIT License. If you would like to use it as the foundation for your own portfolio, you are welcome to do so.
+```powershell
+npm install
+Copy-Item .env.example .env.local
+npm run dev
+```
 
-### Steps to get started
+Open `http://localhost:3000`. Without AWS or OpenAI configuration, public pages still render from bundled content. Contact submission, semantic retrieval, admin writes, and analytics require their corresponding services.
 
-1. **Fork or clone** this repository.
+### Environment variables
 
-2. **Update personal data** — Replace all personal content with your own:
-   - `app/layout.tsx` — Update the `metadata` object (title, description, Open Graph fields).
-   - `data/contacts.json` — Update contact links and social handles.
-   - `app/page.tsx` — Update the home page content, timeline data, and skill tags.
-   - `app/projects/page.tsx` — Replace with your own project entries.
-   - `app/experience/page.tsx` and `app/education/page.tsx` — Add your own work and academic history.
+| Variable | Required for | Notes |
+|---|---|---|
+| `OPENAI_API_KEY` | BB-8 and indexing | Server-only secret |
+| `OPENAI_CHAT_MODEL` | BB-8 | Configurable generation model |
+| `OPENAI_EMBEDDING_MODEL` | RAG indexing/query | Defaults to `text-embedding-3-small` |
+| `OPENAI_EMBEDDING_DIMENSIONS` | RAG | Must match the vector index |
+| `RAG_ENABLED` | Semantic retrieval | Local fallback remains available |
+| `RAG_VECTOR_BUCKET` | S3 Vectors | Globally unique bucket name |
+| `RAG_VECTOR_INDEX` | S3 Vectors | Defaults to `portfolio-knowledge` |
+| `RAG_TOP_K` | Retrieval | Safe runtime override is available in Admin |
+| `RAG_MAX_DISTANCE` | Retrieval | Safe runtime override is available in Admin |
+| `APP_AWS_REGION` | AWS clients | Defaults to `us-east-1` |
+| `APP_AWS_ACCESS_KEY_ID` | Local AWS access | Prefer an Amplify compute role in production |
+| `APP_AWS_SECRET_ACCESS_KEY` | Local AWS access | Never expose to the browser |
+| `DYNAMODB_CONTACTS_TABLE` | Contact form | Defaults to `portfolio-contacts` |
+| `DYNAMODB_PORTFOLIO_TABLE` | Content/operations | Defaults to `portfolio-content` |
+| `ADMIN_KEY` | Admin login | Single-owner shared secret |
+| `ADMIN_SESSION_SECRET` | Admin session signing | Falls back to `ADMIN_KEY` if omitted |
+| `GITHUB_TOKEN` | GitHub API | Optional; increases API allowance |
+| `NEXT_PUBLIC_FULL_CHAT_URL` | Chat links | Defaults to `/chat` |
 
-3. **Replace assets** — Swap out any images or public assets in the `public/` directory with your own.
+Use `.env.example` as the canonical variable template. Do not commit `.env.local`.
 
-4. **Configure deployment**:
-   - For AWS Amplify: connect the repository in the Amplify console and set your environment variables there.
-   - For GitHub Pages: update the `homepage` field in `package.json` and the `basePath`/`assetPrefix` values in `next.config.ts` to match your GitHub username and repository name.
+## AWS resource setup
 
-5. **Set up environment variables** — Create a `.env.local` file at the root (never commit it). Required variables:
+### Content and operations table
 
-   | Variable | Purpose |
-   |---|---|
-   | `APP_AWS_ACCESS_KEY_ID` | AWS IAM access key (note: Amplify reserves the `AWS_` prefix, so use `APP_AWS_*` locally and in Amplify) |
-   | `APP_AWS_SECRET_ACCESS_KEY` | AWS IAM secret key |
-   | `APP_AWS_REGION` | AWS region for DynamoDB (e.g. `us-east-1`) |
-   | `DYNAMODB_CONTACTS_TABLE` | DynamoDB table name (defaults to `portfolio-contacts`) |
-   | `ADMIN_KEY` | Secret key for the admin control panel |
+```powershell
+npm run content:setup
+npm run content:seed
+```
 
-   If you do not need the contact form or admin panel, remove `/api/contact`, `/api/admin`, and the corresponding UI components.
+This creates the on-demand `portfolio-content` table, enables TTL, and seeds the initial project and experience records. See [Command Center](docs/COMMAND_CENTER.md) for IAM permissions and publishing behavior.
 
-6. **Remove or update the license attribution** — You may keep or modify the `LICENSE` file. Attribution is appreciated but not required.
+### RAG vector resources
 
----
+```powershell
+npm run rag:setup
+npm run rag:index
+npm run rag:evaluate:s3
+```
 
-## License
+Set `RAG_ENABLED=true` after the index is ready. See [BB-8 Portfolio RAG](docs/RAG.md) for the retrieval architecture, IAM policies, tuning, and evaluation workflow.
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+The contacts table is intentionally separate because contact submissions have a different key shape and privacy lifecycle from public portfolio content.
 
----
+## Useful commands
+
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start local development |
+| `npm run build` | Build the Amplify/SSR application |
+| `npm run lint` | Run ESLint |
+| `npm run content:setup` | Create the portfolio operations table |
+| `npm run content:seed` | Seed projects and experience |
+| `npm run rag:setup` | Create/validate S3 Vector resources |
+| `npm run rag:index` | Rebuild the current published corpus |
+| `npm run rag:evaluate` | Evaluate local retrieval |
+| `npm run rag:evaluate:s3` | Evaluate semantic retrieval |
+| `npm run build:ghpages` | Produce the static mirror |
+| `npm run deploy` | Publish the static mirror |
+
+## Deployment
+
+Pushes to `main` trigger the AWS Amplify build. `amplify.yml` writes an allow-listed set of server variables into `.env.production` for the Next.js SSR runtime. Route 53 provides the custom domain.
+
+The GitHub Pages mirror is a static export. API-backed functionality—including BB-8 responses, live admin content, analytics, and contact submission—is unavailable or reduced on that mirror by design.
+
+## Security and privacy
+
+- Secrets remain server-side.
+- Admin access uses a signed `HttpOnly`, `SameSite=Strict` cookie.
+- APIs validate lengths, enums, paths, and URLs.
+- BB-8 cannot send a contact message for a visitor.
+- Chat requests set `store: false`; the app does not persist chat transcripts server-side.
+- Analytics store only path-level counters and hashed per-tab deduplication records with TTL.
+- Contact submissions are visible only through protected admin APIs.
+
+Read the public [Privacy Policy](https://adityamore.dev/privacy) and the implementation details in [System Architecture](docs/ARCHITECTURE.md).
 
 ## Documentation
 
-Developer notes, known issues, and planned features are tracked in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+| Document | Contents |
+|---|---|
+| [Implemented Features](docs/FEATURES.md) | Shipped functionality and explicit non-features |
+| [System Architecture](docs/ARCHITECTURE.md) | Diagrams, flows, data model, trust boundaries, failures |
+| [API Reference](docs/API.md) | Public and protected endpoint contracts |
+| [Command Center](docs/COMMAND_CENTER.md) | DynamoDB setup, IAM, publishing, auth, analytics |
+| [BB-8 Portfolio RAG](docs/RAG.md) | Indexing, retrieval, evaluation, permissions, tuning |
+| [Developer Notes](docs/DEVELOPMENT.md) | Development workflow, fallbacks, deployment caveats |
+| [Issue & Fix Changelog](docs/CHANGELOG.md) | Historical production incidents and fixes |
+| [Code Citations](docs/%23%20Code%20Citations.md) | Third-party code and license attributions |
+
+## License
+
+Licensed under the [MIT License](LICENSE).
