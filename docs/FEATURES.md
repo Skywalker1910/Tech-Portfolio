@@ -49,14 +49,16 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
   - Projects: create, edit, order, publish, draft, and delete.
   - Experience: create, edit, order, publish, draft, and delete.
   - RAG Control: enable semantic retrieval, tune `topK` and maximum distance, inspect index status, and deliberately reindex published content.
-  - Traffic: 7-, 30-, and 90-day summaries, daily activity, and popular routes.
+  - Traffic: 7-, 30-, and 90-day summaries, engaged time, page performance, device/OS/browser/viewport/location/source breakdowns, numbered returning visits, manual audience labels, and timestamped page journeys.
 
 ## Data and privacy behavior
 
 - Contact submissions are validated server-side and stored in the contacts DynamoDB table.
-- First-party analytics record only the public path, date, page-view count, and an anonymous per-tab identifier used for daily deduplication.
-- The analytics implementation does not store IP addresses, user agents, referrers, geolocation, form fields, keystrokes, or chat messages.
-- Analytics records use DynamoDB TTL and expire after approximately 400 days.
+- Basic first-party measurement is cookieless and opt-out. It records page views, engagement duration, server time, coarse country/region, device/OS/browser, and viewport bucket without creating a persistent visitor identity.
+- Enhanced analytics requires affirmative opt-in. A random browser ID supports pseudonymous returning-visitor and Visit #2/Visit #3 reporting; a 30-minute-inactivity visit ID groups timestamped page activity and a broad source category/referring hostname.
+- The private owner can manually classify an enhanced profile as recruiter, hiring manager, technical peer, student, or general visitor. No attribute or behavior performs this classification automatically.
+- The server does not store raw IP addresses, precise location, city, postal codes, device models, fingerprints, form fields, keystrokes, or chat messages as analytics.
+- Both tiers honor Do Not Track and Global Privacy Control, can be disabled from the footer, and expire through DynamoDB TTL after approximately 365 days.
 - Chat transcripts and BB-8 contact drafts use browser `sessionStorage`; application servers do not persist chat transcripts.
 - OpenAI requests use `store: false`.
 - No advertising, cross-site tracking, or third-party analytics SDK is included.
@@ -77,6 +79,6 @@ The following remain roadmap items and should not be presented as current functi
 - Blog or long-form writing system.
 - Public interactive ML model demos.
 - Individual project-detail routes.
-- Geographic visitor analytics, fingerprinting, or behavioral profiling.
+- Precise geographic analytics, device fingerprinting, advertising attribution, or cross-site behavioral profiling.
 - Multi-user admin accounts or role-based access control.
 - Automated visitor-message submission by BB-8.

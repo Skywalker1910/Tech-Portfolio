@@ -1,6 +1,6 @@
 # Portfolio Command Center
 
-The private `/admin` area manages live portfolio content, BB-8 retrieval, messages, and anonymous traffic metrics.
+The private `/admin` area manages live portfolio content, BB-8 retrieval, messages, and tiered first-party visitor analytics.
 
 ## One-time AWS setup
 
@@ -50,4 +50,21 @@ For a single-owner portfolio this is intentionally lightweight. Move to Cognito 
 
 ## Traffic analytics
 
-`TrafficTracker` records one view per public path per browser tab session. The server stores daily path counters and a one-way hash used only for daily deduplication. It does not store IP addresses, user agents, referrers, or chat messages. Analytics and deduplication records expire after approximately 400 days through DynamoDB TTL.
+`TrafficTracker` uses two clearly separated measurement tiers:
+
+- **Basic measurement** is enabled by default but can be disabled at any time. It is cookieless and sends the route, an isolated one-time event UUID, page engagement duration, viewport bucket, broad device/OS/browser category, and coarse country/region supplied by the edge. It does not create a persistent visitor identity or route history.
+- **Enhanced journeys** require an affirmative choice. They add a random visitor UUID in `localStorage`, a visit UUID in `sessionStorage`, visit numbering, page sequences, and a broad source category/referrer host. A visit rolls over after 30 minutes of inactivity.
+
+Both tiers stop when the visitor disables analytics or the browser exposes Do Not Track or Global Privacy Control. The server hashes every browser-generated identifier before writing it to DynamoDB.
+
+The Traffic dashboard includes:
+
+- Page views, average engaged time, returning visits, and enhanced-journey coverage.
+- Daily traffic plus device, viewport/layout, country/region, operating-system, browser, and traffic-source breakdowns.
+- Page-performance metrics with view count, enhanced sessions, and average engaged time.
+- Recent pseudonymous enhanced journeys with visit numbers, local-time display, coarse context, source, and expandable page timelines.
+- Owner-controlled audience classification. Labels such as recruiter or hiring manager are manual annotations and are never inferred from location, device, or browsing behavior.
+
+AWS Amplify's managed SSR cache forwards `CloudFront-Viewer-Country`. Region is shown only when a compatible edge header is available. The application never persists the source IP, city, coordinates, postal code, detailed device model, form data, keystrokes, or BB-8 messages as analytics. New records expire after approximately 365 days through DynamoDB TTL.
+
+The existing compute-role policy is sufficient: journey analytics uses the same `GetItem`, `PutItem`, `UpdateItem`, and `Query` permissions on `portfolio-content`. No new table or third-party analytics account is required.

@@ -259,7 +259,7 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
 
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-semibold text-[var(--text)] leading-none">BB-8</p>
-                <p className="text-[10px] text-[var(--muted)] mt-1 truncate">RAG-powered Tech Portfolio co-pilot</p>
+                <p className="text-[10px] text-[var(--muted)] mt-1 truncate">RAG-Powered Co-Pilot</p>
               </div>
 
               {/* Open full chat link */}

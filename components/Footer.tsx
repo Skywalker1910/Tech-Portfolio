@@ -1,3 +1,5 @@
+import AnalyticsPreferencesButton from "./AnalyticsPreferencesButton";
+
 export default function Footer() {
   return (
     <footer className="mt-16 border-t border-slate-200 dark:border-slate-800">
@@ -46,6 +48,7 @@ export default function Footer() {
           <span>© {new Date().getFullYear()} Aditya More</span>
           <a href="/notice" className="hover:text-slate-400 transition-colors">Notice</a>
           <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</a>
+          <AnalyticsPreferencesButton />
         </div>
       </div>
     </footer>

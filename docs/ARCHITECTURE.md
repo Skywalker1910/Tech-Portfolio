@@ -61,6 +61,7 @@ flowchart TB
       BB8[BB-8 overlay / full chat]
       Tracker[TrafficTracker]
       Session[(sessionStorage)]
+      Local[(localStorage\nprivacy tier + optional visitor ID)]
     end
 
     subgraph NextServer[Next.js server runtime]
@@ -76,6 +77,8 @@ flowchart TB
     BB8 --> PublicRoutes
     Tracker --> PublicRoutes
     BB8 <--> Session
+    Tracker <--> Local
+    Tracker <--> Session
     ProtectedRoutes --> Auth
     PublicRoutes --> Repository
     ProtectedRoutes --> Repository
@@ -165,10 +168,46 @@ Composite primary key: `pk` and `sk`.
 | `CONTENT#EXPERIENCE` | `ITEM#<id>` | Experience records |
 | `SETTINGS` | `RAG` | Safe runtime retrieval settings |
 | `STATUS` | `RAG` | Last index-operation status |
-| `ANALYTICS#YYYY-MM-DD` | `PAGE#<path>` | Daily views and unique page sessions |
-| `ANALYTICS_SESSION#YYYY-MM-DD` | `<path>#<hash>` | Anonymous daily deduplication records |
+| `OP_EVENT#<eventHash>` | `SUMMARY` | Isolated basic page-view event and optional engagement duration |
+| `ANALYTICS#YYYY-MM-DD` | `PAGE#<path>` | Daily page views, engagement, and enhanced-session totals |
+| `ANALYTICS#YYYY-MM-DD` | `CONTEXT#<hash>` | Daily coarse device, viewport, location, and source aggregates |
+| `ANALYTICS_SESSION#YYYY-MM-DD` | `<path>#<hash>` | Pseudonymous daily visit-session deduplication records |
+| `ANALYTICS_VISITS#YYYY-MM-DD` | `<startedAt>#<visitHash>` | Recent-visit index for the admin dashboard |
+| `VISITOR#<visitorHash>` | `PROFILE` | Pseudonymous first/last-seen time, visit counter, and optional owner-assigned audience segment |
+| `VISITOR#<visitorHash>` | `VISIT#<visitHash>` | Numbered visit summary, coarse context, and timestamps |
+| `VISITOR#<visitorHash>` | `VISIT#<visitHash>#EVENT#<time>#<event>` | Timestamped public-page activity |
 
-Analytics items include `expiresAt`, which is managed by DynamoDB TTL.
+Analytics items include `expiresAt`, which is managed by DynamoDB TTL with a 365-day retention target. Browser-generated UUIDs are SHA-256 hashed before storage. CloudFront derives the country code from the request IP; the application stores only the country code and an optional region header, never the IP address, coordinates, postal code, or device fingerprint.
+
+## Visitor analytics flow
+
+```mermaid
+sequenceDiagram
+    participant V as Visitor browser
+    participant T as TrafficTracker
+    participant A as /api/analytics
+    participant D as portfolio-content
+    participant C as Admin Command Center
+
+    V->>T: Open a public page
+    alt Disabled, Do Not Track, or Global Privacy Control
+      T-->>V: No analytics request or identifier
+    else Basic measurement (default, opt-out)
+      T->>A: Path, one-time event UUID, viewport hints
+      A->>A: Derive coarse country, device, OS, and browser
+      A->>D: Isolated event, aggregate counters, engagement duration
+      opt Visitor allows enhanced journeys
+        T->>T: Create/reuse random visitor and visit IDs
+        T->>A: Hashed-identifier inputs and broad traffic source
+        A->>D: Numbered visit and timestamped page sequence
+      end
+      C->>D: Protected aggregate and journey queries
+      D-->>C: UX metrics and optional visitor journeys
+      C->>D: Optional manual audience classification
+    end
+```
+
+Basic measurement is cookieless and does not create a persistent visitor identity. Enhanced measurement is opt-in and adds a random browser identifier, visit numbering, route sequences, and broad traffic-source categories. Audience classifications such as recruiter or technical peer are assigned manually in the Command Center; geography and device data never infer them automatically.
 
 ## Authentication and trust boundaries
 
