@@ -74,7 +74,7 @@ Also verify proportionate user flows:
 - Contact draft review and explicit visitor submission.
 - Notice and Privacy statements after any data-flow change.
 
-The GitHub API route is rendered dynamically and cached for one hour, so temporary GitHub or local certificate failures do not block a production build. The route returns a safe unavailable response when the upstream request cannot be completed.
+The GitHub API route is rendered dynamically, cached at the CDN for one hour, and can serve stale data for 24 hours while revalidating, so temporary GitHub or local certificate failures do not block a production build. An expired configured token is retried against the public API, and the client exposes retry and direct-profile actions when the upstream request still cannot be completed. Set `GITHUB_TOKEN` in Amplify for the higher authenticated API allowance.
 
 ## Documentation maintenance
 

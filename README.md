@@ -108,7 +108,7 @@ Open `http://localhost:3000`. Without AWS or OpenAI configuration, public pages 
 | `DYNAMODB_PORTFOLIO_TABLE` | Content/operations | Defaults to `portfolio-content` |
 | `ADMIN_KEY` | Admin login | Single-owner shared secret |
 | `ADMIN_SESSION_SECRET` | Admin session signing | Falls back to `ADMIN_KEY` if omitted |
-| `GITHUB_TOKEN` | GitHub API | Optional; increases API allowance |
+| `GITHUB_TOKEN` | GitHub API | Recommended in production; increases API allowance and reduces anonymous rate-limit failures |
 | `NEXT_PUBLIC_FULL_CHAT_URL` | Chat links | Defaults to `/chat` |
 
 Use `.env.example` as the canonical variable template. Do not commit `.env.local`.

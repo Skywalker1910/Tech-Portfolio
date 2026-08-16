@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { Star, GitFork, BookMarked, Users, UserCheck, ExternalLink, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
@@ -41,13 +41,23 @@ export default function GitHubPreview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/github")
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then(setData)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+  const loadGitHubData = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const response = await fetch("/api/github", { cache: "no-store" });
+      if (!response.ok) throw new Error(`GitHub proxy returned ${response.status}`);
+      const payload = await response.json() as GitHubData;
+      if (!payload.login || !Array.isArray(payload.topRepos)) throw new Error("Invalid GitHub response");
+      setData(payload);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { void loadGitHubData(); }, [loadGitHubData]);
 
   if (loading) {
     return (
@@ -75,9 +85,15 @@ export default function GitHubPreview() {
 
   if (error || !data) {
     return (
-      <div className="mt-6 flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-xs text-[var(--muted)] shadow-sm">
+      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-xs text-[var(--muted)] shadow-sm">
         <AlertCircle size={14} className="shrink-0 text-[var(--sub-muted)]" />
-        GitHub statistics are temporarily unavailable.
+        <span className="mr-auto">GitHub statistics are temporarily unavailable.</span>
+        <button type="button" onClick={() => void loadGitHubData()} className="font-semibold text-[var(--text)] underline-offset-4 hover:underline">
+          Retry
+        </button>
+        <a href="https://github.com/Skywalker1910" target="_blank" rel="noopener noreferrer" className="font-semibold text-[var(--text)] underline-offset-4 hover:underline">
+          View GitHub
+        </a>
       </div>
     );
   }
