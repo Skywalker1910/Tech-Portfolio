@@ -103,6 +103,14 @@ export default function Navbar() {
 
   useEffect(() => () => { if (hideTimeout.current) clearTimeout(hideTimeout.current); }, []);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [mobileOpen]);
+
   const activeItem = NAV_ITEMS.find(i => i.href === activeKey);
 
   return (
@@ -248,6 +256,8 @@ export default function Navbar() {
             style={{ color: "var(--navbar-muted)" }}
             onClick={() => setMobileOpen(o => !o)}
             aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
           >
             <span className="flex flex-col gap-[5px] items-center justify-center w-4">
               <span className={`block h-px w-full bg-current transition-all ${mobileOpen ? "rotate-45 translate-y-[6px]" : ""}`} />
@@ -257,15 +267,16 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile menu — always dark as an overlay */}
+        {/* Mobile menu */}
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
+              id="mobile-navigation"
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="md:hidden bg-[#0d1117]/98 backdrop-blur-xl border-b border-white/10 flex flex-col"
+              className="md:hidden flex max-h-[calc(100dvh-2.75rem)] flex-col overflow-y-auto overscroll-contain border-b border-[var(--navbar-border)] bg-[var(--surface)]/98 text-[var(--text)] shadow-xl backdrop-blur-xl"
             >
               {NAV_ITEMS.map(item =>
                 item.external ? (
@@ -274,7 +285,7 @@ export default function Navbar() {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-6 py-3.5 text-[14px] text-white/60 hover:text-white border-b border-white/5 transition-colors"
+                    className="border-b border-[var(--border)] px-6 py-3.5 text-[14px] text-[var(--muted)] transition-colors last:border-b-0 hover:bg-[var(--tag-bg)] hover:text-[var(--text)]"
                   >
                     {item.label}
                   </a>
@@ -282,7 +293,8 @@ export default function Navbar() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="px-6 py-3.5 text-[14px] text-white/60 hover:text-white border-b border-white/5 transition-colors"
+                    aria-current={pathname === item.href ? "page" : undefined}
+                    className={`border-b border-[var(--border)] px-6 py-3.5 text-[14px] transition-colors last:border-b-0 hover:bg-[var(--tag-bg)] hover:text-[var(--text)] ${pathname === item.href ? "bg-[var(--tag-bg)] font-semibold text-[var(--text)]" : "text-[var(--muted)]"}`}
                   >
                     {item.label}
                   </Link>

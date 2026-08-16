@@ -10,7 +10,7 @@ export default function CustomCursor() {
   const dotRef  = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
     const ring = ringRef.current!;
     const dot  = dotRef.current!;
@@ -90,7 +90,7 @@ export default function CustomCursor() {
       {/* Lagging magnetic ring */}
       <div
         ref={ringRef}
-        className="pointer-events-none fixed z-[9998] rounded-full border will-change-transform"
+        className="custom-cursor pointer-events-none fixed z-[9998] rounded-full border will-change-transform"
         style={{
           width: 36, height: 36,
           borderWidth: "1.5px",
@@ -103,7 +103,7 @@ export default function CustomCursor() {
       {/* Sharp snapping dot */}
       <div
         ref={dotRef}
-        className="pointer-events-none fixed z-[9999] w-1.5 h-1.5 rounded-full -translate-x-1/2 -translate-y-1/2 will-change-transform"
+        className="custom-cursor pointer-events-none fixed z-[9999] w-1.5 h-1.5 rounded-full -translate-x-1/2 -translate-y-1/2 will-change-transform"
         style={{
           background: "rgba(249,115,22,0.9)",
           boxShadow: "0 0 6px rgba(249,115,22,0.8)",

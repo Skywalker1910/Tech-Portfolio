@@ -81,7 +81,7 @@ const timelineItems: {
 }[] = [
   {
     period: "May 2026 – Present",
-    title: "Volunteer Researcher – LLM Agents & Human Behavior",
+    title: "Researcher - LLM Agents and Human Behavior",
     org: "Clemson University, School of Computing",
     location: "Clemson, SC / Remote",
     type: "Research",
@@ -126,7 +126,7 @@ const timelineItems: {
   },
   {
     period: "Oct 2021 – Jul 2023",
-    title: "Software Test Engineer",
+    title: "Software Engineer",
     org: "Amdocs",
     location: "Pune, India",
     type: "Work",
@@ -210,6 +210,11 @@ function TimelineItem({ item, index }: { item: (typeof timelineItems)[0]; index:
   const c = colorMap[item.color];
   const Icon = item.type === "Education" ? GraduationCap : Briefcase;
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const imageLogo = item.logo.type === "image" ? item.logo : null;
+  const isClemsonDegree = imageLogo?.src === "/clemson-university-logo.png";
+  const isAmdocsRole = imageLogo?.src === "/amdocs-logo.png";
+  const isDypcetDegree = imageLogo?.src === "/dypcet-logo.png";
+  const usesSplitMobileHeader = isClemsonDegree || isAmdocsRole;
 
   return (
     <motion.div
@@ -218,14 +223,14 @@ function TimelineItem({ item, index }: { item: (typeof timelineItems)[0]; index:
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.65, ease: "easeOut", delay: index * 0.05 }}
-      className="relative grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4 md:gap-10 group"
+      className="relative grid grid-cols-1 gap-4 pl-8 md:grid-cols-[240px_1fr] md:gap-10 md:pl-0 group"
     >
       {/* ── Left: date + location + logo ── */}
-      <div className="md:text-right md:pt-1 md:pr-5 flex md:flex-col gap-3 md:gap-1 items-center md:items-end">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:flex-col md:items-end md:gap-1 md:pr-5 md:pt-1 md:text-right">
         <span className="text-[13px] font-mono text-[var(--muted)] whitespace-nowrap">
           {item.period}
         </span>
-        <span className="text-[13px] text-[var(--muted)] whitespace-nowrap">{item.location}</span>
+        <span className="text-[13px] text-[var(--muted)]">{item.location}</span>
         {/* Logo — desktop only, sits below location */}
         <div className="hidden md:flex justify-end mt-2">
           {item.logo.type === "image" ? (
@@ -252,50 +257,92 @@ function TimelineItem({ item, index }: { item: (typeof timelineItems)[0]; index:
 
       {/* ── Dot on the line ── */}
       <div
-        className={`absolute left-0 md:left-[240px] top-1.5 w-3 h-3 rounded-full -translate-x-[6px] md:translate-x-[calc(-50%-0.5px)] ${c.dot} ring-4 ring-[var(--dot-ring)] group-hover:ring-8 group-hover:${c.ring} transition-all duration-300 z-10`}
+        className={`absolute left-2 top-1.5 h-3 w-3 -translate-x-1/2 rounded-full md:left-[240px] md:translate-x-[calc(-50%-0.5px)] ${c.dot} ring-4 ring-[var(--dot-ring)] group-hover:ring-8 group-hover:${c.ring} transition-all duration-300 z-10`}
       />
 
       {/* ── Right: content ── */}
-      <div className="pl-6 md:pl-0">
+      <div>
         {/* org + type badge — logo shown inline on mobile */}
-        <div className="flex items-center gap-2 mb-1.5">
+        <div className="mb-2 flex flex-col items-start gap-2 md:mb-1.5 md:flex-row md:items-center">
           {/* Mobile logo */}
-          <span className="md:hidden">
+          {!usesSplitMobileHeader && (
+          <span className={`flex w-full items-center justify-start md:hidden ${isDypcetDegree ? "h-24" : "h-16"}`}>
             {item.logo.type === "image" ? (
               <Image
                 src={item.logo.src}
                 alt={item.org}
-                width={100}
-                height={100}
-                className={`rounded opacity-100 object-contain${item.logo.darkOnly ? " dypcet-logo" : ""}`}
+                width={isDypcetDegree ? 280 : 180}
+                height={isDypcetDegree ? 96 : 64}
+                className={`${isDypcetDegree ? "h-24 w-[min(78vw,280px)] object-cover object-[center_37%]" : "h-16 w-[min(52vw,180px)] object-contain object-left"} rounded opacity-100${item.logo.darkOnly ? " dypcet-logo" : ""}`}
                 style={item.logo.filter ? { filter: item.logo.filter } : undefined}
               />
             ) : (
               <span
-                className="inline-flex items-center justify-center w-[100px] h-[100px] rounded text-sm font-bold"
+                className="inline-flex h-14 min-w-24 items-center justify-center rounded px-4 text-sm font-bold"
                 style={{ background: item.logo.bg, color: item.logo.fg }}
               >
                 {item.logo.text}
               </span>
             )}
           </span>
-          <Icon size={14} className="text-[var(--muted)] shrink-0" />
-          <span className={`text-[11px] font-semibold uppercase tracking-widest ${c.label}`}>
-            {item.org}
-          </span>
+          )}
+          <div className={`${usesSplitMobileHeader ? "hidden md:flex" : "flex"} min-w-0 items-start gap-2`}>
+            <Icon size={14} className="mt-0.5 shrink-0 text-[var(--muted)]" />
+            <span className={`min-w-0 break-words text-[11px] font-semibold uppercase leading-relaxed tracking-[0.12em] md:tracking-widest ${c.label}`}>
+              {item.org}
+            </span>
+          </div>
         </div>
 
         {/* title */}
-        <h3 className="text-xl md:text-2xl font-bold text-[var(--text)] mb-3 leading-snug">
-          {item.title}
-        </h3>
+        {usesSplitMobileHeader && imageLogo ? (
+          <>
+            <div className={`mb-3 grid items-start gap-3 md:hidden ${isClemsonDegree ? "grid-cols-[minmax(0,1fr)_96px]" : "grid-cols-[minmax(0,1fr)_160px]"}`}>
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold leading-snug text-[var(--text)] sm:text-xl">{item.title}</h3>
+                <div className="mt-2 flex min-w-0 items-start gap-2">
+                  <Icon size={14} className="mt-0.5 shrink-0 text-[var(--muted)]" />
+                  <span className={`min-w-0 break-words text-[10px] font-semibold uppercase leading-relaxed tracking-[0.1em] ${c.label}`}>
+                    {item.org}
+                  </span>
+                </div>
+                {isClemsonDegree && (
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {item.tags.map((tag) => {
+                      const TagIcon = TAG_ICONS[tag];
+                      return (
+                        <span key={tag} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] ${c.tag}`}>
+                          {TagIcon && <TagIcon size={10} />}
+                          {tag}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              <Image
+                src={imageLogo.src}
+                alt={item.org}
+                width={isClemsonDegree ? 96 : 160}
+                height={isClemsonDegree ? 96 : 64}
+                className={`${isClemsonDegree ? "h-24 w-24" : "h-16 w-40"} justify-self-end object-contain object-right`}
+                style={imageLogo.filter ? { filter: imageLogo.filter } : undefined}
+              />
+            </div>
+            <h3 className="mb-3 hidden text-2xl font-bold leading-snug text-[var(--text)] md:block">{item.title}</h3>
+          </>
+        ) : (
+          <h3 className="mb-3 text-lg font-bold leading-snug text-[var(--text)] sm:text-xl md:text-2xl">
+            {item.title}
+          </h3>
+        )}
 
         {/* tags */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        <div className={`mb-4 flex-wrap ${isClemsonDegree ? "hidden gap-1 md:flex" : "flex gap-1.5"}`}>
           {item.tags.map((tag) => {
             const TagIcon = TAG_ICONS[tag];
             return (
-              <span key={tag} className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full ${c.tag}`}>
+              <span key={tag} className={`inline-flex items-center gap-1 rounded-full py-0.5 ${isClemsonDegree ? "px-2 text-[10px] sm:px-2.5 sm:text-[11px]" : "px-2.5 text-[11px]"} ${c.tag}`}>
                 {TagIcon && <TagIcon size={10} />}
                 {tag}
               </span>
@@ -485,7 +532,7 @@ export default function Home() {
           </motion.div>
 
           <div className="relative">
-            <div className="absolute left-0 md:left-[240px] top-0 bottom-0 w-px bg-gradient-to-b from-[var(--timeline-line)] via-[var(--border)] to-transparent md:-translate-x-[0.5px]" />
+            <div className="absolute bottom-0 left-2 top-0 w-px -translate-x-1/2 bg-gradient-to-b from-[var(--timeline-line)] via-[var(--border)] to-transparent md:left-[240px] md:-translate-x-[0.5px]" />
             <div className="space-y-16 md:space-y-20">
               {homeTimeline.map((item, i) => (
                 <TimelineItem key={i} item={item} index={i} />
