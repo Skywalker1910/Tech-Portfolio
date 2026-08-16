@@ -39,7 +39,7 @@ type Role = {
 
 const roles: Role[] = [
   {
-    title: "Volunteer Researcher – LLM Agents & Human Behavior",
+    title: "Researcher - LLM Agents and Human Behavior",
     dept: "LLM Agents & Human Behavior",
     subdept: "School of Computing",
     org: "Clemson University",
@@ -125,7 +125,7 @@ const roles: Role[] = [
     ],
   },
   {
-    title: "Software Test Engineer",
+    title: "Software Engineer",
     dept: "Software Engineering & QA",
     subdept: "Telecom Systems",
     org: "Amdocs",
@@ -206,7 +206,7 @@ export default function Experience() {
             className={`group relative rounded-2xl border ${r.border} bg-[var(--surface)] overflow-hidden shadow-lg hover:shadow-xl ${r.glow} card-elevated transition-all duration-300 hover:-translate-y-0.5`}
           >
             {/* Gradient header */}
-            <div className={`relative h-28 overflow-hidden bg-gradient-to-br ${r.gradient}`}>
+            <div className={`relative min-h-28 overflow-hidden bg-gradient-to-br ${r.gradient}`}>
               {/* Animated orbs */}
               <motion.div
                 className={`absolute top-2 right-16 w-28 h-28 rounded-full ${r.orb1} blur-3xl opacity-35`}
@@ -228,13 +228,13 @@ export default function Experience() {
                 }}
               />
               {/* Header content */}
-              <div className="relative z-10 h-full flex items-center px-6 gap-4">
+              <div className="relative z-10 flex min-h-28 flex-col items-start gap-3 px-4 py-5 sm:flex-row sm:items-center sm:gap-4 sm:px-6">
                 <Image
                   src={r.logo}
                   alt={r.org}
                   width={r.logoSize ?? 90}
                   height={r.logoSize ?? 90}
-                  className="object-contain shrink-0"
+                  className="h-10 w-auto max-w-[140px] shrink-0 object-contain object-left sm:h-auto"
                   style={r.logoFilter ? { filter: r.logoFilter } : undefined}
                 />
                 <div className="flex-1 min-w-0">
@@ -245,16 +245,16 @@ export default function Experience() {
                     <span className="text-[10px] text-white/40">{r.location}</span>
                   </div>
                 </div>
-                <span className="shrink-0 text-[10px] font-mono bg-black/40 backdrop-blur-sm text-white/55 px-2.5 py-1 rounded-full border border-white/10">
+                <span className="shrink-0 rounded-full border border-white/10 bg-black/40 px-2.5 py-1 font-mono text-[10px] text-white/70 backdrop-blur-sm sm:ml-auto">
                   {r.period}
                 </span>
               </div>
             </div>
 
             {/* Card body */}
-            <div className="p-6 pt-5">
+            <div className="p-4 pt-5 sm:p-6 sm:pt-5">
               {/* Type + dept badge row */}
-              <div className="flex items-center gap-2 mb-4">
+              <div className="mb-4 flex flex-wrap items-center gap-2">
                 <span
                   className={`${r.accentBg} ${r.accent} text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded border ${r.accentBorder}`}
                 >

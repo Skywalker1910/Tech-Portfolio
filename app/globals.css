@@ -108,6 +108,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Render the magnetic cursor only for devices with a precise hover pointer. */
+.custom-cursor { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .custom-cursor { display: block; }
+}
+
 /* === Custom utilities === */
 @utility container-max {
   @apply max-w-6xl mx-auto px-4 sm:px-6;
