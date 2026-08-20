@@ -1,105 +1,124 @@
-# Developer Notes
+# Engineering and Runtime Notes
 
-## Development model
+## Runtime targets
 
-The repository supports two targets:
+The repository produces two deliberately different delivery surfaces:
 
-1. AWS Amplify runs the full Next.js SSR application, route handlers, live content, contact storage, BB-8, and analytics.
-2. GitHub Pages serves an optional static mirror. It cannot execute route handlers, so server-backed features display fallbacks or notices.
+1. AWS Amplify hosts the complete Next.js SSR application, dynamic route handlers, live content, contact storage, BB-8, analytics, and the private Command Center.
+2. GitHub Pages hosts an optional static continuity mirror. It cannot execute route handlers, so server-backed functionality is disabled, degraded, or redirected to the primary application.
 
-Run `npm run dev` for local development and `npm run build` before deployment. Use `npm run build:ghpages` only when validating the static mirror.
+The Amplify application is the only full production system. Static-export compatibility must never weaken or change dynamic production route behavior.
 
 ## Source-of-truth boundaries
 
-- Stable profile facts, education, skills, contact details, and source-controlled case studies remain in application files and `data/portfolio-knowledge.json`.
-- Projects and experience use DynamoDB as their live source after the operations table is seeded.
-- `lib/content/defaults.ts` is the resilience fallback and initial seed source.
-- RAG indexing combines stable knowledge with the currently published project and experience records.
-- Content publication does not automatically embed every change; reindex once after an edit batch.
+| Data | Primary source | Fallback or secondary source |
+|---|---|---|
+| Stable profile facts | Source-controlled application data | None |
+| Education and skills | Source-controlled page/knowledge data | None |
+| Projects and experience | DynamoDB live content | `lib/content/defaults.ts` |
+| BB-8 static knowledge | `data/portfolio-knowledge.json` | Same bundled corpus |
+| BB-8 live knowledge | Published content repository | Bundled content defaults |
+| RAG runtime settings/status | `portfolio-content` | Deployment-level defaults |
+| Semantic chunks | S3 Vectors | Deterministic keyword retrieval |
+| Contact messages | `portfolio-contacts` | No alternate storage |
+| Visitor analytics | `portfolio-content` | No-op on failure |
+| GitHub statistics | GitHub API through server cache | UI unavailable/retry state |
 
-## Expected fallback behavior
+Features should preserve these boundaries. Presentation components should not silently introduce a second content source, and public browser code should not become an AWS data client.
 
-| Missing dependency | Expected behavior |
+## Resilience rules
+
+- Public rendering and navigation must not depend on OpenAI, S3 Vectors, GitHub, or analytics availability.
+- Public content reads fall back to bundled defaults when DynamoDB is unavailable or empty.
+- Semantic retrieval failures fall back to deterministic local retrieval over current verified knowledge.
+- Analytics failures are accepted as non-blocking no-ops.
+- Contact failures are isolated to submission and inbox behavior.
+- GitHub failures use stale caching where possible and expose retry/direct-profile actions.
+- Protected API authorization is never replaced by a hidden route, client redirect, or omitted navigation link.
+
+## Environment delivery
+
+`amplify.yml` writes only allow-listed server and public variables into `.env.production` during the production build. This ensures managed SSR route handlers receive the same approved configuration used during compilation.
+
+The allow list is intentionally explicit. Adding a new server dependency requires updating both the Amplify variable configuration and the build allow list. Secrets must not use `NEXT_PUBLIC_`.
+
+AWS SDK clients prefer explicit `APP_AWS_*` credentials when present, then use the standard credential provider chain. Production is designed to rely on the Amplify compute role so long-lived credential variables can remain absent.
+
+See [AWS Infrastructure](AWS_INFRASTRUCTURE.md) for resource and IAM details.
+
+## Static-export boundary
+
+When `NEXT_PUBLIC_GITHUB_PAGES=true`, `next.config.ts`:
+
+- Selects static export output.
+- Applies the `/Tech-Portfolio` base and asset paths.
+- Enables trailing slashes.
+- Disables server image optimization.
+- Replaces API route modules with static stubs through `null-loader`.
+
+The primary Amplify build does not enable these branches. Dynamic APIs remain `force-dynamic` where request-time execution is required.
+
+## Content and RAG consistency
+
+Publishing a project or experience record updates public reads immediately but does not automatically update the vector index. This intentional gap allows a batch of edits to produce one embedding/indexing operation.
+
+During the gap:
+
+- Public pages use the updated published record.
+- Local retrieval builds from the updated repository.
+- Semantic retrieval can still return the previous indexed version.
+
+I close the gap through RAG Control after reviewing a content batch. The indexer upserts the current corpus and deletes stale keys.
+
+## Admin boundary
+
+Admin pages live below `/admin`, and `ConditionalLayout` removes public navigation and BB-8 from that surface. The actual trust boundary is server authorization:
+
+- The login endpoint exchanges the admin key for a signed session.
+- Protected routes validate the cookie or legacy admin header on every request.
+- The raw admin key is not persisted in browser storage.
+- Mutations pass through server validation before AWS access.
+
+See [Security Model](SECURITY.md) and [Command Center](COMMAND_CENTER.md).
+
+## Quality gate
+
+GitHub Actions defines the production quality gate. It uses Node.js 20 and a locked dependency install, then executes:
+
+1. ESLint.
+2. TypeScript checking without emission.
+3. The deterministic 27-question RAG evaluation.
+4. A production Next.js build.
+
+The CI environment deliberately disables semantic retrieval and does not receive AWS or OpenAI secrets. This keeps pull-request validation deterministic, low-cost, and safe for untrusted changes. Semantic retrieval verification is an operational check when the indexed corpus, embedding configuration, or distance threshold changes.
+
+## Review invariants
+
+Changes should preserve:
+
+- Mobile and desktop layouts in light and dark themes.
+- Keyboard access, focus visibility, reduced-motion behavior, and semantic controls.
+- BB-8 overlay continuity during validated navigation.
+- Explicit visitor review before contact submission.
+- Published/draft isolation.
+- Public fallback behavior during dependency failures.
+- Alignment between analytics behavior and the public Privacy/Notice pages.
+- Alignment between IAM permissions and actual SDK commands.
+
+## Documentation ownership
+
+| Change type | Required documentation |
 |---|---|
-| `portfolio-content` table | Public content and local retrieval use bundled defaults |
-| OpenAI key | BB-8 returns a configuration/service error |
-| S3 Vector configuration | BB-8 uses deterministic local retrieval |
-| GitHub token | Public GitHub requests use the lower anonymous API allowance |
-| GitHub API | GitHub cards display an unavailable state |
-| Static GitHub Pages build | API-backed features are disabled or point visitors to the primary site |
+| Cross-system architecture | `ARCHITECTURE.md` and README overview |
+| AWS resource, role, or environment delivery | `AWS_INFRASTRUCTURE.md`, `SECURITY.md` |
+| Retrieval, corpus, indexing, generation, tools | `RAG.md` |
+| Analytics fields, consent, retention, dashboard | `ANALYTICS.md`, public Privacy/Notice |
+| Project or experience model/publishing | `CONTENT_SYSTEM.md`, `COMMAND_CENTER.md` |
+| Endpoint contract or limit | `API.md` |
+| Shipped or removed feature | `FEATURES.md` |
+| CI, review, deployment, rollback | `PULL_REQUESTS.md` |
+| Production incident | `CHANGELOG.md` |
 
-Fallbacks must never block rendering or navigation.
+## Roadmap boundaries
 
-## Admin development
-
-Admin pages live below `/admin`; public chrome and BB-8 are suppressed by `ConditionalLayout`. API authorization is the security boundary—never rely on a hidden link or client redirect.
-
-Authentication flow:
-
-1. `POST /api/admin/session` validates `ADMIN_KEY` using constant-time comparison.
-2. The server issues an eight-hour signed cookie.
-3. Protected route handlers call `isValidAdminRequest`.
-4. `DELETE /api/admin/session` clears the cookie.
-
-The legacy `x-admin-key` header exists for local automation and compatibility. New browser code should use the cookie session.
-
-## Environment delivery on Amplify
-
-Amplify’s runtime environment delivery previously caused missing-variable failures. `amplify.yml` therefore writes only allow-listed prefixes and names to `.env.production` during the build:
-
-```yaml
-- env | grep -e ADMIN_KEY -e ADMIN_SESSION_SECRET -e APP_AWS_ -e DYNAMODB_ -e GITHUB_TOKEN -e OPENAI_ -e RAG_ >> .env.production || true
-- env | grep -e NEXT_PUBLIC_ >> .env.production || true
-```
-
-`.env.production` and `.env.local` must remain ignored. Never add a secret to a `NEXT_PUBLIC_` variable.
-
-## Verification checklist
-
-Before committing a feature that touches server behavior:
-
-```powershell
-npm run check
-```
-
-The same lint, TypeScript, local RAG, and production-build steps run as the GitHub Actions `Quality gate` for every pull request into `main`. See [Pull Requests and Release Checks](PULL_REQUESTS.md) for branch protection and release verification.
-
-Also verify proportionate user flows:
-
-- Public navigation and both themes.
-- BB-8 overlay persistence across route changes.
-- Project/experience fallback and live content states.
-- Admin login, logout, and unauthorized API responses.
-- Draft, publish, edit, and delete behavior without exposing unpublished records.
-- Contact draft review and explicit visitor submission.
-- Notice and Privacy statements after any data-flow change.
-
-The GitHub API route is rendered dynamically, cached at the CDN for one hour, and can serve stale data for 24 hours while revalidating, so temporary GitHub or local certificate failures do not block a production build. An expired configured token is retried against the public API, and the client exposes retry and direct-profile actions when the upstream request still cannot be completed. Set `GITHUB_TOKEN` in Amplify for the higher authenticated API allowance.
-
-## Documentation maintenance
-
-Update documentation in the same change whenever behavior moves between “planned” and “implemented.”
-
-- Feature behavior: `docs/FEATURES.md`
-- Architecture or data flow: `docs/ARCHITECTURE.md`
-- Endpoint contract: `docs/API.md`
-- Admin/AWS operations: `docs/COMMAND_CENTER.md`
-- Retrieval or indexing: `docs/RAG.md`
-- Public data handling and analytics consent: `/privacy` and `/notice`
-
-## Local analytics behavior
-
-The analytics panel appears on the primary Next.js build. Basic cookieless measurement begins unless the visitor selects **Disable all**; **Allow enhanced** adds persistent browser/visit identifiers and journey/source data. Local requests do not have CloudFront location headers, so the dashboard correctly shows location as unavailable. Device classification still uses the request user agent plus coarse touch/platform/viewport hints. Use **Analytics choices** in the footer to switch tiers while testing.
-- Historical incident: `docs/CHANGELOG.md`
-
-The README should remain an accurate entry point and link to the focused document rather than duplicating every implementation detail.
-
-## Roadmap
-
-- Blog and technical writing.
-- Interactive ML demonstrations.
-- Project-detail routes and richer case studies.
-- Automated end-to-end tests and Lighthouse CI.
-- Preview deployments for pull requests.
-- Error monitoring and contact-form spam protection.
-- Cognito or equivalent if administration expands beyond one owner.
+The current architecture does not claim to provide a blog CMS, project-detail routing, public ML inference demos, multi-user administration, distributed rate limiting, automated security monitoring, or automated visitor classification. These remain future architectural decisions rather than partially implemented features.
