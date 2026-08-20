@@ -1,195 +1,111 @@
-# Tech Portfolio — Aditya More
+# My Tech Portfolio
 
-An interactive Next.js portfolio for presenting Aditya More’s AI/ML engineering work, research, experience, and technical skills. The application includes BB-8, a retrieval-augmented portfolio co-pilot; live owner-managed content; a private operations dashboard; and privacy-conscious first-party analytics.
+An interactive, production-hosted portfolio for presenting my AI/ML engineering work, research, experience, and technical capabilities. The application combines a responsive public experience, BB-8 as my RAG-powered portfolio co-pilot, live content I manage, a private operations dashboard, and privacy-conscious first-party analytics.
 
-- Primary site: [adityamore.dev](https://adityamore.dev)
-- Static mirror: [skywalker1910.github.io/Tech-Portfolio](https://skywalker1910.github.io/Tech-Portfolio)
+- Primary application: [adityamore.dev](https://adityamore.dev)
+- Static continuity mirror: [skywalker1910.github.io/Tech-Portfolio](https://skywalker1910.github.io/Tech-Portfolio)
 
-## Highlights
+## Product capabilities
 
-- Polished responsive interface with light-first theming, dark mode, animated navigation previews, project filtering, career timelines, GitHub integration, and accessible interaction states.
-- BB-8 overlay and full-page chat powered by the OpenAI Responses API, verified portfolio knowledge, OpenAI embeddings, and Amazon S3 Vectors.
-- Hybrid retrieval with deterministic local fallback, source-page links, a short context window, and a 27-question evaluation suite.
-- Validated agent actions for in-app navigation, resume download, and reviewable contact-form drafts.
-- Private Admin Command Center for project and experience CRUD, contact-message management, RAG configuration/status, vector reindexing, and traffic monitoring.
-- Tiered first-party analytics: opt-out cookieless UX measurement plus optional pseudonymous return-visit journeys, with no raw-IP storage or third-party analytics SDK.
-- AWS Amplify SSR production deployment plus an optional GitHub Pages static mirror.
+- Responsive light-first interface with dark mode, animated navigation previews, filterable project content, career timelines, GitHub statistics, and accessible interaction states.
+- BB-8 overlay and full-page chat grounded in verified portfolio knowledge through OpenAI embeddings, Amazon S3 Vectors, and deterministic keyword retrieval.
+- Validated co-pilot actions for contextual page navigation, resume delivery, and reviewable contact-form drafts.
+- Live project and experience publishing backed by DynamoDB, with bundled content as a resilience fallback.
+- Private Command Center for content operations, contact messages, RAG configuration and indexing, and visitor-experience analytics.
+- Tiered first-party analytics with cookieless aggregate measurement, optional pseudonymous journeys, manual audience classification, and no stored raw IP address.
+- AWS Amplify SSR production hosting with Route 53, IAM compute-role access, DynamoDB, S3 Vectors, and an optional GitHub Pages static mirror.
 
-See [Implemented Features](docs/FEATURES.md) for the full shipped-feature inventory.
+The full shipped-feature inventory is maintained in [Implemented Features](docs/FEATURES.md).
 
-## Architecture
+## High-level architecture
 
 ```mermaid
 flowchart LR
     Visitor([Visitor]) --> DNS[Route 53]
-    DNS --> App[AWS Amplify\nNext.js SSR]
-    Admin([Admin]) --> App
+    DNS --> Edge[AWS Amplify edge delivery]
+    Edge --> App[Next.js SSR runtime]
+    Me([Me / Admin]) --> Admin[Private Command Center]
+    Admin --> App
 
-    App --> Contacts[(DynamoDB\ncontacts)]
-    App --> Content[(DynamoDB\ncontent + settings + analytics)]
-    App --> Vectors[(Amazon S3 Vectors)]
-    App --> OpenAI[OpenAI API]
-    App --> GitHub[GitHub API]
+    App --> Contacts[(DynamoDB\ncontact messages)]
+    App --> Operations[(DynamoDB\ncontent, settings, analytics)]
+    App --> Vectors[(Amazon S3 Vectors\nportfolio knowledge)]
+    App --> OpenAI[OpenAI\nresponses + embeddings]
+    App --> GitHub[GitHub REST API]
 
-    Repo[(GitHub main)] -->|CI/CD| App
-    Repo -. static export .-> Mirror[GitHub Pages]
+    Repo[(GitHub main)] -->|CI/CD| Edge
+    Repo -. static export .-> Mirror[GitHub Pages mirror]
 ```
 
-The application keeps browser interactions, server-side trust boundaries, public data, operational data, and third-party AI calls separate. The complete diagrams, request flows, failure behavior, and DynamoDB key design are documented in [System Architecture](docs/ARCHITECTURE.md).
+The browser owns presentation, animations, session-scoped chat state, privacy preferences, and approved co-pilot actions. Next.js route handlers form the server trust boundary: they validate requests, enforce admin authorization, access AWS through the Amplify compute role, and call external services without exposing credentials.
+
+## Core runtime flows
+
+```mermaid
+flowchart TB
+    Public[Public portfolio pages]
+    Chat[BB-8 co-pilot]
+    Content[Live content repository]
+    Analytics[Visitor measurement]
+    Admin[Command Center]
+
+    Public --> Content
+    Public --> Analytics
+    Chat --> Retrieval[Hybrid retrieval]
+    Retrieval --> Knowledge[Verified static + published knowledge]
+    Retrieval --> Vectors[Semantic vector search]
+    Chat --> Actions[Validated browser actions]
+    Admin --> Content
+    Admin --> Retrieval
+    Admin --> Analytics
+```
+
+- Public content reads DynamoDB first and automatically falls back to bundled records when the operations table is unavailable.
+- BB-8 retrieves a small set of verified chunks, sends only a short conversation window to OpenAI, and returns source routes and optional validated actions.
+- Basic analytics records aggregate UX signals without a persistent identity; enhanced analytics adds opt-in visit continuity and page journeys.
+- Content publication and RAG indexing are deliberately separate so multiple edits can be indexed in one controlled operation.
+
+Detailed system, sequence, trust-boundary, and data-model diagrams are available in [System Architecture](docs/ARCHITECTURE.md).
 
 ## Technology stack
 
 | Layer | Technology |
 |---|---|
-| Application | Next.js 16 App Router, React 19, TypeScript |
-| Styling | Tailwind CSS v4, CSS Modules |
-| Animation | Framer Motion |
-| Visualizations | Cobe, Canvas, custom CSS 3D transforms |
-| AI | OpenAI Responses API and Embeddings API |
-| Retrieval | Amazon S3 Vectors plus local keyword fallback |
-| Data | AWS DynamoDB via AWS SDK v3 |
-| Hosting | AWS Amplify SSR and Route 53 |
-| Static mirror | GitHub Pages |
-| Build | Turbopack |
+| Web application | Next.js 16 App Router, React 19, TypeScript |
+| Styling and interaction | Tailwind CSS v4, CSS Modules, Framer Motion |
+| Specialized visuals | Cobe, Canvas, CSS 3D transforms |
+| AI generation | OpenAI Responses API |
+| Retrieval | OpenAI Embeddings API, Amazon S3 Vectors, local keyword fallback |
+| Operational data | Amazon DynamoDB through AWS SDK v3 |
+| Hosting and delivery | AWS Amplify SSR, CloudFront-managed delivery, Route 53 |
+| Source and quality gate | GitHub, GitHub Actions, Turbopack |
+| Continuity surface | GitHub Pages static export |
 
-## Project structure
+## Reliability and privacy posture
 
-```text
-app/
-  admin/                 Private Command Center pages
-  api/                   Public and protected route handlers
-  chat/                  Full-page BB-8 experience
-  projects/              Filterable project gallery
-  experience/            Detailed professional experience
-  notice/ privacy/       Product status and data disclosures
-components/
-  admin/                 Shared administration components
-  BB8ChatDroid.tsx       Interactive BB-8 visual
-  ChatWidget.tsx         Persistent chat and agent-action UI
-  TrafficTracker.tsx     Tiered measurement, engagement, and journeys
-data/                    Verified static knowledge and contact links
-lib/
-  content/               Content models, validation, defaults, repository
-  rag/                   Chunking, indexing, retrieval, and types
-scripts/                 AWS setup, content seed, indexing, evaluation
-docs/                    Architecture and operating documentation
-evals/                   RAG evaluation cases
-```
+- Server-only credentials remain outside browser bundles and production AWS access uses temporary compute-role credentials.
+- Admin sessions are signed, eight-hour, `HttpOnly`, `SameSite=Strict` cookies.
+- OpenAI chat requests set `store: false`; the application does not persist BB-8 transcripts server-side.
+- RAG falls back to deterministic local retrieval when semantic retrieval is disabled or unavailable.
+- Live content falls back to source-controlled defaults when DynamoDB cannot be read.
+- Analytics excludes raw IP storage, exact location, fingerprints, advertising identifiers, form values, and chat text.
+- The GitHub proxy is cached and fails independently from the rest of the public experience.
+- Production changes pass linting, TypeScript checks, RAG evaluation, and a Next.js production build before merge.
 
-## Local development
+## Documentation index
 
-Requirements: Node.js 20 or newer, npm, and optional AWS/OpenAI credentials for server-backed features.
-
-```powershell
-npm install
-Copy-Item .env.example .env.local
-npm run dev
-```
-
-Open `http://localhost:3000`. Without AWS or OpenAI configuration, public pages still render from bundled content. Contact submission, semantic retrieval, admin writes, and analytics require their corresponding services.
-
-### Environment variables
-
-| Variable | Required for | Notes |
-|---|---|---|
-| `OPENAI_API_KEY` | BB-8 and indexing | Server-only secret |
-| `OPENAI_CHAT_MODEL` | BB-8 | Configurable generation model |
-| `OPENAI_EMBEDDING_MODEL` | RAG indexing/query | Defaults to `text-embedding-3-small` |
-| `OPENAI_EMBEDDING_DIMENSIONS` | RAG | Must match the vector index |
-| `RAG_ENABLED` | Semantic retrieval | Local fallback remains available |
-| `RAG_VECTOR_BUCKET` | S3 Vectors | Globally unique bucket name |
-| `RAG_VECTOR_INDEX` | S3 Vectors | Defaults to `portfolio-knowledge` |
-| `RAG_TOP_K` | Retrieval | Safe runtime override is available in Admin |
-| `RAG_MAX_DISTANCE` | Retrieval | Safe runtime override is available in Admin |
-| `APP_AWS_REGION` | AWS clients | Defaults to `us-east-1` |
-| `APP_AWS_ACCESS_KEY_ID` | Local AWS access | Prefer an Amplify compute role in production |
-| `APP_AWS_SECRET_ACCESS_KEY` | Local AWS access | Never expose to the browser |
-| `DYNAMODB_CONTACTS_TABLE` | Contact form | Defaults to `portfolio-contacts` |
-| `DYNAMODB_PORTFOLIO_TABLE` | Content/operations | Defaults to `portfolio-content` |
-| `ADMIN_KEY` | Admin login | Single-owner shared secret |
-| `ADMIN_SESSION_SECRET` | Admin session signing | Falls back to `ADMIN_KEY` if omitted |
-| `GITHUB_TOKEN` | GitHub API | Recommended in production; increases API allowance and reduces anonymous rate-limit failures |
-| `NEXT_PUBLIC_FULL_CHAT_URL` | Chat links | Defaults to `/chat` |
-
-Use `.env.example` as the canonical variable template. Do not commit `.env.local`.
-
-## AWS resource setup
-
-### Content and operations table
-
-```powershell
-npm run content:setup
-npm run content:seed
-```
-
-This creates the on-demand `portfolio-content` table, enables TTL, and seeds the initial project and experience records. See [Command Center](docs/COMMAND_CENTER.md) for IAM permissions and publishing behavior.
-
-### RAG vector resources
-
-```powershell
-npm run rag:setup
-npm run rag:index
-npm run rag:evaluate:s3
-```
-
-Set `RAG_ENABLED=true` after the index is ready. See [BB-8 Portfolio RAG](docs/RAG.md) for the retrieval architecture, IAM policies, tuning, and evaluation workflow.
-
-The contacts table is intentionally separate because contact submissions have a different key shape and privacy lifecycle from public portfolio content.
-
-## Useful commands
-
-| Command | Purpose |
+| Document | Technical scope |
 |---|---|
-| `npm run dev` | Start local development |
-| `npm run build` | Build the Amplify/SSR application |
-| `npm run lint` | Run ESLint |
-| `npm run typecheck` | Check TypeScript without emitting files |
-| `npm run check` | Run the complete local pull-request quality gate |
-| `npm run content:setup` | Create the portfolio operations table |
-| `npm run content:seed` | Seed projects and experience |
-| `npm run rag:setup` | Create/validate S3 Vector resources |
-| `npm run rag:index` | Rebuild the current published corpus |
-| `npm run rag:evaluate` | Evaluate local retrieval |
-| `npm run rag:evaluate:s3` | Evaluate semantic retrieval |
-| `npm run build:ghpages` | Produce the static mirror |
-| `npm run deploy` | Publish the static mirror |
-
-## Deployment
-
-Pushes to `main` trigger the AWS Amplify build. `amplify.yml` writes an allow-listed set of server variables into `.env.production` for the Next.js SSR runtime. Route 53 provides the custom domain.
-
-Pull requests targeting `main` run the GitHub Actions `Quality gate`: lint, TypeScript, local RAG evaluation, and a production build. See [Pull Requests and Release Checks](docs/PULL_REQUESTS.md) for the review checklist and recommended `main` branch protection.
-
-The GitHub Pages mirror is a static export. API-backed functionality—including BB-8 responses, live admin content, analytics, and contact submission—is unavailable or reduced on that mirror by design.
-
-## Security and privacy
-
-- Secrets remain server-side.
-- Admin access uses a signed `HttpOnly`, `SameSite=Strict` cookie.
-- APIs validate lengths, enums, paths, and URLs.
-- BB-8 cannot send a contact message for a visitor.
-- Basic first-party UX measurement is cookieless and opt-out; persistent journey analytics requires opt-in. Both honor Do Not Track and Global Privacy Control.
-- Analytics stores a one-way pseudonymous visitor key rather than the browser UUID or raw IP address.
-- Chat requests set `store: false`; the app does not persist chat transcripts server-side.
-- Analytics stores page/engagement aggregates and coarse UX context; enhanced mode adds hashed visitor/visit identifiers and journeys. Raw IP addresses are never persisted.
-- Contact submissions are visible only through protected admin APIs.
-
-Read the public [Privacy Policy](https://adityamore.dev/privacy) and the implementation details in [System Architecture](docs/ARCHITECTURE.md).
-
-## Documentation
-
-| Document | Contents |
-|---|---|
-| [Implemented Features](docs/FEATURES.md) | Shipped functionality and explicit non-features |
-| [System Architecture](docs/ARCHITECTURE.md) | Diagrams, flows, data model, trust boundaries, failures |
-| [API Reference](docs/API.md) | Public and protected endpoint contracts |
-| [Command Center](docs/COMMAND_CENTER.md) | DynamoDB setup, IAM, publishing, auth, analytics |
-| [BB-8 Portfolio RAG](docs/RAG.md) | Indexing, retrieval, evaluation, permissions, tuning |
-| [Developer Notes](docs/DEVELOPMENT.md) | Development workflow, fallbacks, deployment caveats |
-| [Pull Requests and Release Checks](docs/PULL_REQUESTS.md) | CI, review checklist, branch protection, and release verification |
-| [Issue & Fix Changelog](docs/CHANGELOG.md) | Historical production incidents and fixes |
-| [Code Citations](docs/%23%20Code%20Citations.md) | Third-party code and license attributions |
-
-## License
-
-Licensed under the [MIT License](LICENSE).
+| [System Architecture](docs/ARCHITECTURE.md) | End-to-end topology, runtime boundaries, integrated flows, data ownership, and failure behavior |
+| [AWS Infrastructure](docs/AWS_INFRASTRUCTURE.md) | Amplify, Route 53, compute role, DynamoDB, S3 Vectors, environment delivery, IAM, and resource lifecycle |
+| [BB-8 RAG System](docs/RAG.md) | Corpus assembly, chunking, embeddings, indexing, hybrid retrieval, generation, tools, tuning, and evaluation |
+| [Visitor Analytics](docs/ANALYTICS.md) | Measurement tiers, attributes, traffic sources, engagement, storage model, privacy controls, and dashboard semantics |
+| [Live Content System](docs/CONTENT_SYSTEM.md) | Project and experience models, publishing, validation, fallback behavior, DynamoDB layout, and RAG synchronization |
+| [Security Model](docs/SECURITY.md) | Trust boundaries, admin authentication, secret handling, validation, privacy controls, and known limitations |
+| [API Reference](docs/API.md) | Public and protected route contracts, limits, responses, and side effects |
+| [Command Center](docs/COMMAND_CENTER.md) | My operational surfaces for content, messages, RAG, and analytics |
+| [Implemented Features](docs/FEATURES.md) | Current application capabilities and explicit non-features |
+| [Engineering and Runtime Notes](docs/DEVELOPMENT.md) | Source-of-truth boundaries, resilience rules, deployment-time configuration, and documentation ownership |
+| [Pull Requests and Release Checks](docs/PULL_REQUESTS.md) | CI quality gate, review expectations, branch protection, release verification, and rollback |
+| [Operational Incident Log](docs/CHANGELOG.md) | Historical production issues, root causes, fixes, and verification evidence |
+| [Code Citations](docs/CODE_CITATIONS.md) | Retained third-party code-attribution record |

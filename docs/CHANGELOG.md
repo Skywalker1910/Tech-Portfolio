@@ -1,6 +1,8 @@
-# Issue & Fix Changelog
+# Operational Incident Log
 
-A running log of bugs, issues, and fixes for this project. Each entry records what was broken, what caused it, how it was fixed, and when.
+A historical log of production-impacting failures and their verified corrections. Current architecture and configuration are documented in [AWS Infrastructure](AWS_INFRASTRUCTURE.md), [System Architecture](ARCHITECTURE.md), and [Security Model](SECURITY.md); this file preserves incident context rather than serving as current setup guidance.
+
+> Current-state note: the application now uses a dedicated Amplify SSR compute role for runtime AWS access. References below to the earlier logging-role or long-lived credential workaround describe the system at the time of the incident and are superseded by the role-based design in the current infrastructure documentation.
 
 ---
 

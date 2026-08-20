@@ -2,12 +2,12 @@
 
 ## Overview
 
-The portfolio is a Next.js 16 application deployed primarily as an AWS Amplify SSR application. It combines public portfolio pages, BB-8’s retrieval-augmented chat, a private owner-operated Command Center, two DynamoDB tables, Amazon S3 Vectors, and selected external APIs.
+My portfolio is a Next.js 16 application deployed primarily as an AWS Amplify SSR application. It combines public portfolio pages, BB-8’s retrieval-augmented chat, a private Command Center I operate, two DynamoDB tables, Amazon S3 Vectors, first-party analytics, and selected external APIs.
 
 ```mermaid
 flowchart LR
     Visitor([Visitor])
-    Admin([Aditya / Admin])
+    Admin([Me / Admin])
     GitHubRepo[(GitHub repository)]
 
     subgraph AWS[AWS]
@@ -87,6 +87,18 @@ flowchart TB
 ```
 
 Client components handle animation and interaction. Server route handlers validate untrusted input, keep credentials private, access AWS services, and call external APIs. Admin data mutations are never performed directly from the browser against AWS.
+
+## Component architecture references
+
+This document describes how the complete application fits together. Detailed subsystem configuration and flows are maintained separately:
+
+| Subsystem | Detailed reference |
+|---|---|
+| AWS delivery, compute role, DynamoDB, S3 Vectors, DNS | [AWS Infrastructure](AWS_INFRASTRUCTURE.md) |
+| Corpus, chunking, indexing, hybrid retrieval, generation, tools | [BB-8 RAG System](RAG.md) |
+| Analytics tiers, attributes, traffic sources, engagement, dashboard | [Visitor Analytics](ANALYTICS.md) |
+| Project and experience models, publishing, fallback, RAG sync | [Live Content System](CONTENT_SYSTEM.md) |
+| Authentication, secrets, validation, privacy, limitations | [Security Model](SECURITY.md) |
 
 ## BB-8 request flow
 
@@ -173,7 +185,7 @@ Composite primary key: `pk` and `sk`.
 | `ANALYTICS#YYYY-MM-DD` | `CONTEXT#<hash>` | Daily coarse device, viewport, location, and source aggregates |
 | `ANALYTICS_SESSION#YYYY-MM-DD` | `<path>#<hash>` | Pseudonymous daily visit-session deduplication records |
 | `ANALYTICS_VISITS#YYYY-MM-DD` | `<startedAt>#<visitHash>` | Recent-visit index for the admin dashboard |
-| `VISITOR#<visitorHash>` | `PROFILE` | Pseudonymous first/last-seen time, visit counter, and optional owner-assigned audience segment |
+| `VISITOR#<visitorHash>` | `PROFILE` | Pseudonymous first/last-seen time, visit counter, and optional audience segment I assign |
 | `VISITOR#<visitorHash>` | `VISIT#<visitHash>` | Numbered visit summary, coarse context, and timestamps |
 | `VISITOR#<visitorHash>` | `VISIT#<visitHash>#EVENT#<time>#<event>` | Timestamped public-page activity |
 
@@ -209,15 +221,30 @@ sequenceDiagram
 
 Basic measurement is cookieless and does not create a persistent visitor identity. Enhanced measurement is opt-in and adds a random browser identifier, visit numbering, route sequences, and broad traffic-source categories. Audience classifications such as recruiter or technical peer are assigned manually in the Command Center; geography and device data never infer them automatically.
 
+Enhanced traffic source uses the browser referrer and stores only an allow-listed category plus validated hostname. Complete URLs, query parameters, search terms, and UTM values are not retained. Basic events have no traffic-source field and appear as Basic measurement in dashboard source totals.
+
+## Data ownership
+
+| Data | Controller/source | Storage | Public exposure |
+|---|---|---|---|
+| Stable portfolio facts | Source-controlled knowledge | Repository bundle | Through pages and grounded chat |
+| Live projects/experience | Me | `portfolio-content` | Published records only |
+| Contact messages | Visitor submission | `portfolio-contacts` | Never public |
+| RAG settings/status | Me / application | `portfolio-content` | Protected admin only |
+| Vectorized chunks | Indexer | S3 Vectors | Returned only through grounded server retrieval |
+| Basic analytics | First-party tracker | Aggregates in `portfolio-content` | Protected admin only |
+| Enhanced journeys | Consenting browser | Pseudonymous records in `portfolio-content` | Protected admin only |
+| Chat transcript | Visitor browser | Same-tab `sessionStorage` | Visible only in that browser tab |
+
 ## Authentication and trust boundaries
 
-1. The owner posts `ADMIN_KEY` to `/api/admin/session`.
+1. I submit `ADMIN_KEY` to `/api/admin/session`.
 2. The server uses constant-time comparison and issues a signed eight-hour session cookie.
 3. The cookie is `HttpOnly`, `SameSite=Strict`, and `Secure` in production.
 4. Protected APIs validate the signature and expiration on every request.
 5. All content fields, URLs, enums, IDs, arrays, and analytics paths are validated server-side.
 
-This model is appropriate for one owner. A multi-user administration product should replace it with Cognito or another identity provider and role-based authorization.
+This model is appropriate for my single-admin workflow. If I expand administration to multiple users, I should replace it with Cognito or another identity provider and role-based authorization.
 
 ## Failure behavior
 

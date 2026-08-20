@@ -5,14 +5,14 @@ Changes reach production through a pull request into `main`. Direct pushes to `m
 ## Standard workflow
 
 1. Create a focused branch and make the change.
-2. Run `npm run check` locally.
+2. Confirm the change is ready for the repository quality gate.
 3. Push the branch and open a pull request with `main` as the base.
 4. Complete the repository pull-request template and review the full diff.
 5. Wait for the `Quality gate` check to pass.
-6. Test the relevant application flows in an Amplify preview when the change depends on AWS, OpenAI, browser behavior, or responsive layout.
-7. Squash-merge the pull request and monitor the production Amplify deployment.
+6. Squash-merge the pull request after review and required checks pass.
+7. Monitor the production Amplify deployment and verify the affected application flows after release.
 
-The CI workflow intentionally uses local RAG retrieval and does not receive AWS or OpenAI secrets. This makes pull requests safe to validate, including pull requests from forks. Run `npm run rag:evaluate:s3` separately when changes affect embeddings, S3 Vectors, retrieval thresholds, or the indexed corpus.
+The CI workflow intentionally uses deterministic keyword RAG retrieval and does not receive AWS or OpenAI secrets. This makes pull requests safe to validate, including pull requests from forks. Semantic retrieval is verified as a controlled operational check when changes affect embeddings, S3 Vectors, retrieval thresholds, or the indexed corpus.
 
 ## Review checklist
 
@@ -42,7 +42,7 @@ It installs the lockfile, runs ESLint, checks TypeScript, evaluates the no-cost 
 In GitHub, open **Settings → Branches → Add branch protection rule**, use the branch pattern `main`, and enable:
 
 - Require a pull request before merging.
-- Require approvals. Use one approval when another reviewer is available; a solo-maintainer repository may leave this disabled.
+- Require approvals. I use one approval when another reviewer is available and may leave this disabled when I am the only reviewer.
 - Dismiss stale approvals when new commits are pushed.
 - Require status checks to pass and select `Quality gate` after it has run at least once.
 - Require branches to be up to date before merging.
@@ -50,7 +50,9 @@ In GitHub, open **Settings → Branches → Add branch protection rule**, use th
 - Block force pushes and branch deletion.
 - Apply the rule to administrators if production should never bypass review.
 
-Do not require AWS/OpenAI integration checks on every pull request: those checks need secrets, can incur cost, and should instead run in a controlled staging environment.
+Do not require AWS/OpenAI integration checks on every pull request: those checks need secrets, can incur cost, and should run only as controlled operator verification when the affected service changes.
+
+The repository currently deploys only `main` through Amplify. A feature branch or pull request passing GitHub checks does not create an application preview unless an Amplify preview branch is configured separately.
 
 ## After merge
 
