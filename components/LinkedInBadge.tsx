@@ -1,7 +1,8 @@
 "use client";
 
-import Script from "next/script";
 import { motion } from "framer-motion";
+import { ExternalLink } from "lucide-react";
+import { FaLinkedin } from "react-icons/fa";
 
 export default function LinkedInBadge() {
   return (
@@ -11,30 +12,16 @@ export default function LinkedInBadge() {
       transition={{ duration: 0.4 }}
       className="rounded-xl"
     >
-      {/* LinkedIn badge — constrained inside parent */}
-      <div
-        className="badge-base LI-profile-badge"
-        data-locale="en_US"
-        data-size="medium"
-        data-theme="dark"
-        data-type="HORIZONTAL"
-        data-vanity="more-aditya"
-        data-version="v1"
-
+      <a
+        className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:border-sky-500/35 hover:shadow-sm"
+        href="https://www.linkedin.com/in/more-aditya"
+        target="_blank"
+        rel="noopener noreferrer"
       >
-        <a
-          className="badge-base__link LI-simple-link"
-          href="https://www.linkedin.com/in/more-aditya?trk=profile-badge"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Aditya More
-        </a>
-      </div>
-      <Script
-        src="https://platform.linkedin.com/badges/js/profile.js"
-        strategy="lazyOnload"
-      />
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400"><FaLinkedin size={19}/></span>
+        <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-[var(--text)]">Aditya More</span><span className="block text-xs text-[var(--muted)]">View my LinkedIn profile</span></span>
+        <ExternalLink size={14} className="text-[var(--sub-muted)]"/>
+      </a>
     </motion.div>
   );
 }

@@ -1,28 +1,52 @@
 import { createHash } from "node:crypto";
 import { BatchGetCommand, GetCommand, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, PORTFOLIO_TABLE } from "@/lib/dynamodb";
+import { retentionEpoch } from "@/lib/analytics-policy";
 
 const DAY_MS = 86_400_000;
-const ANALYTICS_RETENTION_DAYS = 365;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const VISITOR_KEY_PATTERN = /^[0-9a-f]{64}$/;
 const isoDay = (date: Date) => date.toISOString().slice(0, 10);
-const expiresAt = () => Math.floor((Date.now() + ANALYTICS_RETENTION_DAYS * DAY_MS) / 1000);
 const hashId = (value: string) => createHash("sha256").update(value).digest("hex");
 
 export const AUDIENCE_SEGMENTS = ["unclassified", "recruiter", "hiring-manager", "technical-peer", "student", "general"] as const;
 export type AudienceSegment = typeof AUDIENCE_SEGMENTS[number];
 export type AnalyticsClientHints = { platform?:unknown; touchPoints?:unknown; viewportWidth?:unknown };
+export type AnalyticsLocation = {
+  countryCode:string|null;
+  country:string|null;
+  region:string|null;
+  regionCode:string|null;
+};
 export type AnalyticsContext = {
-  location:{ countryCode:string|null; region:string|null };
+  location:AnalyticsLocation;
   device:{ type:"Mobile"|"Tablet"|"Desktop"|"Unknown"; os:string; browser:string };
   viewport:string;
 };
-export type TrafficSource = { category:"Direct"|"Internal"|"Search"|"Social"|"Referral"; host:string|null };
+export type TrafficSource = { category:"direct"|"internal"|"search"|"social"|"professional_network"|"github"|"referral"|"other"; host:string|null };
+export type ChatTokenUsage = { inputTokens:number; outputTokens:number; totalTokens:number; cachedTokens:number };
+export type ChatTelemetryRecordInput = {
+  visitorId:string;
+  sessionId:string;
+  chatSessionId:string;
+  successful:boolean;
+  durationMs:number;
+  model:string;
+  usage:ChatTokenUsage;
+  retrievalMode?:string|null;
+  retrievalFallback?:boolean;
+  actionType?:string|null;
+  detailed:boolean;
+};
+export const BASIC_EVENT_NAMES = ["project_opened", "demo_started", "demo_completed", "external_link_clicked", "contact_form_started", "contact_form_submitted"] as const;
+export type BasicEventName = typeof BASIC_EVENT_NAMES[number];
+export type BasicFeatureEvent = { eventName:BasicEventName; page:string; feature:string; metadata:{ targetCategory?:"github"|"linkedin"|"demo"|"resume"|"other" } };
 
 type OperationalPageViewInput = {
   path:string;
   eventId:string;
+  visitorId:string;
+  sessionId:string;
   context:AnalyticsContext;
   source:TrafficSource|null;
 };
@@ -49,6 +73,72 @@ export function sanitizeAudienceSegment(value: unknown): AudienceSegment | null 
 
 export function sanitizeVisitorKey(value: unknown) {
   return typeof value === "string" && VISITOR_KEY_PATTERN.test(value) ? value : null;
+}
+
+export function sanitizeBasicFeatureEvent(value:unknown):BasicFeatureEvent|null {
+  if (!value || typeof value !== "object") return null;
+  const input = value as { eventName?:unknown; page?:unknown; feature?:unknown; metadata?:unknown };
+  if (typeof input.eventName !== "string" || !(BASIC_EVENT_NAMES as readonly string[]).includes(input.eventName)) return null;
+  const page = sanitizeTrackedPath(input.page);
+  const feature = typeof input.feature === "string" && /^[a-z0-9:_-]{1,80}$/.test(input.feature) ? input.feature : null;
+  if (!page || !feature) return null;
+  const metadataInput = input.metadata && typeof input.metadata === "object" ? input.metadata as { targetCategory?:unknown } : {};
+  const targetCategories = new Set(["github", "linkedin", "demo", "resume", "other"]);
+  const targetCategory = typeof metadataInput.targetCategory === "string" && targetCategories.has(metadataInput.targetCategory) ? metadataInput.targetCategory as BasicFeatureEvent["metadata"]["targetCategory"] : undefined;
+  return { eventName:input.eventName as BasicEventName, page, feature, metadata:targetCategory ? { targetCategory } : {} };
+}
+
+export function getAnalyticsVisitorReference(value: unknown) {
+  const visitorId = sanitizeAnalyticsId(value);
+  if (!visitorId) return null;
+  const visitorKey = hashId(visitorId);
+  return { visitorKey, visitorId:visitorKey.slice(0, 12) };
+}
+
+export function buildChatTelemetryRecord(input:ChatTelemetryRecordInput) {
+  return {
+    eventName:input.successful ? "request_success" : "request_failure",
+    visitorId:hashId(input.visitorId).slice(0, 12),
+    visitorKey:hashId(input.visitorId),
+    sessionId:hashId(input.sessionId).slice(0, 12),
+    sessionKey:hashId(input.sessionId),
+    chatSessionId:hashId(input.chatSessionId).slice(0, 12),
+    chatSessionKey:hashId(input.chatSessionId),
+    responseLatencyMs:Math.max(0, Math.round(input.durationMs)),
+    model:input.model.slice(0, 80),
+    tokenCount:Math.max(0, Math.round(input.usage.totalTokens)),
+    ragUsed:Boolean(input.retrievalMode),
+    ragFallback:Boolean(input.retrievalFallback),
+    ...(input.detailed && input.actionType ? { agentAction:input.actionType.slice(0, 40), agentActionSuccess:input.successful } : {}),
+  };
+}
+
+export function buildMandatoryTelemetryRecord(input:{
+  eventId:string;
+  visitorId:string;
+  sessionId:string;
+  location:AnalyticsLocation;
+  timestamp:string;
+  expiresAt:number;
+}) {
+  const eventKey = hashId(input.eventId);
+  const visitorKey = hashId(input.visitorId);
+  const sessionKey = hashId(input.sessionId);
+  return {
+    pk:`MANDATORY_EVENT#${eventKey}`,
+    sk:"SUMMARY",
+    eventId:eventKey.slice(0, 12),
+    eventKey,
+    eventName:"visitor_session_started" as const,
+    day:input.timestamp.slice(0, 10),
+    occurredAt:input.timestamp,
+    visitorId:visitorKey.slice(0, 12),
+    visitorKey,
+    sessionId:sessionKey.slice(0, 12),
+    sessionKey,
+    location:input.location,
+    expiresAt:input.expiresAt,
+  };
 }
 
 function cleanHeader(value: string | null, maxLength = 80) {
@@ -101,13 +191,12 @@ export function getAnalyticsContext(headers: Headers, hints: AnalyticsClientHint
   const safeHints = hints && typeof hints === "object" ? hints : {};
   const countryCandidate = cleanHeader(headers.get("cloudfront-viewer-country") ?? headers.get("x-vercel-ip-country"), 2)?.toUpperCase() ?? null;
   const countryCode = countryCandidate && /^[A-Z]{2}$/.test(countryCandidate) ? countryCandidate : null;
-  const region = cleanHeader(
-    headers.get("cloudfront-viewer-country-region-name") ??
-    headers.get("cloudfront-viewer-country-region") ??
-    headers.get("x-vercel-ip-country-region"),
-  );
+  const region = cleanHeader(headers.get("cloudfront-viewer-country-region-name"));
+  const regionCandidate = cleanHeader(headers.get("cloudfront-viewer-country-region") ?? headers.get("x-vercel-ip-country-region"), 12)?.toUpperCase() ?? null;
+  const regionCode = regionCandidate && /^[A-Z0-9-]{1,12}$/.test(regionCandidate) ? regionCandidate : null;
+  const country = cleanHeader(headers.get("cloudfront-viewer-country-name"));
   return {
-    location:{ countryCode, region },
+    location:{ countryCode, country, region, regionCode },
     device:detectDevice(headers.get("user-agent") ?? "", safeHints),
     viewport:viewportBucket(safeHints.viewportWidth),
   };
@@ -116,7 +205,7 @@ export function getAnalyticsContext(headers: Headers, hints: AnalyticsClientHint
 export function sanitizeTrafficSource(value: unknown): TrafficSource | null {
   if (!value || typeof value !== "object") return null;
   const input = value as { category?:unknown; host?:unknown };
-  const categories = new Set<TrafficSource["category"]>(["Direct", "Internal", "Search", "Social", "Referral"]);
+  const categories = new Set<TrafficSource["category"]>(["direct", "internal", "search", "social", "professional_network", "github", "referral", "other"]);
   if (typeof input.category !== "string" || !categories.has(input.category as TrafficSource["category"])) return null;
   const rawHost = typeof input.host === "string" ? input.host.toLowerCase().trim().slice(0, 120) : "";
   const host = rawHost && /^[a-z0-9.-]+$/.test(rawHost) ? rawHost : null;
@@ -130,7 +219,9 @@ function isConditionalFailure(error: unknown) {
 function contextKey(context: AnalyticsContext, source: TrafficSource | null) {
   return hashId(JSON.stringify([
     context.location.countryCode,
+    context.location.country,
     context.location.region,
+    context.location.regionCode,
     context.device.type,
     context.device.os,
     context.device.browser,
@@ -140,12 +231,266 @@ function contextKey(context: AnalyticsContext, source: TrafficSource | null) {
   ])).slice(0, 24);
 }
 
+function locationKey(location: AnalyticsLocation) {
+  return hashId(JSON.stringify([location.countryCode, location.country, location.region, location.regionCode])).slice(0, 24);
+}
+
+export async function recordMandatoryVisitorSession(input:{ eventId:string; visitorId:string; sessionId:string; location:AnalyticsLocation }) {
+  const now = new Date();
+  const timestamp = now.toISOString();
+  const day = isoDay(now);
+  const expiration = retentionEpoch("mandatory", now.getTime());
+  const visitorKey = hashId(input.visitorId);
+  const sessionKey = hashId(input.sessionId);
+  const event = buildMandatoryTelemetryRecord({ ...input, timestamp, expiresAt:expiration });
+
+  try {
+    await docClient.send(new PutCommand({
+      TableName:PORTFOLIO_TABLE,
+      Item:event,
+      ConditionExpression:"attribute_not_exists(pk)",
+    }));
+  } catch (error) {
+    if (isConditionalFailure(error)) return { duplicate:true, day };
+    throw error;
+  }
+
+  let uniqueVisitor = 0;
+  try {
+    await docClient.send(new PutCommand({
+      TableName:PORTFOLIO_TABLE,
+      Item:{ pk:`MANDATORY_VISITORS#${day}`, sk:`${locationKey(input.location)}#${visitorKey}`, expiresAt:expiration },
+      ConditionExpression:"attribute_not_exists(pk)",
+    }));
+    uniqueVisitor = 1;
+  } catch (error) {
+    if (!isConditionalFailure(error)) throw error;
+  }
+
+  await docClient.send(new UpdateCommand({
+    TableName:PORTFOLIO_TABLE,
+    Key:{ pk:`ANALYTICS#${day}`, sk:`GEO#${locationKey(input.location)}` },
+    UpdateExpression:"SET #day = :day, #location = :location, updatedAt = :now, expiresAt = :expires ADD #visits :one, #visitors :visitor",
+    ExpressionAttributeNames:{ "#day":"day", "#location":"location", "#visits":"visits", "#visitors":"visitors" },
+    ExpressionAttributeValues:{ ":day":day, ":location":input.location, ":now":timestamp, ":expires":expiration, ":one":1, ":visitor":uniqueVisitor },
+  }));
+  return { duplicate:false, day, timestamp, visitorId:visitorKey.slice(0, 12), sessionId:sessionKey.slice(0, 12) };
+}
+
+export async function recordBasicFeatureEvent(input:{ eventId:string; visitorId:string; sessionId:string; event:BasicFeatureEvent }) {
+  const now = new Date();
+  const timestamp = now.toISOString();
+  const day = isoDay(now);
+  const expiration = retentionEpoch("basic", now.getTime());
+  const eventHash = hashId(input.eventId);
+  const visitorKey = hashId(input.visitorId);
+  const sessionKey = hashId(input.sessionId);
+  try {
+    await docClient.send(new PutCommand({
+      TableName:PORTFOLIO_TABLE,
+      Item:{
+        pk:`OP_EVENT#${eventHash}`,
+        sk:"SUMMARY",
+        eventId:eventHash.slice(0, 12),
+        eventKey:eventHash,
+        eventName:input.event.eventName,
+        occurredAt:timestamp,
+        day,
+        page:input.event.page,
+        feature:input.event.feature,
+        metadata:input.event.metadata,
+        visitorId:visitorKey.slice(0, 12),
+        visitorKey,
+        sessionId:sessionKey.slice(0, 12),
+        sessionKey,
+        expiresAt:expiration,
+      },
+      ConditionExpression:"attribute_not_exists(pk)",
+    }));
+  } catch (error) {
+    if (isConditionalFailure(error)) return { duplicate:true, day };
+    throw error;
+  }
+  await docClient.send(new UpdateCommand({
+    TableName:PORTFOLIO_TABLE,
+    Key:{ pk:`ANALYTICS#${day}`, sk:`FEATURE#${input.event.eventName}#${hashId(input.event.feature).slice(0, 16)}` },
+    UpdateExpression:"SET #day = :day, eventName = :eventName, feature = :feature, metadata = :metadata, updatedAt = :now, expiresAt = :expires ADD #count :one",
+    ExpressionAttributeNames:{ "#day":"day", "#count":"count" },
+    ExpressionAttributeValues:{ ":day":day, ":eventName":input.event.eventName, ":feature":input.event.feature, ":metadata":input.event.metadata, ":now":timestamp, ":expires":expiration, ":one":1 },
+  }));
+  return { duplicate:false, day };
+}
+
+async function ensureChatSession(day: string, sessionId: string | null, expiration: number) {
+  if (!sessionId) return false;
+  try {
+    await docClient.send(new PutCommand({
+      TableName:PORTFOLIO_TABLE,
+      Item:{ pk:`ANALYTICS_CHAT_SESSIONS#${day}`, sk:hashId(sessionId), expiresAt:expiration },
+      ConditionExpression:"attribute_not_exists(pk)",
+    }));
+    return true;
+  } catch (error) {
+    if (isConditionalFailure(error)) return false;
+    throw error;
+  }
+}
+
+async function recordChatContext(day: string, context: AnalyticsContext, requests: number, opens: number, sessions: number, expiration: number) {
+  await docClient.send(new UpdateCommand({
+    TableName:PORTFOLIO_TABLE,
+    Key:{ pk:`ANALYTICS#${day}`, sk:`CHAT_CONTEXT#${contextKey(context, null)}` },
+    UpdateExpression:"SET #day = :day, #location = :location, device = :device, viewport = :viewport, updatedAt = :now, expiresAt = :expires ADD #requests :requests, #opens :opens, #sessions :sessions",
+    ExpressionAttributeNames:{ "#day":"day", "#location":"location", "#requests":"requests", "#opens":"opens", "#sessions":"sessions" },
+    ExpressionAttributeValues:{
+      ":day":day,
+      ":location":context.location,
+      ":device":context.device,
+      ":viewport":context.viewport,
+      ":now":new Date().toISOString(),
+      ":expires":expiration,
+      ":requests":requests,
+      ":opens":opens,
+      ":sessions":sessions,
+    },
+  }));
+}
+
+export async function recordChatOpen(input:{ eventId:string; visitorId:string; sessionId:string; chatSessionId:string; context:AnalyticsContext; detailed:boolean }) {
+  const now = new Date();
+  const timestamp = now.toISOString();
+  const day = isoDay(now);
+  const expiration = retentionEpoch("bb8", now.getTime());
+  try {
+    await docClient.send(new PutCommand({
+      TableName:PORTFOLIO_TABLE,
+      Item:{
+        pk:`ANALYTICS_CHAT_EVENT#${hashId(input.eventId)}`,
+        sk:"OPEN",
+        eventId:hashId(input.eventId).slice(0, 12),
+        eventKey:hashId(input.eventId),
+        eventName:"copilot_opened",
+        day,
+        occurredAt:timestamp,
+        visitorId:hashId(input.visitorId).slice(0, 12),
+        visitorKey:hashId(input.visitorId),
+        sessionId:hashId(input.sessionId).slice(0, 12),
+        sessionKey:hashId(input.sessionId),
+        chatSessionId:hashId(input.chatSessionId).slice(0, 12),
+        chatSessionKey:hashId(input.chatSessionId),
+        detailed:input.detailed,
+        expiresAt:expiration,
+      },
+      ConditionExpression:"attribute_not_exists(pk)",
+    }));
+  } catch (error) {
+    if (isConditionalFailure(error)) return { duplicate:true, day };
+    throw error;
+  }
+  const firstSessionEvent = await ensureChatSession(day, input.chatSessionId, expiration);
+  await Promise.all([
+    docClient.send(new UpdateCommand({
+      TableName:PORTFOLIO_TABLE,
+      Key:{ pk:`ANALYTICS#${day}`, sk:"CHAT#SUMMARY" },
+      UpdateExpression:"SET #day = :day, updatedAt = :now, expiresAt = :expires ADD #opens :one, #sessions :sessions",
+      ExpressionAttributeNames:{ "#day":"day", "#opens":"opens", "#sessions":"sessions" },
+      ExpressionAttributeValues:{ ":day":day, ":now":timestamp, ":expires":expiration, ":one":1, ":sessions":firstSessionEvent ? 1 : 0 },
+    })),
+    recordChatContext(day, input.context, 0, 1, firstSessionEvent ? 1 : 0, expiration),
+  ]);
+  return { duplicate:false, day };
+}
+
+export async function recordChatUsage(input: {
+  eventId:string;
+  visitorId:string;
+  sessionId:string;
+  chatSessionId:string;
+  context:AnalyticsContext;
+  model:string;
+  successful:boolean;
+  durationMs:number;
+  retrievalMode?:string|null;
+  retrievalFallback?:boolean;
+  actionType?:string|null;
+  usage?:ChatTokenUsage|null;
+  detailed:boolean;
+}) {
+  const now = new Date();
+  const timestamp = now.toISOString();
+  const day = isoDay(now);
+  const expiration = retentionEpoch("bb8", now.getTime());
+  const firstSessionEvent = await ensureChatSession(day, input.chatSessionId, expiration);
+  const usage = input.usage ?? { inputTokens:0, outputTokens:0, totalTokens:0, cachedTokens:0 };
+  const success = input.successful ? 1 : 0;
+  const failure = input.successful ? 0 : 1;
+  const fallback = input.retrievalFallback ? 1 : 0;
+  const modelKey = hashId(input.model).slice(0, 16);
+
+  const writes: Promise<unknown>[] = [
+    docClient.send(new PutCommand({
+      TableName:PORTFOLIO_TABLE,
+      Item:{
+        pk:`ANALYTICS_CHAT_EVENT#${hashId(input.eventId)}`,
+        sk:"REQUEST",
+        eventId:hashId(input.eventId).slice(0, 12),
+        eventKey:hashId(input.eventId),
+        day,
+        occurredAt:timestamp,
+        ...buildChatTelemetryRecord({ ...input, usage }),
+        expiresAt:expiration,
+      },
+    })),
+    docClient.send(new UpdateCommand({
+      TableName:PORTFOLIO_TABLE,
+      Key:{ pk:`ANALYTICS#${day}`, sk:"CHAT#SUMMARY" },
+      UpdateExpression:"SET #day = :day, updatedAt = :now, expiresAt = :expires ADD #requests :one, #sessions :sessions, #successful :success, #failed :failure, #duration :duration, #input :input, #output :output, #total :total, #cached :cached, #fallback :fallback",
+      ExpressionAttributeNames:{ "#day":"day", "#requests":"requests", "#sessions":"sessions", "#successful":"successfulRequests", "#failed":"failedRequests", "#duration":"durationMs", "#input":"inputTokens", "#output":"outputTokens", "#total":"totalTokens", "#cached":"cachedTokens", "#fallback":"fallbackRequests" },
+      ExpressionAttributeValues:{
+        ":day":day, ":now":timestamp, ":expires":expiration, ":one":1, ":sessions":firstSessionEvent ? 1 : 0,
+        ":success":success, ":failure":failure, ":duration":Math.max(0, Math.round(input.durationMs)),
+        ":input":usage.inputTokens, ":output":usage.outputTokens, ":total":usage.totalTokens, ":cached":usage.cachedTokens, ":fallback":fallback,
+      },
+    })),
+    docClient.send(new UpdateCommand({
+      TableName:PORTFOLIO_TABLE,
+      Key:{ pk:`ANALYTICS#${day}`, sk:`CHAT_MODEL#${modelKey}` },
+      UpdateExpression:"SET #day = :day, #model = :model, updatedAt = :now, expiresAt = :expires ADD #requests :one, #input :input, #output :output, #total :total",
+      ExpressionAttributeNames:{ "#day":"day", "#model":"model", "#requests":"requests", "#input":"inputTokens", "#output":"outputTokens", "#total":"totalTokens" },
+      ExpressionAttributeValues:{ ":day":day, ":model":input.model, ":now":timestamp, ":expires":expiration, ":one":1, ":input":usage.inputTokens, ":output":usage.outputTokens, ":total":usage.totalTokens },
+    })),
+    recordChatContext(day, input.context, 1, 0, firstSessionEvent ? 1 : 0, expiration),
+  ];
+
+  if (input.detailed && input.actionType) {
+    writes.push(docClient.send(new UpdateCommand({
+      TableName:PORTFOLIO_TABLE,
+      Key:{ pk:`ANALYTICS#${day}`, sk:`CHAT_ACTION#${input.actionType.slice(0, 40)}` },
+      UpdateExpression:"SET #day = :day, actionType = :action, updatedAt = :now, expiresAt = :expires ADD #count :one",
+      ExpressionAttributeNames:{ "#day":"day", "#count":"count" },
+      ExpressionAttributeValues:{ ":day":day, ":action":input.actionType.slice(0, 40), ":now":timestamp, ":expires":expiration, ":one":1 },
+    })));
+  }
+  if (input.retrievalMode) {
+    writes.push(docClient.send(new UpdateCommand({
+      TableName:PORTFOLIO_TABLE,
+      Key:{ pk:`ANALYTICS#${day}`, sk:`CHAT_RETRIEVAL#${input.retrievalMode.slice(0, 40)}` },
+      UpdateExpression:"SET #day = :day, retrievalMode = :mode, updatedAt = :now, expiresAt = :expires ADD #count :one",
+      ExpressionAttributeNames:{ "#day":"day", "#count":"count" },
+      ExpressionAttributeValues:{ ":day":day, ":mode":input.retrievalMode.slice(0, 40), ":now":timestamp, ":expires":expiration, ":one":1 },
+    })));
+  }
+  await Promise.all(writes);
+}
+
 export async function recordOperationalPageView(input: OperationalPageViewInput) {
   const now = new Date();
   const timestamp = now.toISOString();
   const day = isoDay(now);
-  const expiration = expiresAt();
+  const expiration = retentionEpoch("basic", now.getTime());
   const eventHash = hashId(input.eventId);
+  const visitorKey = hashId(input.visitorId);
+  const sessionKey = hashId(input.sessionId);
   const analyticsContextKey = contextKey(input.context, input.source);
 
   try {
@@ -154,9 +499,16 @@ export async function recordOperationalPageView(input: OperationalPageViewInput)
       Item:{
         pk:`OP_EVENT#${eventHash}`,
         sk:"SUMMARY",
+        eventId:eventHash.slice(0, 12),
+        eventKey:eventHash,
+        eventName:"page_view",
         day,
         path:input.path,
         occurredAt:timestamp,
+        visitorId:visitorKey.slice(0, 12),
+        visitorKey,
+        sessionId:sessionKey.slice(0, 12),
+        sessionKey,
         contextKey:analyticsContextKey,
         context:input.context,
         source:input.source,
@@ -193,6 +545,7 @@ export async function recordOperationalPageView(input: OperationalPageViewInput)
         ":one":1,
       },
     })),
+    recordUniquePageSession(input.path, input.sessionId),
   ]);
 
   return { duplicate:false, day };
@@ -233,10 +586,10 @@ export async function recordPageEngagement(eventId: string, durationMs: number) 
   return { accepted:true, duplicate:false };
 }
 
-async function recordUniquePageSession(path: string, visitHash: string) {
+async function recordUniquePageSession(path: string, sessionId: string) {
   const day = isoDay(new Date());
-  const expiration = expiresAt();
-  const sessionHash = hashId(`${day}:${path}:${visitHash}`).slice(0, 32);
+  const expiration = retentionEpoch("basic");
+  const sessionHash = hashId(`${day}:${path}:${sessionId}`).slice(0, 32);
   try {
     await docClient.send(new PutCommand({
       TableName:PORTFOLIO_TABLE,
@@ -258,7 +611,7 @@ async function recordUniquePageSession(path: string, visitHash: string) {
 export async function recordPageActivity(input: PageActivityInput) {
   const now = new Date();
   const timestamp = now.toISOString();
-  const expiration = expiresAt();
+  const expiration = retentionEpoch("enhanced", now.getTime());
   const visitorHash = hashId(input.visitorId);
   const visitHash = hashId(input.visitId);
   const eventHash = hashId(input.eventId).slice(0, 16);
@@ -378,7 +731,6 @@ export async function recordPageActivity(input: PageActivityInput) {
         ":one":1,
       },
     })),
-    recordUniquePageSession(input.path, visitHash),
   ]);
   return { accepted:true, duplicate:false };
 }
@@ -421,6 +773,8 @@ export async function getTrafficReport(days = 30) {
 
   const daily = analyticsResponses.map((response, index) => {
     const pageItems = (response.Items ?? []).filter((item) => String(item.sk).startsWith("PAGE#"));
+    const geoItems = (response.Items ?? []).filter((item) => String(item.sk).startsWith("GEO#"));
+    const chatSummary = (response.Items ?? []).find((item) => String(item.sk) === "CHAT#SUMMARY");
     const pages = pageItems.map((item) => ({
       path:String(item.path),
       views:Number(item.views ?? 0),
@@ -436,6 +790,11 @@ export async function getTrafficReport(days = 30) {
       engagementMs:pages.reduce((sum, page) => sum + page.engagementMs, 0),
       engagedViews:pages.reduce((sum, page) => sum + page.engagedViews, 0),
       visits,
+      mandatoryVisits:geoItems.reduce((sum, item) => sum + Number(item.visits ?? 0), 0),
+      mandatoryVisitors:geoItems.reduce((sum, item) => sum + Number(item.visitors ?? 0), 0),
+      chatOpens:Number(chatSummary?.opens ?? 0),
+      chatSessions:Number(chatSummary?.sessions ?? 0),
+      chatRequests:Number(chatSummary?.requests ?? 0),
       pages,
     };
   });
@@ -455,8 +814,18 @@ export async function getTrafficReport(days = 30) {
   const browsers = new Map<string, BreakdownValue>();
   const viewports = new Map<string, BreakdownValue>();
   const locations = new Map<string, BreakdownValue>();
+  const mandatoryLocations = new Map<string, BreakdownValue>();
+  const mandatoryRegions = new Map<string, BreakdownValue>();
   const regions = new Map<string, BreakdownValue>();
   const sources = new Map<string, BreakdownValue>();
+  const featureEvents = new Map<string, BreakdownValue>();
+  analyticsResponses.flatMap((response) => response.Items ?? []).filter((item) => String(item.sk).startsWith("GEO#")).forEach((item) => {
+    const visits = Number(item.visits ?? 0);
+    const location = item.location as AnalyticsLocation | undefined;
+    addBreakdown(mandatoryLocations, location?.countryCode ?? location?.country ?? "Unknown", visits, 0, 0);
+    const region = location?.region ?? location?.regionCode;
+    if (region) addBreakdown(mandatoryRegions, `${location?.countryCode ?? location?.country ?? "Unknown"} · ${region}`, visits, 0, 0);
+  });
   analyticsResponses.flatMap((response) => response.Items ?? []).filter((item) => String(item.sk).startsWith("CONTEXT#")).forEach((item) => {
     const views = Number(item.views ?? 0);
     const engagementMs = Number(item.engagementMs ?? 0);
@@ -469,6 +838,62 @@ export async function getTrafficReport(days = 30) {
     addBreakdown(locations, context.location?.countryCode ?? "Unknown", views, engagementMs, engagedViews);
     if (context.location?.region) addBreakdown(regions, `${context.location.countryCode ?? "Unknown"} · ${context.location.region}`, views, engagementMs, engagedViews);
     addBreakdown(sources, context.source?.category ?? "Basic measurement", views, engagementMs, engagedViews);
+  });
+  analyticsResponses.flatMap((response) => response.Items ?? []).filter((item) => String(item.sk).startsWith("FEATURE#")).forEach((item) => {
+    addBreakdown(featureEvents, `${String(item.eventName ?? "event")} · ${String(item.feature ?? "unknown")}`, Number(item.count ?? 0), 0, 0);
+  });
+
+  const chatActions = new Map<string, BreakdownValue>();
+  const chatRetrievalModes = new Map<string, BreakdownValue>();
+  const chatDevices = new Map<string, BreakdownValue>();
+  const chatLocations = new Map<string, BreakdownValue>();
+  const chatRegions = new Map<string, BreakdownValue>();
+  const chatModels = new Map<string, { label:string; requests:number; inputTokens:number; outputTokens:number; totalTokens:number }>();
+  let chatOpens = 0;
+  let chatSessions = 0;
+  let chatRequests = 0;
+  let chatSuccessfulRequests = 0;
+  let chatFailedRequests = 0;
+  let chatDurationMs = 0;
+  let chatInputTokens = 0;
+  let chatOutputTokens = 0;
+  let chatTotalTokens = 0;
+  let chatCachedTokens = 0;
+  let chatFallbackRequests = 0;
+  analyticsResponses.flatMap((response) => response.Items ?? []).forEach((item) => {
+    const sk = String(item.sk);
+    if (sk === "CHAT#SUMMARY") {
+      chatOpens += Number(item.opens ?? 0);
+      chatSessions += Number(item.sessions ?? 0);
+      chatRequests += Number(item.requests ?? 0);
+      chatSuccessfulRequests += Number(item.successfulRequests ?? 0);
+      chatFailedRequests += Number(item.failedRequests ?? 0);
+      chatDurationMs += Number(item.durationMs ?? 0);
+      chatInputTokens += Number(item.inputTokens ?? 0);
+      chatOutputTokens += Number(item.outputTokens ?? 0);
+      chatTotalTokens += Number(item.totalTokens ?? 0);
+      chatCachedTokens += Number(item.cachedTokens ?? 0);
+      chatFallbackRequests += Number(item.fallbackRequests ?? 0);
+    } else if (sk.startsWith("CHAT_ACTION#")) {
+      addBreakdown(chatActions, String(item.actionType ?? "Unknown"), Number(item.count ?? 0), 0, 0);
+    } else if (sk.startsWith("CHAT_RETRIEVAL#")) {
+      addBreakdown(chatRetrievalModes, String(item.retrievalMode ?? "Unknown"), Number(item.count ?? 0), 0, 0);
+    } else if (sk.startsWith("CHAT_CONTEXT#")) {
+      const context = item as { location?:AnalyticsLocation; device?:AnalyticsContext["device"] };
+      const requests = Number(item.requests ?? 0);
+      addBreakdown(chatDevices, context.device?.type ?? "Unknown", requests, 0, 0);
+      addBreakdown(chatLocations, context.location?.countryCode ?? context.location?.country ?? "Unknown", requests, 0, 0);
+      const region = context.location?.region ?? context.location?.regionCode;
+      if (region) addBreakdown(chatRegions, `${context.location?.countryCode ?? context.location?.country ?? "Unknown"} · ${region}`, requests, 0, 0);
+    } else if (sk.startsWith("CHAT_MODEL#")) {
+      const label = String(item.model ?? "Unknown");
+      const current = chatModels.get(label) ?? { label, requests:0, inputTokens:0, outputTokens:0, totalTokens:0 };
+      current.requests += Number(item.requests ?? 0);
+      current.inputTokens += Number(item.inputTokens ?? 0);
+      current.outputTokens += Number(item.outputTokens ?? 0);
+      current.totalTokens += Number(item.totalTokens ?? 0);
+      chatModels.set(label, current);
+    }
   });
 
   const allIndexedVisits = visitResponses.flatMap((response) => response.Items ?? []).sort((left, right) => String(right.startedAt).localeCompare(String(left.startedAt)));
@@ -532,11 +957,35 @@ export async function getTrafficReport(days = 30) {
       operatingSystems:finishBreakdown(operatingSystems),
       browsers:finishBreakdown(browsers),
       viewports:finishBreakdown(viewports),
-      locations:finishBreakdown(locations),
-      regions:finishBreakdown(regions),
+      locations:finishBreakdown(mandatoryLocations.size ? mandatoryLocations : locations),
+      regions:finishBreakdown(mandatoryRegions.size ? mandatoryRegions : regions),
       sources:finishBreakdown(sources),
+      events:finishBreakdown(featureEvents),
+    },
+    chat:{
+      opens:chatOpens,
+      sessions:chatSessions,
+      requests:chatRequests,
+      successfulRequests:chatSuccessfulRequests,
+      failedRequests:chatFailedRequests,
+      successRate:chatRequests ? Math.round(chatSuccessfulRequests / chatRequests * 100) : 0,
+      averageLatencyMs:chatRequests ? Math.round(chatDurationMs / chatRequests) : 0,
+      inputTokens:chatInputTokens,
+      outputTokens:chatOutputTokens,
+      totalTokens:chatTotalTokens,
+      cachedTokens:chatCachedTokens,
+      fallbackRequests:chatFallbackRequests,
+      fallbackRate:chatRequests ? Math.round(chatFallbackRequests / chatRequests * 100) : 0,
+      actions:finishBreakdown(chatActions),
+      retrievalModes:finishBreakdown(chatRetrievalModes),
+      devices:finishBreakdown(chatDevices),
+      locations:finishBreakdown(chatLocations),
+      regions:finishBreakdown(chatRegions),
+      models:[...chatModels.values()].sort((left, right) => right.requests - left.requests),
     },
     totals:{
+      mandatoryVisits:daily.reduce((sum, entry) => sum + entry.mandatoryVisits, 0),
+      mandatoryVisitors:daily.reduce((sum, entry) => sum + entry.mandatoryVisitors, 0),
       views:totalViews,
       uniques:daily.reduce((sum, entry) => sum + entry.uniques, 0),
       visitors:visitorIds.size,

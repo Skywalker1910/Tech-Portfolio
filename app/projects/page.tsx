@@ -3,6 +3,9 @@ import { useMemo, useState, useEffect, type ComponentType } from "react";
 import { FlaskConical, ExternalLink, FolderOpen, Brain, ShieldAlert, Languages, Eye, BookOpen, Phone, Workflow, TestTube2, Cpu, Bot, Swords, Car, Star, ClipboardList, Shield, Database, Layers, GitBranch, Search, X, ChevronDown, SlidersHorizontal, MessageSquare, Zap, CheckCircle2 } from "lucide-react";
 import { SiGithub, SiPython, SiTensorflow, SiOpencv, SiJupyter, SiCoursera, SiSelenium, SiPytorch, SiOpenai, SiScikitlearn, SiPandas, SiNumpy, SiDocker, SiPostman, SiNasa, SiFastapi, SiReact } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
+import { trackBasicAnalyticsEvent } from "@/lib/client-analytics";
+
+const projectFeature = (title:string) => `project:${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "unknown"}`;
 
 const TAG_ICONS: Record<string, ComponentType<{ size?: number; className?: string }>> = {
   "Python":                   SiPython,
@@ -409,7 +412,7 @@ export default function Projects() {
       {/* Projects Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {filtered.map((p, i) => (
-          <ProjectFancyCard key={i} project={p} index={i} onClick={() => setSelectedProject(p)} />
+          <ProjectFancyCard key={i} project={p} index={i} onClick={() => { trackBasicAnalyticsEvent("project_opened", { page:"/projects", feature:projectFeature(p.title) }); setSelectedProject(p); }} />
         ))}
       </div>
 
@@ -637,7 +640,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
               href={project.github}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"github" } }); }}
               className={`inline-flex items-center gap-1.5 text-sm font-medium ${a.badge} hover:text-[var(--text)] transition-colors`}
             >
               <SiGithub size={14} /> GitHub
@@ -647,7 +650,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
               href="https://github.com/Skywalker1910"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"github" } }); }}
               className={`inline-flex items-center gap-1.5 text-sm font-medium ${a.badge} opacity-50 hover:opacity-100 hover:text-[var(--text)] transition-all`}
             >
               <SiGithub size={14} /> GitHub
@@ -655,14 +658,14 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
           )}
           {project.demo && (
             <a href={project.demo} target="_blank" rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); trackBasicAnalyticsEvent("demo_started", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"demo" } }); }}
               className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors ml-auto">
               Demo <ExternalLink size={10} />
             </a>
           )}
           {project.link && (
             <a href={project.link} target="_blank" rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"other" } }); }}
               className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors ml-auto">
               View <ExternalLink size={10} />
             </a>
@@ -833,6 +836,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                   href={project.github}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"github" } })}
                   className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--tag-bg)] border border-[var(--border)] text-sm font-medium text-[var(--text)] hover:bg-[var(--tag-bg)] transition-colors`}
                 >
                   <SiGithub size={16} /> View on GitHub
@@ -842,6 +846,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                   href="https://github.com/Skywalker1910"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"github" } })}
                   className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--tag-bg)] border border-[var(--border)] text-sm font-medium text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--tag-bg)] transition-colors`}
                 >
                   <SiGithub size={16} /> GitHub Profile
@@ -852,6 +857,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                   href={project.demo}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackBasicAnalyticsEvent("demo_started", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"demo" } })}
                   className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
                 >
                   Demo <ExternalLink size={12} />
@@ -862,6 +868,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                   href={project.link}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"other" } })}
                   className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
                 >
                   View <ExternalLink size={12} />

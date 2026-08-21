@@ -46,21 +46,25 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
 - Eight-hour signed `HttpOnly`, `SameSite=Strict` admin session; the raw admin key is not stored in browser storage.
 - In-memory login-attempt rate limiting and legacy `x-admin-key` support for local automation.
 - Dashboard sections for:
-  - Contact messages: search, filtering, read state, sender classification, and deletion.
+  - Contact messages: search, filtering, read state, sender classification, deletion, and consent-aware links to enhanced visitor journeys.
   - Projects: create, edit, order, publish, draft, and delete.
   - Experience: create, edit, order, publish, draft, and delete.
   - RAG Control: enable semantic retrieval, tune `topK` and maximum distance, inspect index status, and deliberately reindex published content.
-  - Traffic: 7-, 30-, and 90-day summaries, engaged time, page performance, device/OS/browser/viewport/location/source breakdowns, numbered returning visits, manual audience labels, and timestamped page journeys.
+  - Traffic: 7-, 30-, and 90-day summaries, mandatory country/region reach, consented feature and page performance, optional device/OS/browser/viewport/source breakdowns, numbered returning visits, manual audience labels, timestamped journeys, and purpose-limited BB-8 activity.
+  - API Usage: expandable provider hub with a branded OpenAI dashboard for protected request, embedding, token, model, and cost reporting through a server-only Admin API key, optionally scoped to BB-8’s dedicated OpenAI project.
 
 ## Data and privacy behavior
 
 - Contact submissions are validated server-side and stored in the contacts DynamoDB table.
-- Basic first-party measurement is cookieless and opt-out. It records page views, engagement duration, server time, coarse country/region, device/OS/browser, and viewport bucket without creating a persistent visitor identity.
+- Mandatory first-party telemetry is cookieless and applies to public visits. It records random visitor/session IDs, server timestamp, country/code, and region/code without storing raw IP or creating cross-session recognition.
+- Optional basic measurement records page views, engagement duration, device/OS/browser, and viewport bucket after the visitor selects a tier.
 - Enhanced analytics requires affirmative opt-in. A random browser ID supports pseudonymous returning-visitor and Visit #2/Visit #3 reporting; a 30-minute-inactivity visit ID groups timestamped page activity and a broad source category/referring hostname.
-- Traffic sources are classified as Direct, Internal, Search, Social, or Referral from the browser referrer. Only the validated hostname is retained; complete URLs, query parameters, search terms, and UTM values are excluded.
+- Contact submissions made while enhanced analytics is active store only the hashed analytics visitor reference, allowing the private inbox to open the related journey. Basic and essential-only submissions remain unlinked.
+- Enhanced traffic sources use the controlled categories Direct, Internal, Search, Social, Professional Network, GitHub, Referral, and Other. Only a validated hostname is retained; complete URLs, query parameters, search terms, and arbitrary campaign values are excluded.
 - I can manually classify an enhanced profile as recruiter, hiring manager, technical peer, student, or general visitor. No attribute or behavior performs this classification automatically.
-- The server does not store raw IP addresses, precise location, city, postal codes, device models, fingerprints, form fields, keystrokes, or chat messages as analytics.
-- Both tiers honor Do Not Track and Global Privacy Control, can be disabled from the footer, and expire through DynamoDB TTL after approximately 365 days.
+- BB-8 telemetry is off until Basic or Enhanced consent. It records anonymous opens/sessions, outcomes, latency, model/token totals, retrieval status, and country/region/device categories; detailed actions are Enhanced-only. It never stores prompt or response text as analytics.
+- The server does not store raw IP addresses, city, county, postal codes, coordinates, device models, fingerprints, form fields, keystrokes, or chat messages as analytics.
+- Do Not Track and Global Privacy Control disable optional analytics. Mandatory visitor/session and country/region measurement remains active. Category-specific configurable TTL defaults are 90 days (mandatory and BB-8), 180 days (Basic and Enhanced), and 365 days (contacts).
 - The footer exposes persistent Analytics choices so visitors can change tiers after their initial selection.
 - Chat transcripts and BB-8 contact drafts use browser `sessionStorage`; application servers do not persist chat transcripts.
 - OpenAI requests use `store: false`.

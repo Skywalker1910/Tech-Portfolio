@@ -19,7 +19,7 @@ Common error statuses are `400` for invalid input, `401` for missing/invalid adm
 | `POST` | `/api/contact` | Validate and persist a contact message | Contacts DynamoDB table |
 | `GET` | `/api/content/projects` | Published project records with fallback | Portfolio DynamoDB table |
 | `GET` | `/api/content/experience` | Published experience records with fallback | Portfolio DynamoDB table |
-| `POST` | `/api/analytics` | Basic page/engagement event and optional enhanced journey | Portfolio DynamoDB table |
+| `POST` | `/api/analytics` | Mandatory visitor/session reach plus consented feature, page, BB-8, and Enhanced journey events | Portfolio DynamoDB table |
 | `GET` | `/api/github` | Cached GitHub profile and repository summary | GitHub REST API |
 
 ## `POST /api/chat`
@@ -32,7 +32,9 @@ The preferred contract is a `messages` array containing at most six alternating 
 {
   "messages": [
     { "role": "user", "content": "Explain the portfolio's RAG system." }
-  ]
+  ],
+  "sessionId": "UUID",
+  "client": { "viewportWidth": 1440, "touchPoints": 0 }
 }
 ```
 
@@ -66,6 +68,8 @@ Limits:
 
 `action` can be a validated navigation, resume, or contact-draft action. It is never raw model tool output. The server uses only the two latest user messages for retrieval, sends at most the six-message window to generation, and sets `store: false` on OpenAI requests.
 
+With Basic or Enhanced consent, random visitor, session, and BB-8 chat-session UUIDs support adoption counts and are SHA-256 hashed before storage. The route records outcomes, latency, model/token totals, retrieval status, and coarse country/region/device context; detailed agent-action type is Enhanced-only. It does not store prompt text, response text, source content, or raw IP addresses as analytics.
+
 ## `POST /api/contact`
 
 ### Request
@@ -75,11 +79,12 @@ Limits:
   "firstName": "Visitor",
   "lastName": "Name",
   "email": "visitor@example.com",
-  "message": "Portfolio inquiry"
+  "message": "Portfolio inquiry",
+  "analyticsVisitorId": "optional enhanced-analytics UUID"
 }
 ```
 
-All fields are required and email syntax is validated. The server assigns the UUID, timestamp, unread state, and empty sender classification. Success returns `201`.
+The four contact fields are required and email syntax is validated. `analyticsVisitorId` is optional and accepted only when it is a valid UUID. The server immediately SHA-256 hashes it and stores only the full hash and its 12-character display reference; it never persists the raw browser UUID with the contact record. The server assigns the submission UUID, timestamp, unread state, and empty sender classification. Success returns `201`.
 
 BB-8 can prepare this payload in the browser, but only the visitor can submit the endpoint.
 
@@ -89,6 +94,37 @@ BB-8 can prepare this payload in the browser, but only the visitor can submit th
 
 ## `POST /api/analytics`
 
+### Mandatory visitor session
+
+Sent once per anonymous 30-minute public session regardless of optional analytics preference:
+
+```json
+{
+  "eventType": "visitor_session_started",
+  "eventId": "UUID",
+  "visitorId": "random UUID",
+  "sessionId": "random UUID"
+}
+```
+
+The server derives only country, country code, region, and region code from trusted edge headers and adds its own timestamp. It ignores city and more precise fields and never stores the source IP. The visitor identity is session-scoped unless Enhanced consent separately permits persistent recognition.
+
+### BB-8 open
+
+```json
+{
+  "eventType": "chat_open",
+  "eventId": "UUID",
+  "visitorId": "UUID",
+  "sessionId": "UUID",
+  "chatSessionId": "UUID",
+  "tier": "basic",
+  "client": { "viewportWidth": 390, "touchPoints": 5 }
+}
+```
+
+This endpoint is called only after Basic or Enhanced consent. All UUIDs are hashed before persistence, and the event contains no chat content.
+
 ### Basic page view
 
 ```json
@@ -96,6 +132,8 @@ BB-8 can prepare this payload in the browser, but only the visitor can submit th
   "eventType": "page_view",
   "path": "/projects",
   "eventId": "UUID",
+  "visitorId": "random session-scoped UUID",
+  "sessionId": "random UUID",
   "client": {
     "platform": "browser platform",
     "touchPoints": 0,
@@ -106,7 +144,7 @@ BB-8 can prepare this payload in the browser, but only the visitor can submit th
 
 ### Enhanced page view
 
-Enhanced consent adds valid `visitorId` and `visitId` UUIDs plus an allow-listed traffic source:
+Enhanced consent reuses the persistent `visitorId` and adds a valid `visitId` plus an allow-listed traffic source:
 
 ```json
 {
@@ -114,8 +152,9 @@ Enhanced consent adds valid `visitorId` and `visitId` UUIDs plus an allow-listed
   "path": "/projects",
   "eventId": "UUID",
   "visitorId": "UUID",
+  "sessionId": "UUID",
   "visitId": "UUID",
-  "source": { "category": "Social", "host": "linkedin.com" },
+  "source": { "category": "professional_network", "host": "linkedin.com" },
   "client": { "viewportWidth": 390, "touchPoints": 5 }
 }
 ```
@@ -133,8 +172,10 @@ Enhanced consent adds valid `visitorId` and `visitId` UUIDs plus an allow-listed
 Validation and behavior:
 
 - Event IDs must be UUIDs.
-- Visitor and visit IDs must be supplied together.
-- Traffic source is ignored unless enhanced IDs are valid.
+- `visitor_session_started` accepts random visitor/session UUIDs but never a raw IP or client-provided location.
+- `chat_open` requires valid visitor, session, and BB-8 chat-session UUIDs plus a Basic or Enhanced tier.
+- Basic page and feature events require valid visitor/session UUIDs; Enhanced page events additionally carry a valid visit UUID.
+- Traffic source is ignored unless an Enhanced visit ID is valid.
 - Duration is bounded from one second to two hours.
 - Paths are query-free public routes and cannot begin with `/admin` or `/api`.
 - Request bodies are capped at 4 KiB.
@@ -174,7 +215,7 @@ The same `/api/contact` route provides private message management:
 | `PATCH` | Update `read` and/or allow-listed `senderType` |
 | `DELETE` | Delete the message matching `id` |
 
-Allowed sender types are `recruiter`, `visitor`, `friend`, `test`, or `null`.
+Allowed sender types are `recruiter`, `visitor`, `friend`, `test`, or `null`. Returned messages may contain `visitorKey` and `visitorId` when the sender submitted while enhanced analytics was active; the Command Center uses these fields to open the matching journey filter.
 
 ## Protected content operations
 
@@ -204,7 +245,7 @@ The reindex response includes chunk count, stale-vector removal count, model, di
 
 ### `GET /api/admin/analytics?days=7|30|90`
 
-Returns daily totals, page performance, coarse breakdowns, report totals, and up to 100 recent enhanced journeys. Values outside the supported range are bounded to 7–90 days, with a default of 30.
+Returns mandatory country/region visitors and visits, daily totals, consented page and feature performance, optional coarse context breakdowns, purpose-limited BB-8 telemetry, report totals, and up to 100 recent Enhanced journeys. Values outside the supported range are bounded to 7–90 days, with a default of 30.
 
 The response uses `Cache-Control: private, no-store`.
 
@@ -218,6 +259,10 @@ The response uses `Cache-Control: private, no-store`.
 ```
 
 Allowed segments are `unclassified`, `recruiter`, `hiring-manager`, `technical-peer`, `student`, and `general`. The visitor profile must already exist. Classification is an action I perform manually and is never inferred by the API.
+
+### `GET /api/admin/openai-usage?days=7|30|90`
+
+Returns a protected OpenAI organization Usage and Costs report covering completion requests, embedding requests, tokens, daily totals, model groups, and cost line items. The route requires the server-only `OPENAI_ADMIN_KEY`. When `OPENAI_PROJECT_ID` is configured, it filters the report to BB-8’s dedicated project; otherwise the report is organization-wide. Responses are private and non-cacheable in the browser, with a five-minute process-local server cache.
 
 ## Static-export behavior
 

@@ -62,7 +62,7 @@ Request IPs used for rate limiting remain in volatile memory and are not written
 
 ## Secret and AWS credential handling
 
-- `OPENAI_API_KEY`, admin secrets, AWS credential overrides, and `GITHUB_TOKEN` are server-only.
+- `OPENAI_API_KEY`, `OPENAI_ADMIN_KEY`, admin secrets, AWS credential overrides, and `GITHUB_TOKEN` are server-only.
 - `NEXT_PUBLIC_*` is reserved for values intentionally exposed to the browser.
 - Production AWS access is designed to use the Amplify SSR compute role and temporary credentials.
 - Long-lived `APP_AWS_ACCESS_KEY_ID` and `APP_AWS_SECRET_ACCESS_KEY` values should be absent from Amplify when the compute role is attached and verified.
@@ -73,7 +73,7 @@ Detailed resource policies and runtime mapping are maintained in [AWS Infrastruc
 
 ## BB-8 safety boundary
 
-BB-8 receives verified retrieved context plus a short conversation window. OpenAI requests use `store: false`. The application does not save chat transcripts server-side; the visible transcript remains in same-tab `sessionStorage`.
+BB-8 receives verified retrieved context plus a short conversation window. OpenAI requests use `store: false`. My application does not save chat transcripts server-side; the visible transcript remains in same-tab `sessionStorage`. With Basic or Enhanced consent, first-party BB-8 telemetry stores only hashed anonymous visitor/session/chat references, opens, outcomes, latency, model/token totals, retrieval status, and coarse country/region/device categories. Detailed actions are Enhanced-only.
 
 Model-generated function calls are treated as untrusted suggestions. The server validates them into one of three constrained actions:
 
@@ -85,13 +85,14 @@ Actions execute in the browser. Contact submission always requires the visitorâ€
 
 ## Data privacy controls
 
-- Basic analytics is cookieless, does not create a persistent visitor profile, and can be disabled.
+- Mandatory random visitor/session identity and country/region measurement are cookieless and always on for public visits; without Enhanced consent the identity is session-scoped.
+- Basic page/device analytics is optional and does not create a persistent visitor profile.
 - Enhanced journey analytics requires opt-in and stores hashes of random browser UUIDs.
-- Both tiers honor Do Not Track and Global Privacy Control.
-- Analytics excludes raw IP persistence, exact coordinates, city, postal code, hardware model, device fingerprint, form content, keystrokes, and chat text.
+- Do Not Track and Global Privacy Control disable the optional tiers; mandatory country/region measurement remains active.
+- Analytics excludes raw IP persistence, city, county, postal code, coordinates, hardware model, device fingerprint, form content, keystrokes, and chat prompt/response text.
 - Contact submissions are stored separately from content and analytics.
 - Audience classification is a manual annotation I apply, never an automated inference.
-- Analytics expires through DynamoDB TTL after approximately 365 days; contact retention is managed separately.
+- Centralized configurable TTL defaults are 90 days for mandatory and BB-8 telemetry, 180 days for Basic and Enhanced Analytics, and 365 days for contacts.
 
 See [Visitor Analytics](ANALYTICS.md) and the public `/privacy` page for the complete data flow.
 
