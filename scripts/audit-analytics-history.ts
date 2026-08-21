@@ -42,6 +42,14 @@ function dayFromValue(value:unknown) {
   return match?.[0] ?? null;
 }
 
+function increment(map:Map<string, number>, label:string, count:number) {
+  map.set(label, (map.get(label) ?? 0) + count);
+}
+
+function sortedCounts(map:Map<string, number>) {
+  return [...map.entries()].map(([country, count]) => ({ country, count })).sort((left, right) => right.count - left.count);
+}
+
 async function main() {
   const now = Math.floor(Date.now() / 1000);
   const inventory = {
@@ -64,6 +72,11 @@ async function main() {
     device:0,
     viewport:0,
     source:0,
+  };
+  const countryCoverage = {
+    mandatoryVisits:new Map<string, number>(),
+    enhancedVisits:new Map<string, number>(),
+    legacyContextViews:new Map<string, number>(),
   };
   let cursor:Record<string, unknown>|undefined;
 
@@ -90,6 +103,7 @@ async function main() {
         if (item.device) enhancedVisitAttributeCoverage.device += 1;
         if (item.viewport) enhancedVisitAttributeCoverage.viewport += 1;
         if (item.source) enhancedVisitAttributeCoverage.source += 1;
+        increment(countryCoverage.enhancedVisits, String(location?.countryCode ?? location?.country ?? "Unknown"), 1);
       } else if (pk.startsWith("VISITOR#") && sk === "PROFILE") {
         addRecord(inventory.enhancedVisitorProfiles, dayFromValue(item.startedAt), item.expiresAt, now);
       } else if (pk.startsWith("VISITOR#") && sk.startsWith("VISIT#") && sk.includes("#EVENT#")) {
@@ -100,12 +114,26 @@ async function main() {
         addRecord(inventory.mandatoryVisitEvents, dayFromValue(item.occurredAt), item.expiresAt, now);
       } else if (pk.startsWith("ANALYTICS#")) {
         addRecord(inventory.dailyAggregates, dayFromValue(pk), item.expiresAt, now);
+        const location = item.location as { country?:unknown; countryCode?:unknown }|undefined;
+        const country = String(location?.countryCode ?? location?.country ?? "Unknown");
+        if (sk.startsWith("GEO#")) increment(countryCoverage.mandatoryVisits, country, Number(item.visits ?? 0));
+        if (sk.startsWith("CONTEXT#")) increment(countryCoverage.legacyContextViews, country, Number(item.views ?? 0));
       }
     }
     cursor = page.LastEvaluatedKey as Record<string, unknown>|undefined;
   } while (cursor);
 
-  console.log(JSON.stringify({ table:PORTFOLIO_TABLE, generatedAt:new Date().toISOString(), inventory, enhancedVisitAttributeCoverage }, null, 2));
+  console.log(JSON.stringify({
+    table:PORTFOLIO_TABLE,
+    generatedAt:new Date().toISOString(),
+    inventory,
+    enhancedVisitAttributeCoverage,
+    countryCoverage:{
+      mandatoryVisits:sortedCounts(countryCoverage.mandatoryVisits),
+      enhancedVisits:sortedCounts(countryCoverage.enhancedVisits),
+      legacyContextViews:sortedCounts(countryCoverage.legacyContextViews),
+    },
+  }, null, 2));
 }
 
 main().catch((error) => {

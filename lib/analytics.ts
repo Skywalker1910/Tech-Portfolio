@@ -822,6 +822,8 @@ export async function getTrafficReport(days = 30) {
   const viewports = new Map<string, BreakdownValue>();
   const reachLocations = new Map<string, BreakdownValue>();
   const reachRegions = new Map<string, BreakdownValue>();
+  const contextLocations = new Map<string, BreakdownValue>();
+  const contextRegions = new Map<string, BreakdownValue>();
   const sources = new Map<string, BreakdownValue>();
   const featureEvents = new Map<string, BreakdownValue>();
   analyticsResponses.forEach((response, index) => {
@@ -866,6 +868,9 @@ export async function getTrafficReport(days = 30) {
     addBreakdown(operatingSystems, context.device?.os ?? "Unknown", views, engagementMs, engagedViews);
     addBreakdown(browsers, context.device?.browser ?? "Unknown", views, engagementMs, engagedViews);
     addBreakdown(viewports, context.viewport ?? "Unknown", views, engagementMs, engagedViews);
+    addBreakdown(contextLocations, context.location?.countryCode ?? context.location?.country ?? "Unknown", views, engagementMs, engagedViews);
+    const region = context.location?.region ?? context.location?.regionCode;
+    if (region) addBreakdown(contextRegions, `${context.location?.countryCode ?? context.location?.country ?? "Unknown"} · ${region}`, views, engagementMs, engagedViews);
     addBreakdown(sources, context.source?.category ?? "Basic measurement", views, engagementMs, engagedViews);
   });
   analyticsResponses.flatMap((response) => response.Items ?? []).filter((item) => String(item.sk).startsWith("FEATURE#")).forEach((item) => {
@@ -988,6 +993,8 @@ export async function getTrafficReport(days = 30) {
       viewports:finishBreakdown(viewports),
       locations:finishBreakdown(reachLocations),
       regions:finishBreakdown(reachRegions),
+      locationViews:finishBreakdown(contextLocations),
+      regionViews:finishBreakdown(contextRegions),
       sources:finishBreakdown(sources),
       events:finishBreakdown(featureEvents),
     },
