@@ -6,32 +6,32 @@ My portfolio is a Next.js 16 application deployed primarily as an AWS Amplify SS
 
 ```mermaid
 flowchart LR
-    Visitor([Visitor])
-    Admin([Me / Admin])
-    GitHubRepo[(GitHub repository)]
+    Visitor(["Visitor"])
+    Admin(["Me / Admin"])
+    GitHubRepo[("GitHub repository")]
 
-    subgraph AWS[AWS]
-      R53[Route 53]
-      Amplify[AWS Amplify\nCI/CD + Next.js SSR]
-      Contacts[(DynamoDB\nportfolio-contacts)]
-      Operations[(DynamoDB\nportfolio-content)]
-      Vectors[(Amazon S3 Vectors\nportfolio-knowledge)]
+    subgraph AWS["AWS"]
+      R53["Route 53"]
+      Amplify["AWS Amplify<br/>CI/CD + Next.js SSR"]
+      Contacts[("DynamoDB<br/>portfolio-contacts")]
+      Operations[("DynamoDB<br/>portfolio-content")]
+      Vectors[("Amazon S3 Vectors<br/>portfolio-knowledge")]
     end
 
-    subgraph NextApp[Next.js application]
-      Public[Public pages]
-      Chat[/api/chat]
-      ContentAPI[/api/content/*]
-      ContactAPI[/api/contact]
-      AnalyticsAPI[/api/analytics]
-      AdminUI[Admin Command Center]
-      AdminAPI[/api/admin/*]
-      GitHubAPI[/api/github]
+    subgraph NextApp["Next.js application"]
+      Public["Public pages"]
+      Chat["/api/chat"]
+      ContentAPI["/api/content/*"]
+      ContactAPI["/api/contact"]
+      AnalyticsAPI["/api/analytics"]
+      AdminUI["Admin Command Center"]
+      AdminAPI["/api/admin/*"]
+      GitHubAPI["/api/github"]
     end
 
-    OpenAI[OpenAI API\nresponses + embeddings + admin usage]
-    GitHub[GitHub REST API]
-    Mirror[GitHub Pages\nstatic mirror]
+    OpenAI["OpenAI API<br/>responses + embeddings + admin usage"]
+    GitHub["GitHub REST API"]
+    Mirror["GitHub Pages<br/>static mirror"]
 
     Visitor --> R53 --> Amplify --> Public
     Public --> ContentAPI --> Operations
@@ -47,30 +47,30 @@ flowchart LR
     AdminAPI --> Vectors
     AdminAPI --> OpenAI
 
-    GitHubRepo -->|push main| Amplify
-    GitHubRepo -. manual static deployment .-> Mirror
+    GitHubRepo -->|"push main"| Amplify
+    GitHubRepo -.->|"manual static deployment"| Mirror
 ```
 
 ## Application boundaries
 
 ```mermaid
 flowchart TB
-    subgraph Browser
-      Navbar[Navigation previews]
-      Pages[Public React pages]
-      BB8[BB-8 overlay / full chat]
-      Tracker[TrafficTracker]
-      Session[(sessionStorage)]
-      Local[(localStorage\nprivacy tier + optional visitor ID)]
+    subgraph Browser["Browser"]
+      Navbar["Navigation previews"]
+      Pages["Public React pages"]
+      BB8["BB-8 overlay / full chat"]
+      Tracker["TrafficTracker"]
+      Session[("sessionStorage")]
+      Local[("localStorage<br/>privacy tier + optional visitor ID")]
     end
 
-    subgraph NextServer[Next.js server runtime]
-      PublicRoutes[Public APIs]
-      ProtectedRoutes[Protected admin APIs]
-      Repository[Content repository]
-      Retriever[Hybrid RAG retriever]
-      Indexer[RAG indexer]
-      Auth[Signed-session verification]
+    subgraph NextServer["Next.js server runtime"]
+      PublicRoutes["Public APIs"]
+      ProtectedRoutes["Protected admin APIs"]
+      Repository["Content repository"]
+      Retriever["Hybrid RAG retriever"]
+      Indexer["RAG indexer"]
+      Auth["Signed-session verification"]
     end
 
     Pages --> PublicRoutes
