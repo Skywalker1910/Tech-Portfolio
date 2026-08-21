@@ -7,6 +7,13 @@ import { X, Bot, Sparkles, ExternalLink, ChevronDown, ArrowLeft, BookOpen, Downl
 import AiInput from "./AiInput";
 import BB8ChatDroid from "./BB8ChatDroid";
 import { CONTACT_DRAFT_KEY, isBB8Action, type BB8Action } from "@/lib/bb8-actions";
+import {
+  BB8_CHAT_SESSION_KEY,
+  browserPrivacySignal,
+  getOrCreateAnalyticsIdentity,
+  optionalAnalyticsAllowed,
+  readAnalyticsPreference,
+} from "@/lib/client-analytics";
 
 type Role = "user" | "assistant";
 type Model = "openai" | "bb8";
@@ -16,6 +23,38 @@ interface Message { role: Role; text: string; sources?: ChatSource[]; action?: B
 const FULL_CHAT_URL =
   process.env.NEXT_PUBLIC_FULL_CHAT_URL ?? "/chat";
 const CHAT_SESSION_KEY = "bb8-tech-portfolio-chat";
+function getOrCreateChatUsageSessionId() {
+  try {
+    const stored = window.sessionStorage.getItem(BB8_CHAT_SESSION_KEY);
+    if (stored) return stored;
+    const sessionId = crypto.randomUUID();
+    window.sessionStorage.setItem(BB8_CHAT_SESSION_KEY, sessionId);
+    return sessionId;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
+
+function chatTelemetryContext() {
+  const preference = readAnalyticsPreference(localStorage);
+  const privacySignal = browserPrivacySignal(navigator as Navigator & { globalPrivacyControl?:boolean });
+  if (!optionalAnalyticsAllowed(preference, privacySignal)) return null;
+  const identity = getOrCreateAnalyticsIdentity({ sessionStorage, localStorage, preference, privacySignal });
+  return {
+    visitorId:identity.visitorId,
+    sessionId:identity.sessionId,
+    chatSessionId:getOrCreateChatUsageSessionId(),
+    tier:preference === "enhanced" ? "enhanced" : "basic",
+  } as const;
+}
+
+function chatClientHints() {
+  return {
+    platform:navigator.platform.slice(0, 40),
+    touchPoints:Math.min(20, Math.max(0, navigator.maxTouchPoints || 0)),
+    viewportWidth:Math.max(0, Math.round(window.innerWidth)),
+  };
+}
 
 function isMessage(value: unknown): value is Message {
   if (!value || typeof value !== "object") return false;
@@ -75,6 +114,7 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
   const [msgs, setMsgs] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
+  const [analyticsRevision, setAnalyticsRevision] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const modelMenuRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -107,6 +147,31 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
       msgs,
     }));
   }, [fullPage, model, msgs, open, sessionReady]);
+
+  useEffect(() => {
+    const refreshAnalytics = () => setAnalyticsRevision((value) => value + 1);
+    window.addEventListener("portfolio:analytics-consent-changed", refreshAnalytics);
+    return () => window.removeEventListener("portfolio:analytics-consent-changed", refreshAnalytics);
+  }, []);
+
+  useEffect(() => {
+    if (!sessionReady || !open) return;
+    const telemetry = chatTelemetryContext();
+    if (!telemetry) return;
+    const marker = `${BB8_CHAT_SESSION_KEY}:opened:${telemetry.chatSessionId}`;
+    try {
+      if (window.sessionStorage.getItem(marker)) return;
+      window.sessionStorage.setItem(marker, "true");
+    } catch {
+      // The event remains anonymous if browser storage is unavailable.
+    }
+    fetch("/api/analytics", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ eventType:"chat_open", eventId:crypto.randomUUID(), ...telemetry, client:chatClientHints() }),
+      keepalive:true,
+    }).catch(() => {});
+  }, [analyticsRevision, open, sessionReady]);
 
   useEffect(() => {
     if (fullPage) return;
@@ -168,6 +233,8 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: conversation.map(({ role, text: content }) => ({ role, content })),
+          telemetry: chatTelemetryContext(),
+          client: chatClientHints(),
         }),
       });
       const data = await r.json();

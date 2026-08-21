@@ -1,5 +1,5 @@
-import { CreateTableCommand, DescribeTableCommand, DynamoDBClient, UpdateTimeToLiveCommand, waitUntilTableExists } from "@aws-sdk/client-dynamodb";
-import { PORTFOLIO_TABLE } from "../lib/dynamodb";
+import { CreateTableCommand, DescribeTableCommand, DescribeTimeToLiveCommand, DynamoDBClient, UpdateTimeToLiveCommand, waitUntilTableExists } from "@aws-sdk/client-dynamodb";
+import { CONTACTS_TABLE, PORTFOLIO_TABLE } from "../lib/dynamodb";
 
 const region = process.env.APP_AWS_REGION ?? process.env.AWS_REGION ?? "us-east-1";
 const credentials = process.env.APP_AWS_ACCESS_KEY_ID && process.env.APP_AWS_SECRET_ACCESS_KEY ? { accessKeyId:process.env.APP_AWS_ACCESS_KEY_ID, secretAccessKey:process.env.APP_AWS_SECRET_ACCESS_KEY } : undefined;
@@ -13,7 +13,14 @@ async function main() {
     await waitUntilTableExists({ client, maxWaitTime:120 }, { TableName:PORTFOLIO_TABLE });
     console.log(`Created ${PORTFOLIO_TABLE}.`);
   }
-  try { await client.send(new UpdateTimeToLiveCommand({ TableName:PORTFOLIO_TABLE, TimeToLiveSpecification:{ AttributeName:"expiresAt", Enabled:true } })); console.log("Enabled analytics TTL."); }
-  catch (error) { console.warn("TTL may already be enabled:", error instanceof Error ? error.message : error); }
+  for (const tableName of [PORTFOLIO_TABLE, CONTACTS_TABLE]) {
+    const ttl = await client.send(new DescribeTimeToLiveCommand({ TableName:tableName }));
+    if (ttl.TimeToLiveDescription?.TimeToLiveStatus === "ENABLED" || ttl.TimeToLiveDescription?.TimeToLiveStatus === "ENABLING") {
+      console.log(`TTL is already enabled on ${tableName}.`);
+      continue;
+    }
+    await client.send(new UpdateTimeToLiveCommand({ TableName:tableName, TimeToLiveSpecification:{ AttributeName:"expiresAt", Enabled:true } }));
+    console.log(`Enabled TTL on ${tableName}.`);
+  }
 }
 main().catch((error) => { console.error("Content table setup failed:", error); process.exitCode = 1; }).finally(() => client.destroy());

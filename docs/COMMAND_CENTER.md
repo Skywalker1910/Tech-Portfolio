@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The private `/admin` area is my operational control plane for live content, contact messages, BB-8 retrieval, and visitor analytics. It is intentionally designed for my single-admin workflow and uses the same light/dark visual language as the public site.
+The private `/admin` area is my operational control plane for live content, contact messages, BB-8 retrieval, visitor analytics, and OpenAI usage/cost monitoring. It is intentionally designed for my single-admin workflow and uses the same light/dark visual language as the public site.
 
 ## Functional map
 
@@ -15,6 +15,7 @@ flowchart TB
     Dashboard --> Experience[Experience editor]
     Dashboard --> RAG[RAG Control]
     Dashboard --> Traffic[Visitor analytics]
+    Dashboard --> APIUsage[API provider usage]
 
     Messages --> Contacts[(portfolio-contacts)]
     Projects --> Operations[(portfolio-content)]
@@ -22,6 +23,7 @@ flowchart TB
     RAG --> Operations
     RAG --> Vectors[(S3 Vectors)]
     Traffic --> Operations
+    APIUsage --> OpenAI[OpenAI organization Usage and Costs APIs]
 ```
 
 Public navigation, footer, and BB-8 chrome are suppressed below `/admin`; authorization is still enforced independently by every protected API.
@@ -53,8 +55,9 @@ The inbox reads from `portfolio-contacts` and supports:
 - Manual sender classification as recruiter, visitor, friend, or test.
 - Permanent deletion.
 - Direct reply actions through my email client.
+- An analytics visitor reference and journey shortcut when the sender had already enabled enhanced analytics.
 
-Contact sender classification is separate from analytics audience classification. A contact record contains visitor-supplied identity and message content; an analytics profile is pseudonymous and has no automatic connection to a submitted form.
+Contact sender classification remains separate from analytics audience classification. When enhanced analytics is active, the contact client includes the existing random visitor UUID; the server immediately hashes it and stores only the 12-character analytics reference plus its full hash with the message. This deliberate link lets me open the related consented journey. Basic and essential-only visitors do not receive a persistent identifier and their messages remain unlinked.
 
 ## Projects
 
@@ -94,20 +97,35 @@ See [BB-8 RAG System](RAG.md) for the retrieval and indexing architecture.
 
 ## Traffic analytics
 
-The Traffic dashboard combines aggregate UX measurement with the smaller opt-in enhanced-journey sample.
+The Traffic dashboard separates mandatory anonymous visitor/session reach from consented UX measurement, the smaller Enhanced journey sample, and consented first-party BB-8 telemetry.
 
 It provides:
 
 - Page views, average engaged time, returning visits, and journey coverage.
-- Daily activity for 7, 30, or 90 days.
-- Device, viewport, country, region, operating-system, browser, and traffic-source breakdowns.
+- Daily mandatory visitors and visits for 7, 30, or 90 days, with consented page views shown as context.
+- Mandatory country/region counts plus optional device, viewport, operating-system, browser, and Enhanced traffic-source breakdowns.
+- Controlled Basic feature-event totals for projects, demos, external links, and contact-form starts/submissions.
 - Route-level views, enhanced sessions, and average engagement.
+- Sortable page performance plus searchable/sortable visitor journeys.
 - Recent enhanced visits with visit number, time, coarse context, source, and route timeline.
 - Manual audience labels: unclassified, recruiter, hiring manager, technical peer, student, or general visitor.
+- BB-8 opens, anonymous sessions, requests, success/failure, latency, token counts, retrieval fallback, and agent-action counts without prompt or response text.
 
 Audience labels are annotations I apply manually. Location, device, source, and page behavior never perform automated classification.
 
-Basic measurement is cookieless and opt-out; enhanced journeys require opt-in. The complete data model, traffic-source mapping, limitations, retention, and privacy controls are documented in [Visitor Analytics](ANALYTICS.md).
+Random session-scoped visitor/session identity and country/region measurement are mandatory and cookieless. Page/device/BB-8 measurement requires Basic or Enhanced consent; cross-session recognition, source, and journeys require Enhanced consent. The complete model is documented in [Visitor Analytics](ANALYTICS.md).
+
+## API usage providers
+
+The API Usage area is a provider hub so additional AI APIs can receive isolated dashboards later. Its OpenAI card includes the OpenAI logo, connection state, and a dedicated dashboard that reads OpenAI’s organization Usage and Costs APIs through the protected server route. It displays:
+
+- Completion and embedding request totals.
+- Input, output, cached-input, and total token volume.
+- Daily request and cost activity.
+- Usage grouped by model.
+- Cost grouped by OpenAI line item.
+
+`OPENAI_ADMIN_KEY` is a server-only organization Admin API key used only for this report. `OPENAI_PROJECT_ID` is strongly recommended so the results represent the dedicated BB-8 project instead of the full OpenAI organization. The browser never receives either value. Results are cached in server memory for five minutes and OpenAI reporting can lag behind the near-real-time first-party BB-8 counters on the Traffic page.
 
 ## Data and API boundaries
 
@@ -119,6 +137,7 @@ Basic measurement is cookieless and opt-out; enhanced journeys require opt-in. T
 | RAG settings/status | `portfolio-content` | `/api/admin/rag` |
 | Vector synchronization | S3 Vectors + OpenAI | `/api/admin/rag` reindex action |
 | Traffic report/classification | `portfolio-content` | `/api/admin/analytics` |
+| OpenAI requests/tokens/costs | OpenAI organization APIs | `/api/admin/openai-usage` |
 
 Browser components call these APIs; they never connect directly to AWS. Every mutation is authenticated and server-validated.
 
@@ -137,6 +156,7 @@ The complete least-privilege split is maintained in [AWS Infrastructure](AWS_INF
 | Contacts table unavailable | Inbox or message mutations fail independently |
 | Vector service unavailable | Status reports an error and reindex records failure; public chat can fall back locally |
 | OpenAI unavailable during reindex | Reindex records an error without changing public content |
+| OpenAI Admin API key absent/invalid | OpenAI provider dashboard shows setup or connection guidance; BB-8 continues using its separate project API key |
 | Analytics query unavailable | Traffic page shows an unavailable state without affecting public navigation |
 
 ## Scope limit

@@ -19,6 +19,7 @@ import {
   Loader2,
   Circle,
   CheckCircle2,
+  UserRoundSearch,
 } from "lucide-react";
 
 type SenderType = "recruiter" | "visitor" | "friend" | "test" | null;
@@ -32,6 +33,8 @@ type Message = {
   submittedAt: string;
   read: boolean;
   senderType: SenderType;
+  visitorKey?: string;
+  visitorId?: string;
 };
 
 // --- Sender type config ---
@@ -44,7 +47,7 @@ type SenderOption = {
 };
 
 const SENDER_OPTIONS: SenderOption[] = [
-  { value: null,        label: "Untagged",  color: "text-zinc-500 border-zinc-700 bg-zinc-800/60",          dot: "bg-zinc-500" },
+  { value: null,        label: "Untagged",  color: "text-[var(--muted)] border-[var(--border)] bg-[var(--tag-bg)]", dot: "bg-zinc-500" },
   { value: "recruiter", label: "Recruiter", color: "text-sky-400 border-sky-500/30 bg-sky-500/10",          dot: "bg-sky-400" },
   { value: "visitor",   label: "Visitor",   color: "text-violet-400 border-violet-500/30 bg-violet-500/10", dot: "bg-violet-400" },
   { value: "friend",    label: "Friend",    color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10", dot: "bg-emerald-400" },
@@ -83,9 +86,9 @@ function isThisWeek(iso: string) {
 
 function StatCard({ label, value, accent }: { label: string; value: number; accent: string }) {
   return (
-    <div className={`bg-zinc-900 border ${accent} rounded-xl px-5 py-4`}>
-      <div className="text-2xl font-bold text-white tabular-nums">{value}</div>
-      <div className="text-xs text-zinc-500 mt-0.5">{label}</div>
+    <div className={`bg-[var(--surface)] border ${accent} rounded-xl px-5 py-4 shadow-sm`}>
+      <div className="text-2xl font-bold text-[var(--text)] tabular-nums">{value}</div>
+      <div className="text-xs text-[var(--muted)] mt-0.5">{label}</div>
     </div>
   );
 }
@@ -120,7 +123,7 @@ function SenderTypePicker({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.97 }}
             transition={{ duration: 0.12 }}
-            className="absolute right-0 top-full mt-1.5 z-50 w-36 bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl overflow-hidden"
+            className="absolute right-0 top-full mt-1.5 z-50 w-36 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-xl overflow-hidden"
           >
             {SENDER_OPTIONS.map((opt) => (
               <button
@@ -129,8 +132,8 @@ function SenderTypePicker({
                   onChange(opt.value);
                   setOpen(false);
                 }}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors hover:bg-zinc-800 ${
-                  value === opt.value ? "text-white font-medium" : "text-zinc-400"
+                className={`w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors hover:bg-[var(--tag-bg)] ${
+                  value === opt.value ? "text-[var(--text)] font-medium" : "text-[var(--muted)]"
                 }`}
               >
                 <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${opt.dot}`} />
@@ -222,10 +225,10 @@ function MessageCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.2 }}
-      className={`relative bg-zinc-900 border rounded-xl p-4 transition-colors ${
+      className={`relative bg-[var(--surface)] border rounded-xl p-4 transition-colors ${
         isUnread
           ? "border-violet-500/30 shadow-[0_0_0_1px_rgba(139,92,246,0.08)]"
-          : "border-zinc-800 hover:border-zinc-700"
+          : "border-[var(--border)] hover:border-orange-500/30"
       }`}
     >
       {isUnread && (
@@ -235,10 +238,10 @@ function MessageCard({
       <div className="flex items-start gap-3">
         <div
           className={`h-9 w-9 rounded-full border flex items-center justify-center flex-shrink-0 mt-0.5 ${
-            isUnread ? "bg-violet-500/20 border-violet-500/30" : "bg-zinc-800 border-zinc-700"
+            isUnread ? "bg-violet-500/20 border-violet-500/30" : "bg-[var(--tag-bg)] border-[var(--border)]"
           }`}
         >
-          <span className={`text-xs font-semibold ${isUnread ? "text-violet-300" : "text-zinc-400"}`}>
+          <span className={`text-xs font-semibold ${isUnread ? "text-violet-500" : "text-[var(--muted)]"}`}>
             {getInitials(msg.firstName, msg.lastName)}
           </span>
         </div>
@@ -246,7 +249,7 @@ function MessageCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2 min-w-0">
-              <p className={`text-sm font-medium truncate ${isUnread ? "text-white" : "text-zinc-300"}`}>
+              <p className={`text-sm font-medium truncate ${isUnread ? "text-[var(--text)]" : "text-[var(--muted)]"}`}>
                 {msg.firstName} {msg.lastName}
               </p>
               {isUnread && (
@@ -263,13 +266,13 @@ function MessageCard({
                 <button
                   onClick={handleMarkRead}
                   title="Mark as read"
-                  className="text-xs px-2 py-1 rounded-lg border border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 transition-colors"
+                  className="text-xs px-2 py-1 rounded-lg border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] transition-colors"
                 >
                   <CheckCircle2 size={12} />
                 </button>
               )}
 
-              <span className="text-xs text-zinc-600 flex items-center gap-1">
+              <span className="text-xs text-[var(--sub-muted)] flex items-center gap-1">
                 <Calendar size={11} />
                 {formatDate(msg.submittedAt)}
               </span>
@@ -281,7 +284,7 @@ function MessageCard({
                 className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors ${
                   confirmDelete
                     ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                    : "text-zinc-600 hover:text-red-400 hover:bg-red-500/10"
+                    : "text-[var(--sub-muted)] hover:text-red-400 hover:bg-red-500/10"
                 } disabled:opacity-50`}
               >
                 {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
@@ -290,13 +293,23 @@ function MessageCard({
             </div>
           </div>
 
-          <p className="text-xs text-zinc-500 flex items-center gap-1 mt-0.5">
+          <p className="text-xs text-[var(--muted)] flex items-center gap-1 mt-0.5">
             <Mail size={11} />
             {msg.email}
           </p>
 
+          {msg.visitorId && (
+            <a
+              href={`/admin/traffic?visitor=${encodeURIComponent(msg.visitorId)}`}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-2.5 py-1 font-mono text-[10px] font-medium text-cyan-300 transition hover:border-cyan-400/50"
+              title="Open this visitor's enhanced analytics journeys"
+            >
+              <UserRoundSearch size={11} /> Analytics visitor {msg.visitorId}
+            </a>
+          )}
+
           <div className="mt-2.5">
-            <p className={`text-sm text-zinc-300 leading-relaxed ${!expanded ? "line-clamp-2" : ""}`}>
+            <p className={`text-sm text-[var(--text)] leading-relaxed ${!expanded ? "line-clamp-2" : ""}`}>
               {msg.message}
             </p>
             {isLong && (
@@ -464,10 +477,10 @@ export default function MessagesPage() {
 
       {pageStatus === "ready" && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <StatCard label="Total"     value={messages.length} accent="border-zinc-800" />
-          <StatCard label="Unread"    value={unreadCount}     accent={unreadCount > 0 ? "border-violet-500/30" : "border-zinc-800"} />
-          <StatCard label="Today"     value={todayCount}      accent="border-zinc-800" />
-          <StatCard label="This Week" value={weekCount}       accent="border-zinc-800" />
+          <StatCard label="Total"     value={messages.length} accent="border-[var(--border)]" />
+          <StatCard label="Unread"    value={unreadCount}     accent={unreadCount > 0 ? "border-violet-500/30" : "border-[var(--border)]"} />
+          <StatCard label="Today"     value={todayCount}      accent="border-[var(--border)]" />
+          <StatCard label="This Week" value={weekCount}       accent="border-[var(--border)]" />
         </div>
       )}
 
@@ -486,13 +499,13 @@ export default function MessagesPage() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   activeTab === tab.value
                     ? "bg-violet-500/15 text-violet-300 border border-violet-500/25"
-                    : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                    : "text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--tag-bg)]"
                 }`}
               >
                 {tab.label}
                 {count > 0 && (
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                    activeTab === tab.value ? "bg-violet-500/30 text-violet-300" : "bg-zinc-800 text-zinc-500"
+                    activeTab === tab.value ? "bg-violet-500/30 text-violet-500" : "bg-[var(--tag-bg)] text-[var(--muted)]"
                   }`}>
                     {count}
                   </span>
@@ -506,18 +519,18 @@ export default function MessagesPage() {
       {pageStatus === "ready" && (
         <div className="flex gap-3 mb-5">
           <div className="relative flex-1">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or message..."
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500/40 transition-all"
+              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--muted)] focus:outline-none focus:border-violet-500/40 transition-all"
             />
           </div>
           <button
             onClick={() => setSortOrder((s) => (s === "newest" ? "oldest" : "newest"))}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors flex-shrink-0"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] transition-colors flex-shrink-0"
           >
             {sortOrder === "newest" ? <SortDesc size={14} /> : <SortAsc size={14} />}
             {sortOrder === "newest" ? "Newest" : "Oldest"}
@@ -528,7 +541,7 @@ export default function MessagesPage() {
       {pageStatus === "loading" && (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 animate-pulse h-[96px]" />
+            <div key={i} className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 animate-pulse h-[96px]" />
           ))}
         </div>
       )}
@@ -541,7 +554,7 @@ export default function MessagesPage() {
       )}
 
       {pageStatus === "ready" && filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-zinc-600">
+        <div className="flex flex-col items-center justify-center py-20 text-[var(--sub-muted)]">
           <Inbox size={38} className="mb-3 opacity-40" />
           <p className="text-sm">
             {search ? "No messages match your search." : "No messages yet."}
@@ -551,7 +564,7 @@ export default function MessagesPage() {
 
       {pageStatus === "ready" && filtered.length > 0 && adminKey && (
         <>
-          <p className="text-xs text-zinc-600 mb-3">
+          <p className="text-xs text-[var(--sub-muted)] mb-3">
             {filtered.length} {filtered.length === 1 ? "message" : "messages"}
             {search && ` matching "${search}"`}
           </p>

@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   BrainCircuit,
   Activity,
+  Bot,
 } from "lucide-react";
 
 type Tile = {
@@ -70,6 +71,15 @@ const tiles: Tile[] = [
     icon: <Activity size={22} />,
     accent: "hover:border-cyan-500/40 hover:shadow-cyan-500/10",
     iconBg: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
+    available: true,
+  },
+  {
+    href: "/admin/ai-usage",
+    label: "API Usage",
+    description: "Monitor OpenAI requests, tokens, embeddings, models, and costs in a provider-ready workspace.",
+    icon: <Bot size={22} />,
+    accent: "hover:border-fuchsia-500/40 hover:shadow-fuchsia-500/10",
+    iconBg: "bg-fuchsia-500/10 text-fuchsia-500 border-fuchsia-500/20",
     available: true,
   },
   {

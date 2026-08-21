@@ -10,7 +10,7 @@ const statusItems = [
   { icon:ShieldCheck, title:"Portfolio experience", status:"Live", tone:"emerald", description:"About, projects, experience, education, skills, socials, contact, resume, navigation previews, and light/dark presentation are available." },
   { icon:Bot, title:"BB-8 portfolio co-pilot", status:"Beta", tone:"orange", description:"BB-8 answers portfolio questions, cites relevant pages, navigates in place, offers the resume, and can prepare a contact draft for visitor review." },
   { icon:Database, title:"Hybrid RAG", status:"Operational", tone:"violet", description:"Semantic retrieval uses OpenAI embeddings and Amazon S3 Vectors when configured, with a deterministic keyword fallback if the vector service is unavailable." },
-  { icon:Activity, title:"First-party visitor insights", status:"Live", tone:"sky", description:"Cookieless basic measurement supports page, engagement, coarse country/region, device, browser, and viewport analysis with an opt-out. Optional enhanced analytics adds pseudonymous numbered visits and page journeys. Raw IP, precise location, fingerprints, and chat/form content are excluded." },
+  { icon:Activity, title:"First-party visitor insights", status:"Live", tone:"sky", description:"Mandatory anonymous visitor/session identity and country/region measurement cover global reach without storing raw IP addresses or city-level data. Basic consent adds page, feature, device, and BB-8 performance measurement; Enhanced consent adds return visits, sources, and journeys." },
   { icon:GitBranch, title:"GitHub Pages mirror", status:"Static", tone:"slate", description:"The mirror provides public portfolio pages for restricted networks. Chat, contact submission, live content, admin tools, and analytics require the primary SSR deployment." },
 ];
 
@@ -34,7 +34,7 @@ export default function NoticePage() {
       <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.3em] text-orange-500">Product status & disclosures</p>
       <h1 className="text-4xl font-bold text-[var(--text)] md:text-5xl">Notice</h1>
       <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--muted)]">A current, plain-language view of what this portfolio provides, what remains experimental, and the limitations visitors should understand.</p>
-      <p className="mt-3 text-xs text-[var(--sub-muted)]">Last updated: August 16, 2026</p>
+      <p className="mt-3 text-xs text-[var(--sub-muted)]">Last updated: August 20, 2026</p>
     </motion.header>
 
     <motion.section {...fadeUp(0.05)} className="mb-14" aria-labelledby="status-heading">
@@ -49,9 +49,10 @@ export default function NoticePage() {
     <motion.section {...fadeUp(0.1)} className="mb-14" aria-labelledby="disclosures-heading">
       <div className="mb-6 flex items-center gap-3"><span className="h-px flex-1 bg-[var(--border)]"/><h2 id="disclosures-heading" className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--sub-muted)]">Important disclosures</h2><span className="h-px flex-1 bg-[var(--border)]"/></div>
       <div className="space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-sm leading-relaxed text-[var(--muted)]">
-        <p><strong className="font-semibold text-[var(--text)]">AI-generated responses.</strong> BB-8 is designed to stay grounded in verified portfolio information, but generated answers can still be incomplete or mistaken. Confirm hiring, availability, research, or other consequential details directly with Aditya.</p>
+        <p><strong className="font-semibold text-[var(--text)]">AI-generated responses.</strong> BB-8 is designed to stay grounded in verified portfolio information, but generated answers can still be incomplete or mistaken. Confirm hiring, availability, research, or other consequential details directly with me.</p>
         <p><strong className="font-semibold text-[var(--text)]">No autonomous outreach.</strong> BB-8 can prepare a contact-form draft only from details a visitor supplies. It cannot submit, email, or send anything on the visitor&apos;s behalf.</p>
-        <p><strong className="font-semibold text-[var(--text)]">Live content.</strong> Projects and experience can be updated through a private Command Center. Recently published edits may temporarily differ from BB-8&apos;s semantic index until the owner runs the next deliberate reindex.</p>
+        <p><strong className="font-semibold text-[var(--text)]">Analytics choices.</strong> Mandatory reach measurement is limited to random session identity, server time, and country/region. Page, device, journey, traffic-source, and BB-8 telemetry remain consent-controlled, and prompts or responses are never stored as analytics.</p>
+        <p><strong className="font-semibold text-[var(--text)]">Live content.</strong> I can update projects and experience through the private Command Center. Recently published edits may temporarily differ from BB-8&apos;s semantic index until I run the next deliberate reindex.</p>
         <p><strong className="font-semibold text-[var(--text)]">Availability.</strong> This is a personal portfolio and engineering showcase, not a guaranteed commercial service. Third-party API limits, maintenance, or deployment issues may temporarily reduce individual features.</p>
       </div>
     </motion.section>

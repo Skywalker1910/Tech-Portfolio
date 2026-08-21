@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, CONTACTS_TABLE, DeleteCommand, UpdateCommand } from "@/lib/dynamodb";
 import { isValidAdminRequest } from "@/lib/adminAuth";
+import { getAnalyticsVisitorReference } from "@/lib/analytics";
+import { retentionEpoch } from "@/lib/analytics-policy";
 
 // This route must be dynamic so POST requests are handled at request time.
 // The GitHub Pages static export excludes it via a webpack stub in next.config.ts.
@@ -18,12 +20,15 @@ type ContactSubmission = {
   submittedAt: string;
   read: boolean;
   senderType: SenderType;
+  visitorKey?: string;
+  visitorId?: string;
+  expiresAt:number;
 };
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { firstName, lastName, email, message } = body;
+    const { firstName, lastName, email, message, analyticsVisitorId } = body;
 
     // Validate required fields
     if (!firstName || !lastName || !email || !message) {
@@ -42,6 +47,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const visitor = getAnalyticsVisitorReference(analyticsVisitorId);
     const submission: ContactSubmission = {
       id: crypto.randomUUID(),
       firstName: firstName.trim(),
@@ -51,6 +57,8 @@ export async function POST(req: NextRequest) {
       submittedAt: new Date().toISOString(),
       read: false,
       senderType: null,
+      expiresAt:retentionEpoch("contacts"),
+      ...(visitor ?? {}),
     };
 
     await docClient.send(

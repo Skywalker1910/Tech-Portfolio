@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   BrainCircuit,
   Activity,
+  Bot,
 } from "lucide-react";
 
 type NavItem = {
@@ -32,6 +33,9 @@ type NavSection = {
 function pageTitle(pathname: string | null) {
   if (!pathname) return "Command Center";
   if (pathname === "/admin") return "Home";
+  if (pathname === "/admin/ai-usage") return "API Usage";
+  if (pathname === "/admin/ai-usage/openai") return "OpenAI Usage";
+  if (pathname === "/admin/rag") return "RAG Control";
   const seg = pathname.split("/").filter(Boolean).pop() ?? "";
   return seg.charAt(0).toUpperCase() + seg.slice(1);
 }
@@ -88,7 +92,10 @@ const navSections: NavSection[] = [
   },
   {
     title: "Intelligence",
-    items: [{ href: "/admin/rag", label: "RAG Control", icon: <BrainCircuit size={15} /> }],
+    items: [
+      { href: "/admin/rag", label: "RAG Control", icon: <BrainCircuit size={15} /> },
+      { href: "/admin/ai-usage", label: "API Usage", icon: <Bot size={15} /> },
+    ],
   },
 ];
 

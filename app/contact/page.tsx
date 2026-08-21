@@ -1,10 +1,11 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, MessageSquare, Send, CheckCircle2, Loader2, Bot, X } from "lucide-react";
 import { FaLinkedin } from "react-icons/fa";
 import { CONTACT_DRAFT_KEY } from "@/lib/bb8-actions";
+import { browserPrivacySignal, persistentVisitorIdForContact, readAnalyticsPreference, trackBasicAnalyticsEvent } from "@/lib/client-analytics";
 
 const contacts = [
   {
@@ -27,11 +28,17 @@ const contacts = [
   },
 ];
 
+function analyticsVisitorIdForContact() {
+  const privacySignal = browserPrivacySignal(navigator as Navigator & { globalPrivacyControl?:boolean });
+  return persistentVisitorIdForContact(localStorage, readAnalyticsPreference(localStorage), privacySignal);
+}
+
 export default function Contact() {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", message: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [draftPrepared, setDraftPrepared] = useState(false);
+  const formStarted = useRef(false);
 
   useEffect(() => {
     try {
@@ -61,7 +68,10 @@ export default function Contact() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          analyticsVisitorId: analyticsVisitorIdForContact(),
+        }),
       });
 
       if (!res.ok) {
@@ -70,6 +80,7 @@ export default function Contact() {
       }
 
       setStatus("success");
+      trackBasicAnalyticsEvent("contact_form_submitted", { page:"/contact", feature:"contact_form" });
       setForm({ firstName: "", lastName: "", email: "", message: "" });
     } catch (err) {
       setStatus("error");
@@ -129,7 +140,7 @@ export default function Contact() {
               </a>
             </div>
           ) : (
-          <form id="contact-form" onSubmit={handleSubmit} className="space-y-5">
+          <form id="contact-form" onSubmit={handleSubmit} onFocusCapture={() => { if (!formStarted.current) { formStarted.current = true; trackBasicAnalyticsEvent("contact_form_started", { page:"/contact", feature:"contact_form" }); } }} className="space-y-5">
             {draftPrepared && (
               <div className="flex items-start gap-3 rounded-xl border border-orange-500/25 bg-orange-500/10 px-4 py-3 text-sm text-[var(--muted)]">
                 <Bot size={17} className="mt-0.5 shrink-0 text-orange-500" />

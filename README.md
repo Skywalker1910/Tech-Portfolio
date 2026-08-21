@@ -11,8 +11,8 @@ An interactive, production-hosted portfolio for presenting my AI/ML engineering 
 - BB-8 overlay and full-page chat grounded in verified portfolio knowledge through OpenAI embeddings, Amazon S3 Vectors, and deterministic keyword retrieval.
 - Validated co-pilot actions for contextual page navigation, resume delivery, and reviewable contact-form drafts.
 - Live project and experience publishing backed by DynamoDB, with bundled content as a resilience fallback.
-- Private Command Center for content operations, contact messages, RAG configuration and indexing, and visitor-experience analytics.
-- Tiered first-party analytics with cookieless aggregate measurement, optional pseudonymous journeys, manual audience classification, and no stored raw IP address.
+- Private Command Center for content operations, contact messages with consent-aware journey links, RAG configuration/indexing, streamlined visitor-experience analytics, BB-8 adoption, and provider-based API usage/cost monitoring.
+- Tiered first-party analytics with mandatory anonymous visitor/session identity and country/region reach, consent-controlled UX measurement and pseudonymous journeys, manual audience classification, and no stored raw IP address, city, or chat text.
 - AWS Amplify SSR production hosting with Route 53, IAM compute-role access, DynamoDB, S3 Vectors, and an optional GitHub Pages static mirror.
 
 The full shipped-feature inventory is maintained in [Implemented Features](docs/FEATURES.md).
@@ -62,7 +62,7 @@ flowchart TB
 
 - Public content reads DynamoDB first and automatically falls back to bundled records when the operations table is unavailable.
 - BB-8 retrieves a small set of verified chunks, sends only a short conversation window to OpenAI, and returns source routes and optional validated actions.
-- Basic analytics records aggregate UX signals without a persistent identity; enhanced analytics adds opt-in visit continuity and page journeys.
+- Mandatory telemetry records random anonymous visitor/session identities, server timestamps, and country/region without retaining raw IP addresses; explicit Basic and Enhanced consent unlock only their documented optional purposes.
 - Content publication and RAG indexing are deliberately separate so multiple edits can be indexed in one controlled operation.
 
 Detailed system, sequence, trust-boundary, and data-model diagrams are available in [System Architecture](docs/ARCHITECTURE.md).
@@ -88,7 +88,7 @@ Detailed system, sequence, trust-boundary, and data-model diagrams are available
 - OpenAI chat requests set `store: false`; the application does not persist BB-8 transcripts server-side.
 - RAG falls back to deterministic local retrieval when semantic retrieval is disabled or unavailable.
 - Live content falls back to source-controlled defaults when DynamoDB cannot be read.
-- Analytics excludes raw IP storage, exact location, fingerprints, advertising identifiers, form values, and chat text.
+- Analytics excludes raw IP storage, city or more precise location, fingerprints, advertising identifiers, form values, and chat text; category-specific DynamoDB TTL policies limit retention.
 - The GitHub proxy is cached and fails independently from the rest of the public experience.
 - Production changes pass linting, TypeScript checks, RAG evaluation, and a Next.js production build before merge.
 
