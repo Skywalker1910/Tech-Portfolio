@@ -245,7 +245,7 @@ The reindex response includes chunk count, stale-vector removal count, model, di
 
 ### `GET /api/admin/analytics?days=7|30|90`
 
-Returns mandatory country/region visitors and visits, daily totals, consented page and feature performance, optional coarse context breakdowns, purpose-limited BB-8 telemetry, report totals, and up to 100 recent Enhanced journeys. Values outside the supported range are bounded to 7–90 days, with a default of 30.
+Returns mandatory country/region visitors and visits, retained consented country page-view context as a separate breakdown, daily totals, consented page and feature performance, optional coarse context breakdowns, purpose-limited BB-8 telemetry, report totals, and up to 100 recent Enhanced journeys. Reach visits and contextual page views remain separate fields because they are different measurement units. Values outside the supported range are bounded to 7–90 days, with a default of 30.
 
 The response uses `Cache-Control: private, no-store`.
 

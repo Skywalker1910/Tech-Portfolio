@@ -161,7 +161,7 @@ The Traffic dashboard separates mandatory reach from consented behavior:
 
 The OpenAI usage page is a separate provider dashboard based on OpenAI organization/project usage APIs. It is not derived from stored chat content.
 
-The reporting layer remains backward compatible with Enhanced visitor indexes created before mandatory reach telemetry was introduced. For each day, it selects the broader of the mandatory reach aggregate and the retained Enhanced visit index. Geography follows the same per-day source selection. This makes retained historical visitors visible without copying records or double-counting visitors represented in both record families.
+The reporting layer remains backward compatible with Enhanced visitor indexes created before mandatory reach telemetry was introduced. For each day, it selects the broader of the mandatory reach aggregate and the retained Enhanced visit index. The country card also reads retained consented `CONTEXT#` aggregates and displays their page-view counts separately from reach visits. This keeps legacy countries visible without converting page views into visitors, copying records, or double-counting identities represented in multiple record families.
 
 ## Operations and migration
 

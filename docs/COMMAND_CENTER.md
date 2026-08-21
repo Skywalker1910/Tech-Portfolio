@@ -103,7 +103,7 @@ It provides:
 
 - Page views, average engaged time, returning visits, and journey coverage.
 - Daily mandatory visitors and visits for 7, 30, or 90 days, with consented page views shown as context.
-- Mandatory country/region counts plus optional device, viewport, operating-system, browser, and Enhanced traffic-source breakdowns.
+- Mandatory country/region reach plus separately labeled retained consented country page views, optional device, viewport, operating-system, browser, and Enhanced traffic-source breakdowns.
 - Controlled Basic feature-event totals for projects, demos, external links, and contact-form starts/submissions.
 - Route-level views, enhanced sessions, and average engagement.
 - Sortable page performance plus searchable/sortable visitor journeys.
