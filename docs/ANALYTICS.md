@@ -161,8 +161,12 @@ The Traffic dashboard separates mandatory reach from consented behavior:
 
 The OpenAI usage page is a separate provider dashboard based on OpenAI organization/project usage APIs. It is not derived from stored chat content.
 
+The reporting layer remains backward compatible with Enhanced visitor indexes created before mandatory reach telemetry was introduced. For each day, it selects the broader of the mandatory reach aggregate and the retained Enhanced visit index. Geography follows the same per-day source selection. This makes retained historical visitors visible without copying records or double-counting visitors represented in both record families.
+
 ## Operations and migration
 
 After deploying this model, I run `npm run analytics:purge-city` once with the intended AWS credentials to remove historical city attributes from existing analytics records. The script logs only item counts. It does not print record content.
+
+I can run `npm run analytics:audit` as a read-only inventory check. It reports record-family counts, active/expired counts, date coverage, and attribute coverage without printing visitor identifiers or attribute values.
 
 I verify the policy with `npm run analytics:test` and the complete repository gate with `npm run check`.

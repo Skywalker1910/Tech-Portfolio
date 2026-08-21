@@ -17,6 +17,7 @@
     "content:setup": "tsx --env-file-if-exists=.env.local scripts/setup-content.ts",
     "content:seed": "tsx --env-file-if-exists=.env.local scripts/seed-content.ts",
     "analytics:purge-city": "tsx --env-file-if-exists=.env.local scripts/purge-analytics-city.ts",
+    "analytics:audit": "tsx --env-file-if-exists=.env.local scripts/audit-analytics-history.ts",
     "analytics:test": "tsx --test tests/analytics-privacy.test.ts",
     "build:ghpages": "cross-env NEXT_PUBLIC_GITHUB_PAGES=true next build --turbopack",
     "predeploy": "npm run build:ghpages",

@@ -108,6 +108,7 @@ It provides:
 - Route-level views, enhanced sessions, and average engagement.
 - Sortable page performance plus searchable/sortable visitor journeys.
 - Recent enhanced visits with visit number, time, coarse context, source, and route timeline.
+- Backward-compatible reporting that includes retained Enhanced journeys created before mandatory reach records, without rewriting the production table.
 - Manual audience labels: unclassified, recruiter, hiring manager, technical peer, student, or general visitor.
 - BB-8 opens, anonymous sessions, requests, success/failure, latency, token counts, retrieval fallback, and agent-action counts without prompt or response text.
 

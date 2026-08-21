@@ -775,6 +775,7 @@ export async function getTrafficReport(days = 30) {
     const pageItems = (response.Items ?? []).filter((item) => String(item.sk).startsWith("PAGE#"));
     const geoItems = (response.Items ?? []).filter((item) => String(item.sk).startsWith("GEO#"));
     const chatSummary = (response.Items ?? []).find((item) => String(item.sk) === "CHAT#SUMMARY");
+    const indexedVisits = visitResponses[index].Items ?? [];
     const pages = pageItems.map((item) => ({
       path:String(item.path),
       views:Number(item.views ?? 0),
@@ -782,7 +783,10 @@ export async function getTrafficReport(days = 30) {
       engagementMs:Number(item.engagementMs ?? 0),
       engagedViews:Number(item.engagedViews ?? 0),
     }));
-    const visits = visitResponses[index].Count ?? visitResponses[index].Items?.length ?? 0;
+    const visits = visitResponses[index].Count ?? indexedVisits.length;
+    const enhancedVisitors = new Set(indexedVisits.map((visit) => String(visit.visitorPk ?? visit.visitorId ?? "")).filter(Boolean)).size;
+    const mandatoryVisits = geoItems.reduce((sum, item) => sum + Number(item.visits ?? 0), 0);
+    const mandatoryVisitors = geoItems.reduce((sum, item) => sum + Number(item.visitors ?? 0), 0);
     return {
       day:dates[index],
       views:pages.reduce((sum, page) => sum + page.views, 0),
@@ -790,8 +794,11 @@ export async function getTrafficReport(days = 30) {
       engagementMs:pages.reduce((sum, page) => sum + page.engagementMs, 0),
       engagedViews:pages.reduce((sum, page) => sum + page.engagedViews, 0),
       visits,
-      mandatoryVisits:geoItems.reduce((sum, item) => sum + Number(item.visits ?? 0), 0),
-      mandatoryVisitors:geoItems.reduce((sum, item) => sum + Number(item.visitors ?? 0), 0),
+      // Enhanced visit indexes predate mandatory reach telemetry. Taking the
+      // larger per-day coverage restores that history while avoiding double
+      // counting Enhanced visitors represented in both record families.
+      mandatoryVisits:Math.max(mandatoryVisits, visits),
+      mandatoryVisitors:Math.max(mandatoryVisitors, enhancedVisitors),
       chatOpens:Number(chatSummary?.opens ?? 0),
       chatSessions:Number(chatSummary?.sessions ?? 0),
       chatRequests:Number(chatSummary?.requests ?? 0),
@@ -813,18 +820,42 @@ export async function getTrafficReport(days = 30) {
   const operatingSystems = new Map<string, BreakdownValue>();
   const browsers = new Map<string, BreakdownValue>();
   const viewports = new Map<string, BreakdownValue>();
-  const locations = new Map<string, BreakdownValue>();
-  const mandatoryLocations = new Map<string, BreakdownValue>();
-  const mandatoryRegions = new Map<string, BreakdownValue>();
-  const regions = new Map<string, BreakdownValue>();
+  const reachLocations = new Map<string, BreakdownValue>();
+  const reachRegions = new Map<string, BreakdownValue>();
   const sources = new Map<string, BreakdownValue>();
   const featureEvents = new Map<string, BreakdownValue>();
-  analyticsResponses.flatMap((response) => response.Items ?? []).filter((item) => String(item.sk).startsWith("GEO#")).forEach((item) => {
-    const visits = Number(item.visits ?? 0);
-    const location = item.location as AnalyticsLocation | undefined;
-    addBreakdown(mandatoryLocations, location?.countryCode ?? location?.country ?? "Unknown", visits, 0, 0);
-    const region = location?.region ?? location?.regionCode;
-    if (region) addBreakdown(mandatoryRegions, `${location?.countryCode ?? location?.country ?? "Unknown"} · ${region}`, visits, 0, 0);
+  analyticsResponses.forEach((response, index) => {
+    const mandatoryCountries = new Map<string, number>();
+    const mandatoryRegions = new Map<string, number>();
+    const enhancedCountries = new Map<string, number>();
+    const enhancedRegions = new Map<string, number>();
+    (response.Items ?? []).filter((item) => String(item.sk).startsWith("GEO#")).forEach((item) => {
+      const visits = Number(item.visits ?? 0);
+      const location = item.location as AnalyticsLocation | undefined;
+      const country = location?.countryCode ?? location?.country ?? "Unknown";
+      mandatoryCountries.set(country, (mandatoryCountries.get(country) ?? 0) + visits);
+      const region = location?.region ?? location?.regionCode;
+      if (region) {
+        const label = `${country} · ${region}`;
+        mandatoryRegions.set(label, (mandatoryRegions.get(label) ?? 0) + visits);
+      }
+    });
+    (visitResponses[index].Items ?? []).forEach((item) => {
+      const location = item.location as AnalyticsLocation | undefined;
+      const country = location?.countryCode ?? location?.country ?? "Unknown";
+      enhancedCountries.set(country, (enhancedCountries.get(country) ?? 0) + 1);
+      const region = location?.region ?? location?.regionCode;
+      if (region) {
+        const label = `${country} · ${region}`;
+        enhancedRegions.set(label, (enhancedRegions.get(label) ?? 0) + 1);
+      }
+    });
+    const mandatoryCoverage = [...mandatoryCountries.values()].reduce((sum, count) => sum + count, 0);
+    const enhancedCoverage = [...enhancedCountries.values()].reduce((sum, count) => sum + count, 0);
+    const countries = mandatoryCoverage >= enhancedCoverage && mandatoryCoverage > 0 ? mandatoryCountries : enhancedCountries;
+    const regionsForDay = mandatoryCoverage >= enhancedCoverage && mandatoryCoverage > 0 ? mandatoryRegions : enhancedRegions;
+    countries.forEach((count, label) => addBreakdown(reachLocations, label, count, 0, 0));
+    regionsForDay.forEach((count, label) => addBreakdown(reachRegions, label, count, 0, 0));
   });
   analyticsResponses.flatMap((response) => response.Items ?? []).filter((item) => String(item.sk).startsWith("CONTEXT#")).forEach((item) => {
     const views = Number(item.views ?? 0);
@@ -835,8 +866,6 @@ export async function getTrafficReport(days = 30) {
     addBreakdown(operatingSystems, context.device?.os ?? "Unknown", views, engagementMs, engagedViews);
     addBreakdown(browsers, context.device?.browser ?? "Unknown", views, engagementMs, engagedViews);
     addBreakdown(viewports, context.viewport ?? "Unknown", views, engagementMs, engagedViews);
-    addBreakdown(locations, context.location?.countryCode ?? "Unknown", views, engagementMs, engagedViews);
-    if (context.location?.region) addBreakdown(regions, `${context.location.countryCode ?? "Unknown"} · ${context.location.region}`, views, engagementMs, engagedViews);
     addBreakdown(sources, context.source?.category ?? "Basic measurement", views, engagementMs, engagedViews);
   });
   analyticsResponses.flatMap((response) => response.Items ?? []).filter((item) => String(item.sk).startsWith("FEATURE#")).forEach((item) => {
@@ -957,8 +986,8 @@ export async function getTrafficReport(days = 30) {
       operatingSystems:finishBreakdown(operatingSystems),
       browsers:finishBreakdown(browsers),
       viewports:finishBreakdown(viewports),
-      locations:finishBreakdown(mandatoryLocations.size ? mandatoryLocations : locations),
-      regions:finishBreakdown(mandatoryRegions.size ? mandatoryRegions : regions),
+      locations:finishBreakdown(reachLocations),
+      regions:finishBreakdown(reachRegions),
       sources:finishBreakdown(sources),
       events:finishBreakdown(featureEvents),
     },
