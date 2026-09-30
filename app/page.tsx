@@ -80,7 +80,7 @@ const timelineItems: {
   logo: { type: "image"; src: string; size?: number; filter?: string; darkOnly?: boolean } | { type: "initials"; text: string; bg: string; fg: string };
 }[] = [
   {
-    period: "May 2026 – Present",
+    period: "Apr 2026 – Present",
     title: "Researcher - LLM Agents and Human Behavior",
     org: "Clemson University, School of Computing",
     location: "Clemson, SC / Remote",
@@ -89,9 +89,9 @@ const timelineItems: {
     tags: ["LLM Agents", "Generative AI", "Multi-Agent Systems", "Human Behavior Simulation", "Python"],
     logo: { type: "image", src: "/soc-logo.png", size: 187 },
     bullets: [
-      "Researching the capabilities and limitations of LLM-based agents in simulating human behavior under the supervision of Dr. Long Cheng.",
-      "Evaluating multi-agent simulation frameworks and reproducing behavioral experiments to compare AI-agent behavior with human baselines.",
-      "Developing a taxonomy and evaluation framework for measuring behavioral realism across social and decision-making scenarios.",
+      "Researching whether societies of LLM agents can support or substitute human participants in behavioral pilot studies under Dr. Long Cheng.",
+      "Reproducing behavioral experiments and designing new studies with AgentSociety, YuLan-OneSim, and Generative Agents.",
+      "Developing a taxonomy and metrics for behavioral realism, consistency, and human alignment.",
     ],
   },
   {
@@ -111,7 +111,7 @@ const timelineItems: {
   },
   {
     period: "Aug 2024 – Dec 2025",
-    title: "Graduate Student Hourly – Data Science",
+    title: "Graduate Teaching Assistant – Applied Data Science",
     org: "Clemson University, School of Computing",
     location: "Clemson, SC, USA",
     type: "Work",
@@ -119,14 +119,14 @@ const timelineItems: {
     tags: ["Python", "nbgrader", "Coursera", "Curriculum Design"],
     logo: { type: "image", src: "/soc-logo.png", size: 187 },
     bullets: [
-      "Designed and automated Jupyter-based labs and assignments for graduate-level Data Science class.",
-      "Built nbgrader pipelines, reducing manual grading effort.",
-      "Supported students with ML workflows, debugging, and course guidance through office hours.",
+      "Designed Jupyter labs across preprocessing, supervised and unsupervised learning, evaluation, and visualization.",
+      "Built Python and nbgrader pipelines that improved scoring consistency and reduced manual grading.",
+      "Maintained course infrastructure and supported students through debugging and office hours.",
     ],
   },
   {
-    period: "Oct 2021 – Jul 2023",
-    title: "Software Engineer",
+    period: "Oct 2021 – Dec 2022",
+    title: "Software Test Engineer",
     org: "Amdocs",
     location: "Pune, India",
     type: "Work",
@@ -160,12 +160,12 @@ const timelineItems: {
 const featuredProjects = [
   {
     num: "01",
-    type: "ML System",
-    title: "Personalized Movie Recommendation System",
-    year: "2024",
-    tags: ["Recommender Systems", "PyTorch", "Flask", "PostgreSQL", "Docker"],
+    type: "RAG System",
+    title: "BB-8 — RAG-Powered Portfolio Co-Pilot",
+    year: "2026",
+    tags: ["OpenAI", "RAG", "S3 Vectors", "Next.js", "AWS"],
     blurb:
-      "End-to-end recommendation engine processing 26M+ ratings with FunkSVD matrix factorization, achieving ~21% improvement over baseline (RMSE 0.76).",
+      "Source-grounded co-pilot with semantic retrieval, citations, navigation tools, evaluation, and privacy-aware usage telemetry.",
     href: "/projects",
     preview: {
       bg: "from-violet-950 via-purple-900/60 to-indigo-950",
@@ -175,12 +175,12 @@ const featuredProjects = [
   },
   {
     num: "02",
-    type: "ML Pipeline",
-    title: "Skynet – AQI Prediction System",
-    year: "2025",
-    tags: ["ML Pipeline", "scikit-learn", "pandas", "NumPy", "Air Quality"],
+    type: "Live System",
+    title: "Neural Log — Personal Activity & Progress System",
+    year: "2026",
+    tags: ["Flask", "React", "TypeScript", "SQLite", "AWS"],
     blurb:
-      "Built an ML pipeline to forecast Air Quality Index using NASA TEMPO, OpenAQ, weather, and traffic data with temporal and spatial pattern modeling.",
+      "Multi-workspace activity tracker with an auditable XP ledger, analytics, AI weekly reviews, and long-term progress tools.",
     href: "/projects",
     preview: {
       bg: "from-teal-950 via-cyan-900/60 to-emerald-950",
@@ -190,12 +190,12 @@ const featuredProjects = [
   },
   {
     num: "03",
-    type: "LLM Research",
-    title: "R2D2 – Experimental Transformer-based LLM",
-    year: "2025",
-    tags: ["PyTorch", "Transformers", "NLP", "Deep Learning"],
+    type: "ML Product",
+    title: "Movie Recommendation Engine",
+    year: "2024–26",
+    tags: ["PyTorch", "Flask", "React", "Docker", "AWS"],
     blurb:
-      "Building transformer architectures from scratch to understand LLM internals — implementing tokenization, embeddings, and attention mechanisms.",
+      "Production hybrid recommender over 26M+ ratings with FunkSVD RMSE 0.7600, NeuMF, TF-IDF, live TMDB enrichment, and CI/CD.",
     href: "/projects",
     preview: {
       bg: "from-orange-950 via-amber-900/60 to-red-950",
@@ -432,11 +432,12 @@ export default function Home() {
               <SentenceFlip
                 lines={[
                   "MS Computer Science · Clemson University · 2025",
-                  "Built a Movie Recommendation Engine · 26M+ Ratings · PyTorch",
-                  "Air Quality Prediction Pipeline · NASA TEMPO · scikit-learn",
-                  "LLM Research · Transformer Architecture from Scratch",
+                  "Live ML Systems · AWS · Docker · CI/CD",
+                  "Movie Recommendation Engine · 26M+ Ratings · RMSE 0.7600",
+                  "BB8 Transformer Study · 11 Experiments · PyTorch & LoRA",
+                  "Neural Log · Flask · React · SQLite · AWS Lightsail",
                   "AI Security · Adversarial ML · Computer Vision",
-                  "Python · Deep Learning · NLP · Data Science",
+                  "LLM Agents · Human Behavior Simulation · AI Evaluation",
                   "Open to AI / ML & Data Science Roles",
                 ]}
                 interval={2800}

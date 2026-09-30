@@ -11,7 +11,7 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
 - Detailed Experience, Education, Skills, Socials, Contact, Notice, and Privacy pages, including mobile timeline layouts that preserve institution branding and content readability.
 - Pointer-only custom cursor behavior so touch devices retain native mobile interaction.
 - Live GitHub profile and repository summary through a cached server-side proxy with authenticated-to-public retry and unavailable-state actions.
-- Static resume download at `/resume.pdf`.
+- Static resume download at `/Aditya%20More%20-%20Resume.pdf`.
 - AWS Amplify SSR deployment and an optional GitHub Pages static mirror with graceful notices for server-only features.
 
 ## BB-8 portfolio co-pilot
@@ -29,7 +29,7 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
   - Navigate to a relevant portfolio page without closing chat.
   - Offer the resume as a direct download.
   - Prepare—but never submit—a contact-form draft from information explicitly provided by the visitor.
-- RAG evaluation suite covering 27 representative questions, with Hit@3 and latency reporting.
+- Evidence-aware RAG evaluation suite covering 77 representative questions across career, experience, education, projects, skills, contact, and social information, with Hit@3 and latency reporting.
 
 ## Live content system
 

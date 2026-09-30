@@ -11,7 +11,7 @@ const items = [
   },
   {
     icon: Briefcase,
-    text: "Experience: Data Science (Graduate Student Hourly @ Clemson)",
+    text: "Experience: Graduate Teaching Assistant · Applied Data Science @ Clemson",
   },
   {
     icon: Target,
@@ -20,7 +20,7 @@ const items = [
   },
   {
     icon: MapPin,
-    text: "United States (Willing to relocate anywhere within the United States)",
+    text: "Pittsburgh, PA (Willing to relocate within the United States)",
   },
   {
     icon: ShieldCheck,

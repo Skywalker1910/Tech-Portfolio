@@ -12,7 +12,7 @@ export type PortfolioRoute = (typeof PORTFOLIO_ROUTES)[number];
 
 export type BB8Action =
   | { type: "navigate"; href: PortfolioRoute; label: string }
-  | { type: "resume"; href: "/resume.pdf"; label: string }
+  | { type: "resume"; href: "/Aditya%20More%20-%20Resume.pdf"; label: string }
   | {
       type: "contact_draft";
       href: "/contact";
@@ -31,7 +31,7 @@ export function isBB8Action(value: unknown): value is BB8Action {
       typeof action.label === "string";
   }
   if (action.type === "resume") {
-    return action.href === "/resume.pdf" && typeof action.label === "string";
+    return action.href === "/Aditya%20More%20-%20Resume.pdf" && typeof action.label === "string";
   }
   if (action.type === "contact_draft" && action.href === "/contact" && typeof action.label === "string") {
     const draft = action.draft;

@@ -218,7 +218,7 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
     if (model === "bb8") {
       setMsgs(m => [...m,
         { role: "user", text },
-        { role: "assistant", text: "BB-8 Local is still training! Aditya is fine-tuning it on his personal research notes. It'll be available soon. Switch back to OpenAI to get answers right now." },
+        { role: "assistant", text: "BB8 Transformer Lab is a documented LLM engineering project, not the model serving this live chat. It spans 11 experiments from a transformer built in PyTorch to Qwen LoRA and grounded retrieval. Switch to OpenAI for the portfolio co-pilot, or open Projects to explore the experiment." },
       ]);
       return;
     }
@@ -356,7 +356,7 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
                     color: model === "bb8" ? "#ca8a04" : "var(--muted)",
                   }}
                 >
-                  {model === "openai" ? "OpenAI" : "BB-8 Local \u26a0"}
+                  {model === "openai" ? "OpenAI" : "BB8 Lab \u26a0"}
                   <ChevronDown size={9} className={`transition-transform duration-150 ${modelMenuOpen ? "rotate-180" : ""}`} />
                 </button>
 
@@ -393,8 +393,8 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
                       >
                         <span className={`mt-0.5 w-1.5 h-1.5 rounded-full shrink-0 ${model === "bb8" ? "bg-yellow-400" : "bg-[var(--border)]"}`} />
                         <span>
-                          <span className={`block text-[11px] font-semibold ${model === "bb8" ? "text-yellow-600 dark:text-yellow-400" : "text-[var(--text)]"}`}>BB-8 Local</span>
-                          <span className="block text-[10px] text-[var(--sub-muted)] mt-0.5">Aditya&apos;s LLM · Coming soon</span>
+                          <span className={`block text-[11px] font-semibold ${model === "bb8" ? "text-yellow-600 dark:text-yellow-400" : "text-[var(--text)]"}`}>BB8 Transformer Lab</span>
+                          <span className="block text-[10px] text-[var(--sub-muted)] mt-0.5">Experimental LLM · Project preview</span>
                         </span>
                       </button>
                     </motion.div>
@@ -450,7 +450,7 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
                     <div className="flex items-center gap-2 px-3 py-2 rounded-xl w-full"
                       style={{ background: "rgba(234,179,8,0.07)", border: "1px solid rgba(234,179,8,0.18)" }}>
                       <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0 animate-pulse" />
-                      <p className="text-[10px] text-yellow-700 dark:text-yellow-300/80 leading-snug">BB-8 Local is in training — replies will be WIP notices.</p>
+                      <p className="text-[10px] text-yellow-700 dark:text-yellow-300/80 leading-snug">Project preview only — the experimental model does not serve this chat.</p>
                     </div>
                   )}
                 </div>
@@ -559,7 +559,7 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
             <div className="px-3 pb-3 shrink-0 overflow-hidden rounded-b-2xl">
               <AiInput
                 onSubmit={send}
-                placeholder={model === "bb8" ? "BB-8 Local coming soon..." : "Ask BB-8 about Aditya..."}
+                placeholder={model === "bb8" ? "Ask about the BB8 experiment..." : "Ask BB-8 about Aditya..."}
                 mainColor="var(--hero-accent)"
                 backgroundColor="var(--surface)"
                 animationStyle="orbit"

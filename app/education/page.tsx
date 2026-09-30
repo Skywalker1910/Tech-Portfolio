@@ -23,7 +23,7 @@ const degrees = [
     accent: "text-violet-400",
     tag: "bg-violet-500/10 text-violet-300 border border-violet-500/20",
     gpaBg: "bg-violet-500/10 text-violet-300 border-violet-500/30",
-    coursework: ["Machine Learning", "Deep Learning", "Design and Analysis of Algorithms", "Data Science", "Statistical Methods"],
+    coursework: ["AI-Receptive Software Development", "Applied Data Science", "Cloud Computing Architecture", "Database Management Systems", "Deep Learning", "Design and Analysis of Algorithms", "Machine Learning Implementation & Evaluation", "Security in Emerging Systems", "Statistical Methods I"],
     bullets: [
       "Specialized in **Machine Learning** and **Data Science** systems.",
       "Built and evaluated **ML** and **deep learning** models on real-world datasets.",
@@ -66,11 +66,13 @@ const degrees = [
 ];
 
 const certifications = [
-  { name: "Cybersecurity Fundamentals", area: "Security", Icon: Shield },
-  { name: "Certified Information Security and Ethical Hacker (CISEH)", area: "Security", Icon: Shield },
-  { name: "Introduction to Cybersecurity", area: "Security", Icon: Shield },
-  { name: "Data Science Orientation", area: "Data Science", Icon: Database },
-  { name: "IBM Blockchain Essentials V2", area: "Blockchain", Icon: FlaskConical },
+  { name: "Data Science Orientation", detail: "IBM · Jan 2026", Icon: Database },
+  { name: "IBM Blockchain Essentials V2", detail: "IBM · Sep 2021", Icon: FlaskConical },
+  { name: "Cybersecurity Fundamentals", detail: "IBM · Dec 2020", Icon: Shield },
+  { name: "Build Your Own Chatbot — Level 1", detail: "IBM · Nov 2020", Icon: Database },
+  { name: "Introduction to Cybersecurity", detail: "Cisco · Sep 2020", Icon: Shield },
+  { name: "Certified Information Security and Ethical Hacker (CISEH)", detail: "Feb 2020", Icon: Shield },
+  { name: "Programming in C & C++", detail: "Aug 2019", Icon: FlaskConical },
 ];
 
 const languages = [
@@ -239,7 +241,7 @@ export default function Education() {
               </span>
               <div>
                 <p className="text-sm font-medium text-[var(--tag-text)] leading-snug group-hover:text-[var(--text)] transition-colors">{cert.name}</p>
-                <p className="text-[11px] text-[var(--muted)] mt-0.5">{cert.area}</p>
+                <p className="text-[11px] text-[var(--muted)] mt-0.5">{cert.detail}</p>
               </div>
             </motion.div>
           ))}

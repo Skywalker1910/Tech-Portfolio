@@ -10,7 +10,7 @@
       },
       {
         "heading": "Career goals and availability",
-        "content": "Aditya is based in the United States and is willing to relocate within the United States. He is open to AI Engineer, Machine Learning Engineer, and Data Scientist roles. He is authorized to work in the United States under OPT and does not require immediate sponsorship."
+        "content": "Aditya is based in Pittsburgh, Pennsylvania and is willing to relocate within the United States. He is open to AI Engineer, Machine Learning Engineer, and Data Scientist roles. He is authorized to work in the United States under OPT and does not require immediate sponsorship."
       },
       {
         "heading": "Languages",
@@ -25,15 +25,15 @@
     "sections": [
       {
         "heading": "Researcher - LLM Agents and Human Behavior at Clemson University",
-        "content": "Aditya has served as a Researcher in Clemson University's School of Computing from May 2026 to the present, based in Clemson, South Carolina and working remotely. Under the supervision of Dr. Long Cheng, he investigates whether Large Language Model agents can realistically simulate human behavior and how behavioral fidelity can be systematically evaluated. His research covers LLM agents, multi-agent systems, Generative AI, human behavior simulation, and AI evaluation. He is conducting a literature review of LLM-based human behavior simulation, autonomous agents, multi-agent systems, and AI-generated synthetic populations; investigating AgentSociety, YuLan-OneSim, Generative Agents, and MiroFish; and developing a taxonomy spanning decision-making, social interaction, cooperation, trust, and other behavioral dimensions. He is designing and reproducing behavioral experiments including Trust Games and Dictator Games to compare LLM-agent decisions with established human behavioral data, and exploring benchmarks for behavioral realism, consistency, and human-agent similarity. The work is building toward a survey of the strengths and limitations of LLM agents for simulating human behavior and whether AI agents can support or partially substitute human participants in early-stage studies. Technologies and research tools include Python, Large Language Models, Multi-Agent Systems, AgentSociety, YuLan-OneSim, Generative Agents, MiroFish, literature review, experimental design, and behavioral evaluation."
+        "content": "Aditya has served as a Researcher in Clemson University's School of Computing from April 2026 to the present, working remotely. Under the supervision of Dr. Long Cheng, he investigates whether societies of Large Language Model agents can realistically simulate human behavior and support early-stage behavioral studies. He reproduces published behavioral experiments and designs new studies with AgentSociety, YuLan-OneSim, Generative Agents, MiroFish, and related multi-agent frameworks. He is developing a taxonomy and metrics for behavioral realism, consistency, and human alignment across decision-making, social interaction, cooperation, trust, and other behavioral dimensions. The work includes Trust Game and Dictator Game experiments that compare LLM-agent decisions with established human behavioral data, and a broader assessment of whether AI agents can support or partially substitute human participants in behavioral pilot studies. Technologies and research tools include Python, Large Language Models, Multi-Agent Systems, literature review, experimental design, and behavioral evaluation."
       },
       {
-        "heading": "Graduate Student Hourly — Clemson University",
-        "content": "Aditya worked as a Graduate Student Hourly in Data Science at Clemson University's School of Computing in Clemson, South Carolina, from August 2024 through December 2025. He designed Jupyter Notebook labs and assignments for a graduate Applied Data Science course; built automated nbgrader pipelines and submission-validation logic; and created exercises covering preprocessing, IQR and Z-score outlier detection, model selection, cross-validation, feature selection, and PCA. He supported students through weekly office hours, collaborated with faculty on curriculum and Coursera deployment, and diagnosed autograder issues reported through Salesforce tickets before validating and deploying corrected notebooks. Technologies included Python, Jupyter, scikit-learn, pandas, NumPy, nbgrader, and Coursera."
+        "heading": "Graduate Teaching Assistant — Clemson University",
+        "content": "Aditya worked as a Graduate Teaching Assistant for Applied Data Science in Clemson University's School of Computing from August 2024 through December 2025. He designed Jupyter labs and assignments covering data preprocessing, supervised learning, unsupervised learning, model evaluation, and visualization. He built automated grading pipelines with Python and nbgrader to reduce manual effort and improve scoring consistency, maintained live course infrastructure, resolved notebook and autograder issues, and explained machine-learning concepts while debugging student code during office hours. He also collaborated with faculty on curriculum design and Coursera deployment. Technologies included Python, Jupyter, scikit-learn, pandas, NumPy, nbgrader, and Coursera."
       },
       {
-        "heading": "Software Engineer — Amdocs",
-        "content": "Aditya worked as a Software Engineer at Amdocs in Pune, India, from October 2021 through December 2022. He performed end-to-end, regression, and API testing for enterprise telecom systems serving AT&T; designed test cases and validation strategies for production releases; and automated test workflows with Postman and proprietary tools. He collaborated with cross-functional teams in the United States and India in an Agile environment and participated in feature planning, requirements analysis, and validation across multiple releases. Technologies included Postman and Selenium."
+        "heading": "Software Test Engineer — Amdocs",
+        "content": "Aditya worked as a Software Test Engineer at Amdocs in Pune, India, from October 2021 through December 2022. He performed end-to-end, regression, and integration testing for enterprise telecom systems supporting AT&T; designed test cases and validation strategies from product requirements and stakeholder input; and ran functional, UI, and API release tests with Selenium and Postman. He triaged defects with cross-functional Agile teams in the United States and India and participated in requirements analysis and production-release validation."
       }
     ]
   },
@@ -44,7 +44,7 @@
     "sections": [
       {
         "heading": "M.S. Computer Science — Clemson University",
-        "content": "Aditya earned a Master of Science in Computer Science from Clemson University in Clemson, South Carolina. He attended from January 2024 through December 2025, graduated in December 2025, concentrated in Data Science and Informatics, and earned a 3.7/4.0 GPA. Coursework included Machine Learning, Deep Learning, Design and Analysis of Algorithms, Data Science, and Statistical Methods. His academic work included ML and deep-learning models, data pipelines, model evaluation, LLM robustness, AI defense mechanisms, and statistical analysis."
+        "content": "Aditya earned a Master of Science in Computer Science from Clemson University in Clemson, South Carolina. He attended from January 2024 through December 2025, graduated in December 2025, concentrated in Data Science and Informatics, and earned a 3.7/4.0 GPA. Coursework included AI-Receptive Software Development, Applied Data Science, Cloud Computing Architecture, Database Management Systems, Deep Learning, Design and Analysis of Algorithms, Machine Learning Implementation and Evaluation, Security in Emerging Systems, and Statistical Methods I. His academic work included ML and deep-learning models, data pipelines, model evaluation, LLM robustness, AI defense mechanisms, and statistical analysis."
       },
       {
         "heading": "B.E. Computer Science and Engineering — D.Y. Patil",
@@ -52,7 +52,7 @@
       },
       {
         "heading": "Certifications",
-        "content": "Aditya's listed certifications are Cybersecurity Fundamentals, Certified Information Security and Ethical Hacker (CISEH), Introduction to Cybersecurity, Data Science Orientation, and IBM Blockchain Essentials V2."
+        "content": "Aditya's listed credentials include Data Science Orientation from IBM, IBM Blockchain Essentials V2, Cybersecurity Fundamentals from IBM, Build Your Own Chatbot — Level 1 from IBM, Introduction to Cybersecurity from Cisco, Certified Information Security and Ethical Hacker (CISEH), and Programming in C and C++. Clemson University awarded his Master of Science in Computer Science in December 2025."
       }
     ]
   },
@@ -62,32 +62,76 @@
     "route": "/projects",
     "sections": [
       {
-        "heading": "BB-8 AI-Powered Portfolio Assistant",
-        "content": "BB-8 is the active AI co-pilot for Aditya's Tech Portfolio. It uses the OpenAI Responses and Embeddings APIs with a retrieval-augmented generation pipeline over structured, verified portfolio data. Semantic retrieval is backed by Amazon S3 Vectors when configured, with a deterministic local keyword retriever as a development and availability fallback. The system retrieves relevant chunks, supplies only those chunks to the language model, returns source-page links with answers, preserves chat state while navigating, and includes a retrieval evaluation dataset. The application is built with Next.js, TypeScript, React, and the AWS SDK. BB-8 Local is a separate experimental personal language-model project and is not the model serving the live assistant."
+        "heading": "BB-8 portfolio co-pilot — RAG architecture",
+        "content": "BB-8 is the active RAG-powered co-pilot for Aditya's Tech Portfolio. It uses the OpenAI Responses API and OpenAI embeddings with retrieval-augmented generation over structured, verified portfolio knowledge. Amazon S3 Vectors provides semantic retrieval, while a deterministic local keyword retriever provides an availability fallback. BB-8 retrieves relevant chunks, grounds the model with only that evidence, and returns source-page links."
       },
       {
-        "heading": "Personalized Movie Recommendation System",
-        "content": "Completed in 2024, this end-to-end recommendation system combined MovieLens, TMDB, and IMDb data: more than 26 million ratings, 270,000 users, and 45,000 movies. Aditya implemented collaborative filtering, content-based models, matrix factorization with FunkSVD, and neural methods. FunkSVD achieved RMSE 0.76, approximately a 21 percent improvement over baseline. He designed ETL pipelines and optimized sparse-matrix computations. Technologies included Python, scikit-learn, PyTorch, Flask, PostgreSQL, Docker, and recommender-system methods."
+        "heading": "BB-8 portfolio co-pilot — agent capabilities and operations",
+        "content": "The live BB-8 co-pilot preserves chat state while navigating, offers the current resume, and prepares contact-form drafts for visitor review without sending them. The Next.js and TypeScript application includes retrieval evaluation, OpenAI usage telemetry, privacy-aware first-party analytics, DynamoDB-backed content administration, and AWS Amplify SSR deployment. Source: https://github.com/Skywalker1910/Tech-Portfolio. Live system: https://www.adityamore.dev."
+      },
+      {
+        "heading": "Live BB-8 co-pilot versus BB8 Transformer",
+        "content": "The BB8 Transformer repository is a separate LLM engineering study and does not serve or power the live portfolio assistant. The live BB-8 chat uses OpenAI models plus portfolio RAG; the research project implements and evaluates Transformer language models from scratch."
+      },
+      {
+        "heading": "Movie Recommendation Engine — data and baseline results",
+        "content": "Aditya expanded a 2024 Clemson course project into a live full-stack movie recommendation product. The reproducible study combines MovieLens, TMDB, and IMDb data with FunkSVD, NeuMF, TF-IDF content similarity, and Bayesian popularity. It processed more than 26 million ratings across 270,000 users and 45,000 movies. FunkSVD achieved RMSE 0.7600, about 21 percent better than the baseline."
+      },
+      {
+        "heading": "Movie Recommendation Engine — NeuMF v2 improvements",
+        "content": "In September 2026, NeuMF v2 improved validation RMSE from 1.0725 to 0.8543, improved MAE from 0.8078 to 0.6452, and reduced parameters from 26.3 million to 13.1 million. Versioned model artifacts now live on Hugging Face and download automatically when absent."
+      },
+      {
+        "heading": "Movie Recommendation Engine — product and deployment",
+        "content": "The application provides personalized onboarding, watch history, live TMDB enrichment, an isolated admin dashboard, model diagnostics, and lazy model loading. Flask, React, SQLite, Docker, nginx, gunicorn, SSL, and GitHub Actions deploy the service to AWS EC2. Source: https://github.com/Skywalker1910/Movies-Recommendation-Engine. Live system: https://movies.adityamore.dev."
       },
       {
         "heading": "Skynet — AQI Prediction System",
         "content": "Completed in 2025, Skynet is an end-to-end machine-learning pipeline for forecasting Air Quality Index. It integrated NASA TEMPO, OpenAQ, weather, and traffic APIs; implemented ingestion and preprocessing pipelines; engineered environmental and traffic features; and modeled temporal and spatial AQI patterns. Technologies included Python, scikit-learn, pandas, and NumPy."
       },
       {
-        "heading": "R2D2 — Experimental Transformer-based LLM",
-        "content": "R2D2 is an in-progress 2025 research project that builds transformer architectures from scratch to study language-model internals and training dynamics. It implements tokenization, embeddings, and attention mechanisms; trains small-scale transformer models; and explores LLM behavior and optimization. Technologies include Python, PyTorch, Transformers, NLP, and deep learning. R2D2 is distinct from the active BB-8 portfolio co-pilot."
+        "heading": "BB8 Transformer — architecture and experiment progression",
+        "content": "BB8 is Aditya's 2026 graduate-level LLM engineering project, separate from the live BB-8 portfolio co-pilot. He implemented a decoder-only GPT-style Transformer in PyTorch from first principles: embeddings, learned positional embeddings, scaled dot-product attention, multi-head attention, GELU feed-forward layers, Pre-LN decoder blocks, causal masking, character, word, and BPE tokenizers, training and evaluation loops, and decoding strategies. Across 11 documented experiments, the project progressed from 112,320-parameter character models through BPE models, Qwen2.5-0.5B LoRA fine-tuning, and grounded retrieval with citations and abstention."
+      },
+      {
+        "heading": "BB8 Transformer — chat evaluation findings",
+        "content": "An 80-case, five-configuration chat evaluation suite traced failures to a prompt-format mismatch and a preprocessing bug that truncated 29 percent of training examples. An 88-case grounded-QA benchmark with an 80 percent promotion gate rejected a model with perplexity 1.03 because it passed only 22 percent of content and citation checks."
+      },
+      {
+        "heading": "BB8 Transformer — reproducibility and deployment",
+        "content": "After detecting a tokenizer data leak, Aditya added dataset hashing, commit pinning, versioned configurations, and a model registry. The project includes an interactive Token Lab, Hugging Face artifacts, and a CPU AWS Lambda and API Gateway deployment path. Source: https://github.com/Skywalker1910/BB-8. Model artifacts: https://huggingface.co/Skywalker1910/BB8."
       },
       {
         "heading": "Adversarial Attacks — Experimentation and Case Study",
         "content": "This 2024 Clemson AI-security case study examined data poisoning, adversarial patches, and evasion attacks on computer-vision models. Aditya experimented with monocular depth-estimation systems used in autonomous-vehicle perception, analyzed effects on scene understanding and depth pipelines, and evaluated attack transferability across models and threat settings. Technologies and areas included Python, computer vision, deep learning, adversarial machine learning, and AI security."
       },
       {
-        "heading": "LLM Defense Evaluation Framework",
-        "content": "From September through December 2024, Aditya built automated pipelines for jailbreak testing and defense evaluation of large language models. The framework evaluated token-level patterns, semantic behavior, refusal mechanisms, response consistency, latency, and attack success rates, and benchmarked multiple models under diverse jailbreak strategies. Technologies and areas included Python, LLM evaluation, adversarial AI, and AI security."
+        "heading": "LLM Jailbreak Defense Evaluation",
+        "content": "During Spring 2025 in Clemson's CPSC 8570 security course, Aditya and his team replicated and extended the MASTERKEY jailbreak framework for black-box evaluation of commercial LLMs. They built a 13-category dataset from public jailbreak sources and custom augmentations, automated prompt execution and result logging, calculated query-success rates, and categorized timeouts, exceptions, and AI refusals. The evaluation also tracked latency and token usage without requiring internal model access. Source: https://github.com/Skywalker1910/Evaluating-Defense-Mechanisms-Jailbreak-LLMs."
       },
       {
-        "heading": "NeuralLog — Intelligent Activity Tracking System",
-        "content": "Completed in 2025, NeuralLog is a personal machine-learning system that tracks tasks, routines, and habits; analyzes behavioral patterns; and generates personalized productivity insights. Technologies included Python, machine learning, and data analysis."
+        "heading": "Deep Learning Coursework — video captioning and spoken question answering",
+        "content": "Aditya's four-repository CPSC 8430 graduate coursework implemented deep-learning systems end to end in Python and PyTorch. He built an attention-based Seq2Seq encoder-decoder for video captioning with BLEU evaluation and fine-tuned BERT-Base for question answering on Spoken-SQuAD using document stride, automatic mixed precision, gradient checkpointing, and gradient accumulation. The Spoken-SQuAD assignment reported 63.5 percent F1 and 40.1 percent exact match."
+      },
+      {
+        "heading": "Deep Learning Coursework — GAN variants",
+        "content": "For the generative-model assignment, Aditya implemented DCGAN, WGAN, and ACGAN image-generation variants and evaluated them with Frechet Inception Distance and Inception Score. The CPSC 8430 repositories are grouped at https://github.com/Skywalker1910?tab=repositories&q=CPSC-8430."
+      },
+      {
+        "heading": "Neural Log — Personal Activity and Progress System",
+        "content": "Neural Log is Aditya's live 2026 personal activity system for training, nutrition, learning, habits, goals, and long-term progress. It uses eight evidence-based attributes and an auditable XP transaction ledger, along with records, streaks, calendar heatmaps, analytics, privacy-aware leaderboards, private AI weekly reviews, and illustrated personal libraries. Its September 2026 releases added admin-managed invite codes, isolated administration, polished responsive workspaces, and tested nutrition-label auto-capture. Flask serves a React and TypeScript frontend from one origin, SQLite is authoritative, and numbered SQL migrations, verified backups, and automated tests support operation. Docker Compose runs Flask and Gunicorn behind Caddy on AWS Lightsail. Source: https://github.com/Skywalker1910/Neural-Log. Live system: https://neurallog.adityamore.dev."
+      },
+      {
+        "heading": "FIFA World Cup 2026 Prediction Platform",
+        "content": "Aditya built a live, SQLite-backed World Cup prediction platform for a private group. A dependency-free Node HTTP server serves distinct US and India scoring experiences from one deployment, with authenticated player and AI-agent accounts, prediction locking, score forecasts, public picks, profiles, leaderboards, group tables, best-third-place projections, and a road-to-final bracket. Its private Command Center manages accounts, official results, prediction records, settings, regional ledgers, score synchronization, and audit history. The containerized service runs on Railway with persistent storage. Source: https://github.com/Skywalker1910/FIFA-World-Cup-2026. Live system: https://game.adityamore.dev."
+      },
+      {
+        "heading": "FIFA 2026 AI Prediction Agents — prediction workflow",
+        "content": "Aditya built a companion Node service whose LLM agents authenticate as dedicated player accounts, read eligible live fixtures, and submit structured winner and score predictions with rationale, confidence, provider, model, response ID, and token metadata. The OpenAI implementation validates teams, match IDs, lock windows, and output structure."
+      },
+      {
+        "heading": "FIFA 2026 AI Prediction Agents — automation and providers",
+        "content": "The prediction agent supports dry-run, due-window, next-match, and update-existing modes, retries transient database locks, and can run automatically every ten minutes on a GitHub Actions schedule. Claude and Gemini adapters are scaffolded for later providers. Source: https://github.com/Skywalker1910/FIFA-World-Cup-2026-AI-Agents."
       },
       {
         "heading": "Automatic License Plate Recognition",
@@ -103,7 +147,7 @@
       },
       {
         "heading": "Tech Portfolio Website",
-        "content": "This portfolio is built with Next.js 16, TypeScript, Tailwind CSS v4, React, and Framer Motion. It is deployed on AWS Amplify with CI/CD, uses Amazon DynamoDB for contact messages, and includes the animated BB-8 AI co-pilot. The site also has a GitHub Pages static mirror, live GitHub profile integration, responsive design, theme support, and an owner-only administration panel."
+        "content": "This portfolio is built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, and Framer Motion. AWS Amplify hosts the SSR application with CI/CD; DynamoDB stores contacts, editable content, and privacy-aware analytics; Amazon S3 Vectors backs RAG retrieval; and OpenAI provides embeddings and grounded responses. The application includes the animated BB-8 co-pilot, a GitHub Pages static mirror, live GitHub integration, responsive theme-aware design, consent controls, and an owner-only Command Center for content, RAG, traffic, messages, and API usage. Source: https://github.com/Skywalker1910/Tech-Portfolio."
       }
     ]
   },
@@ -114,19 +158,27 @@
     "sections": [
       {
         "heading": "Programming and machine learning",
-        "content": "Aditya's programming and machine-learning stack includes Python, C++, SQL, scikit-learn, PyTorch, and TensorFlow."
+        "content": "Aditya's programming and machine-learning stack includes Python, TypeScript, JavaScript, C++, SQL, scikit-learn, PyTorch, and TensorFlow."
       },
       {
         "heading": "Data visualization and analytics",
         "content": "Aditya works with pandas, NumPy, matplotlib, seaborn, statistical modeling, data preprocessing, feature engineering, and model evaluation."
       },
       {
-        "heading": "Cloud, infrastructure, and developer tools",
-        "content": "Aditya's tools and infrastructure experience includes AWS, Git, Docker, Jupyter, PostgreSQL, Flask, FastAPI, React, Next.js, Postman, Selenium, nbgrader, OpenCV, Tesseract, Pygame, and the OpenAI API."
+        "heading": "Frontend and backend frameworks",
+        "content": "Aditya's frontend and backend application experience includes React, Next.js, Flask, Node.js, FastAPI, TypeScript, and JavaScript."
+      },
+      {
+        "heading": "Databases and data stores",
+        "content": "Aditya has worked with SQLite, PostgreSQL, DynamoDB, and Amazon S3 Vectors across local, cloud, analytical, and retrieval-augmented applications."
+      },
+      {
+        "heading": "Cloud, containers, CI/CD, and developer tools",
+        "content": "Aditya's cloud and infrastructure experience includes AWS Amplify, AWS EC2, AWS Lightsail, AWS Lambda, API Gateway, Docker, Caddy, nginx, gunicorn, Railway, Git, and GitHub Actions CI/CD. Other tools include Jupyter, Postman, Selenium, nbgrader, OpenCV, Tesseract, and the OpenAI API."
       },
       {
         "heading": "Core technical areas",
-        "content": "Aditya's core areas include Machine Learning, Deep Learning, Computer Vision, Large Language Models, Natural Language Processing, MLOps, Retrieval-Augmented Generation systems, recommender systems, AI evaluation, and Adversarial Machine Learning."
+        "content": "Aditya's core areas include Machine Learning, Deep Learning, Computer Vision, Large Language Models, LLM agents, Natural Language Processing, LoRA fine-tuning, Retrieval-Augmented Generation, recommender systems, multi-agent simulation, human-behavior evaluation, AI security, adversarial machine learning, MLOps, and production AI-system evaluation."
       }
     ]
   },
@@ -137,11 +189,15 @@
     "sections": [
       {
         "heading": "Direct contact",
-        "content": "The fastest way to reach Aditya is by email at aditya.more@outlook.in. Visitors can also open the portfolio's Contact page and submit the contact form. For a call or meeting, contact him through email or LinkedIn to coordinate a time."
+        "content": "The fastest way to reach Aditya is by email at aditya.more@outlook.in. Visitors can also open the portfolio's Contact page and submit the contact form. BB-8 can prepare a message by opening the Contact page with a draft for the visitor to review, but it never submits or sends the message. For a call or meeting, contact him through email or LinkedIn to coordinate a time."
       },
       {
         "heading": "Professional opportunities",
-        "content": "Aditya welcomes messages about AI Engineer, Machine Learning Engineer, and Data Scientist roles, as well as project collaborations and research discussions. He is based in the United States and willing to relocate within the United States."
+        "content": "Aditya welcomes messages about AI Engineer, Machine Learning Engineer, and Data Scientist roles, as well as project collaborations and research discussions. He is based in Pittsburgh, Pennsylvania and willing to relocate within the United States."
+      },
+      {
+        "heading": "Resume",
+        "content": "Visitors can download Aditya's current resume through the Resume link in the navigation or ask BB-8 to offer the resume. The current PDF is available at /Aditya%20More%20-%20Resume.pdf and summarizes his education, Clemson research and teaching experience, Amdocs testing experience, major AI and ML projects, and technical skills."
       }
     ]
   },

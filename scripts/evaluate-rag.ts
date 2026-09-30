@@ -2,8 +2,10 @@ import casesJson from "../evals/rag-cases.json";
 import { retrievePortfolioContext } from "../lib/rag/retrieval";
 
 type EvalCase = {
+  category?: string;
   question: string;
   expectedRoutes: string[];
+  expectedTerms?: string[];
 };
 
 function percentile(values: number[], fraction: number) {
@@ -24,11 +26,17 @@ async function main() {
       topK: 3,
     });
     const routes = [...new Set(result.chunks.map((chunk) => chunk.href))];
-    const hit = routes.some((route) => testCase.expectedRoutes.includes(route));
+    const routeHit = routes.some((route) => testCase.expectedRoutes.includes(route));
+    const evidence = result.chunks.map((chunk) => chunk.searchText).join("\n").toLowerCase();
+    const evidenceHit = !testCase.expectedTerms?.length
+      || testCase.expectedTerms.every((term) => evidence.includes(term.toLowerCase()));
+    const hit = routeHit && evidenceHit;
     if (hit) hits += 1;
     rows.push({
       result: hit ? "PASS" : "MISS",
+      category: testCase.category ?? "general",
       expected: testCase.expectedRoutes.join(" | "),
+      evidence: evidenceHit ? "yes" : `missing: ${testCase.expectedTerms?.join(" | ")}`,
       retrieved: routes.join(" | ") || "none",
       latencyMs: Math.round(result.durationMs),
       question: testCase.question,

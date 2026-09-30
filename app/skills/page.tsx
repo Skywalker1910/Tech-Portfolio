@@ -5,7 +5,8 @@ import {
   SiPython, SiPostgresql, SiCplusplus,
   SiPytorch, SiTensorflow, SiScikitlearn,
   SiPlotly, SiPandas, SiNumpy,
-  SiGit, SiDocker, SiJupyter,
+  SiGit, SiDocker, SiJupyter, SiTypescript, SiReact,
+  SiNextdotjs, SiFlask, SiSqlite, SiNodedotjs, SiGithubactions,
 } from "react-icons/si";
 import {
   Cloud, BrainCircuit, BarChart3, ShieldAlert, Eye, Workflow,
@@ -51,6 +52,7 @@ const categories: Category[] = [
     chipCls: "bg-violet-500/10 border-violet-500/20 text-violet-100 hover:bg-violet-500/20",
     skills: [
       { name: "Python",       Icon: SiPython,      color: "text-[#3776AB]" },
+      { name: "TypeScript",   Icon: SiTypescript,  color: "text-[#3178C6]" },
       { name: "C++",          Icon: SiCplusplus,   color: "text-[#00599C]" },
       { name: "SQL",          Icon: SiPostgresql,  color: "text-[#336791]" },
       { name: "scikit-learn", Icon: SiScikitlearn, color: "text-[#F7931E]" },
@@ -79,8 +81,8 @@ const categories: Category[] = [
     ],
   },
   {
-    title: "Tools & Infrastructure",
-    eyebrow: "Cloud & Dev Tools",
+    title: "Applications, Cloud & Infrastructure",
+    eyebrow: "Engineering Stack",
     CatIcon: Settings2,
     gradient: "from-sky-950 via-blue-900/40 to-cyan-950",
     orb1: "bg-sky-500",
@@ -92,10 +94,16 @@ const categories: Category[] = [
     accentBorder: "border-sky-500/20",
     chipCls: "bg-sky-500/10 border-sky-500/20 text-sky-100 hover:bg-sky-500/20",
     skills: [
-      { name: "AWS",        Icon: Cloud,        color: "text-[#FF9900]" },
-      { name: "Git",        Icon: SiGit,        color: "text-[#F05032]" },
-      { name: "Docker",     Icon: SiDocker,     color: "text-[#2496ED]" },
-      { name: "Jupyter",    Icon: SiJupyter,    color: "text-[#F37626]" },
+      { name: "React",          Icon: SiReact,         color: "text-[#61DAFB]" },
+      { name: "Next.js",        Icon: SiNextdotjs,     color: "text-[var(--text)]" },
+      { name: "Flask",          Icon: SiFlask,         color: "text-[var(--text)]" },
+      { name: "Node.js",        Icon: SiNodedotjs,     color: "text-[#5FA04E]" },
+      { name: "SQLite",         Icon: SiSqlite,        color: "text-[#003B57]" },
+      { name: "AWS",            Icon: Cloud,           color: "text-[#FF9900]" },
+      { name: "Docker",         Icon: SiDocker,        color: "text-[#2496ED]" },
+      { name: "GitHub Actions", Icon: SiGithubactions, color: "text-[#2088FF]" },
+      { name: "Git",            Icon: SiGit,           color: "text-[#F05032]" },
+      { name: "Jupyter",        Icon: SiJupyter,       color: "text-[#F37626]" },
     ],
   },
   {
@@ -116,6 +124,8 @@ const categories: Category[] = [
       { name: "Deep Learning",     Icon: BrainCircuit,      color: "text-orange-400" },
       { name: "Computer Vision",   Icon: Eye,               color: "text-emerald-400" },
       { name: "LLMs",              Icon: MessageSquareCode, color: "text-sky-400" },
+      { name: "LLM Agents",        Icon: BrainCircuit,      color: "text-violet-400" },
+      { name: "AI Evaluation",     Icon: Workflow,          color: "text-cyan-400" },
       { name: "MLOps",             Icon: Workflow,          color: "text-amber-400" },
       { name: "RAG Systems",       Icon: Database,          color: "text-teal-400" },
       { name: "Adversarial ML",    Icon: ShieldAlert,       color: "text-red-400" },
