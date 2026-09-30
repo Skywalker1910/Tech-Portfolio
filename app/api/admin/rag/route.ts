@@ -4,6 +4,7 @@ import { getRagRuntimeSettings, getRagStatus, saveRagRuntimeSettings, saveRagSta
 import { getEmbeddingConfig, getRagConfig } from "@/lib/rag/config";
 import { countIndexedVectors, indexPortfolioKnowledge } from "@/lib/rag/indexing";
 import { syncSourceControlledProfile } from "@/lib/content/profile-sync";
+import { boundedInteger } from "@/lib/rag/policy";
 
 export const dynamic = "force-dynamic";
 const unauthorized = () => NextResponse.json({ error:"Unauthorized" }, { status:401 });
@@ -13,7 +14,8 @@ export async function GET(req: NextRequest) {
   const env = getRagConfig(); const embedding = getEmbeddingConfig(); const runtime = await getRagRuntimeSettings();
   let vectors:number | null = null; let connection:"connected" | "unconfigured" | "error" = env.vectorBucketName ? "connected" : "unconfigured";
   if (env.vectorBucketName) { try { vectors = await countIndexedVectors(); } catch { connection = "error"; } }
-  return NextResponse.json({ settings:{ enabled:runtime?.enabled ?? env.enabled, topK:runtime?.topK ?? env.topK, maxDistance:runtime?.maxDistance ?? env.maxDistance }, infrastructure:{ connection, bucketConfigured:Boolean(env.vectorBucketName), index:env.indexName, embeddingModel:embedding.model, dimensions:embedding.dimensions, vectors }, lastSync:await getRagStatus() });
+  return NextResponse.json({ settings:{ enabled:runtime?.enabled ?? env.enabled, topK:runtime?.topK ?? env.topK, maxDistance:runtime?.maxDistance ?? env.maxDistance,
+    strategy:runtime?.strategy ?? "fixed", adaptiveMaxK:runtime?.adaptiveMaxK ?? 8, contextTokenBudget:runtime?.contextTokenBudget ?? 12000 }, infrastructure:{ connection, bucketConfigured:Boolean(env.vectorBucketName), index:env.indexName, embeddingModel:embedding.model, dimensions:embedding.dimensions, vectors }, lastSync:await getRagStatus() });
 }
 
 export async function PATCH(req: NextRequest) {
@@ -21,7 +23,9 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const topK = Math.min(10, Math.max(1, Math.round(Number(body.topK) || 4)));
   const maxDistance = Math.min(2, Math.max(0, Number(body.maxDistance) || 0));
-  try { return NextResponse.json(await saveRagRuntimeSettings({ enabled:Boolean(body.enabled), topK, maxDistance })); }
+  try { return NextResponse.json(await saveRagRuntimeSettings({ enabled:Boolean(body.enabled), topK, maxDistance,
+    strategy:body.strategy === "adaptive" ? "adaptive" : "fixed", adaptiveMaxK:boundedInteger(body.adaptiveMaxK, 8, 1, 10),
+    contextTokenBudget:boundedInteger(body.contextTokenBudget, 12000, 1000, 32000) })); }
   catch (error) { console.error("[rag admin] Settings save failed", error); return NextResponse.json({ error:"Could not save settings. Provision the portfolio table first." }, { status:503 }); }
 }
 

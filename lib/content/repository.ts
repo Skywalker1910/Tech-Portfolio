@@ -46,7 +46,8 @@ export async function getRagRuntimeSettings(): Promise<RagRuntimeSettings | null
   try {
     const result = await docClient.send(new GetCommand({ TableName: PORTFOLIO_TABLE, Key: { pk:"SETTINGS", sk:"RAG" } }));
     if (!result.Item) return null;
-    return { enabled:Boolean(result.Item.enabled), topK:Number(result.Item.topK), maxDistance:Number(result.Item.maxDistance), updatedAt:result.Item.updatedAt };
+    return { enabled:Boolean(result.Item.enabled), topK:Number(result.Item.topK), maxDistance:Number(result.Item.maxDistance), updatedAt:result.Item.updatedAt,
+      strategy:result.Item.strategy === "adaptive" ? "adaptive" : "fixed", adaptiveMaxK:result.Item.adaptiveMaxK, contextTokenBudget:result.Item.contextTokenBudget };
   } catch (error) {
     if (!isMissingPortfolioTable(error)) console.error("[rag] Could not read runtime settings.", error);
     return null;

@@ -49,5 +49,8 @@ export type RagRuntimeSettings = {
   enabled: boolean;
   topK: number;
   maxDistance: number;
+  strategy?: "fixed" | "adaptive";
+  adaptiveMaxK?: number;
+  contextTokenBudget?: number;
   updatedAt?: string;
 };

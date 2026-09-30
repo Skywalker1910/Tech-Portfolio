@@ -1,0 +1,14 @@
+[
+  {"id":"test-paraphrase-education","category":"paraphrase","question":"Which postgraduate specialization did he complete?","expectedRoutes":["/education"],"expectedTerms":["Data Science and Informatics"]},
+  {"id":"test-paraphrase-grading","category":"paraphrase","question":"How did he reduce manual marking of student notebooks?","expectedRoutes":["/experience"],"expectedTerms":["nbgrader"]},
+  {"id":"test-ambiguous-model","category":"ambiguous","question":"Which model did you build?","expectedRoutes":[],"answerable":false,"reviewNotes":"Multiple projects/model types: clarify scope; do not claim co-pilot trained a model."},
+  {"id":"test-ambiguous-this","category":"ambiguous","question":"Is this better than the other one?","expectedRoutes":[],"answerable":false,"reviewNotes":"No antecedents: ask for the two subjects and comparison criteria."},
+  {"id":"test-compare-deployment","category":"comparison","question":"Compare hosting and release workflows of the movie recommender and this portfolio.","expectedRoutes":["/projects"],"expectedTerms":["AWS EC2","Amplify","GitHub Actions"]},
+  {"id":"test-compare-research","category":"comparison","question":"Contrast Skynet air quality prediction with his LLM human behavior research.","expectedRoutes":["/projects","/experience"],"expectedTerms":["NASA TEMPO","human behavior"]},
+  {"id":"test-summary-learning","category":"summary","question":"Summarize how his education and teaching prepared him for machine learning work.","expectedRoutes":["/education","/experience"],"expectedTerms":["Clemson","Applied Data Science"]},
+  {"id":"test-summary-llm","category":"summary","question":"Give an overview of his LLM engineering and agent research experience.","expectedRoutes":["/projects","/experience"],"expectedTerms":["LoRA","LLM Agents"]},
+  {"id":"test-followup-hf","category":"follow-up","history":[{"role":"user","content":"Explain BB-8: Transformer Language Model."}],"question":"Where are its weights published?","expectedRoutes":["/projects"],"expectedTerms":["https://huggingface.co/Skywalker1910/BB8"]},
+  {"id":"test-followup-teaching","category":"follow-up","history":[{"role":"user","content":"Tell me about his Applied Data Science teaching at Clemson."}],"question":"Which tool automated the grading?","expectedRoutes":["/experience"],"expectedTerms":["nbgrader"]},
+  {"id":"test-missing-clients","category":"missing-evidence","question":"List the private paying clients of Neural Log and their email addresses.","expectedRoutes":[],"answerable":false,"reviewNotes":"Private client list absent: decline to invent."},
+  {"id":"test-missing-benchmark","category":"missing-evidence","question":"What independently audited production uptime SLA does Skynet guarantee?","expectedRoutes":[],"answerable":false,"reviewNotes":"No audited SLA in evidence."}
+]

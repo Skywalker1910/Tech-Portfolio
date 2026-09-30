@@ -1,5 +1,7 @@
 # Portfolio Command Center
 
+My RAG Control includes a protected **Evaluate published knowledge** panel. I preview a no-charge plan, explicitly approve a $0.05 OpenAI reservation ceiling, then run a small published-index smoke test. Retrieval compares keyword, pure semantic and hybrid 4/6/8/adaptive evidence with independent Hit@3; answer tests use one selected synthetic development fixture and my configured generation model. Neither action changes production retrieval settings or reindexes. My [evaluation protocol](RAG_EVALUATION.md#command-center-production-evaluation) covers budget, lock, reporting and review limits.
+
 ## Purpose
 
 The private `/admin` area is my operational control plane for live content, contact messages, BB-8 retrieval, visitor analytics, and OpenAI usage/cost monitoring. It is intentionally designed for my single-admin workflow and uses the same light/dark visual language as the public site.
@@ -82,6 +84,10 @@ Runtime controls stored in DynamoDB:
 - Semantic retrieval enabled/disabled.
 - `topK`, bounded from 1 to 10.
 - Maximum cosine distance, bounded from 0 to 2.
+- Fixed (default) versus experimental adaptive strategy, with a separate adaptive maximum from 1 to 10.
+- Verified-source context token budget, from 1,000 to 32,000 conservative UTF-8 byte/token upper-bound units.
+
+I retain fixed 4 chunks and 0.65 distance pending live answer-quality evidence. Adaptive uses up to 3 chunks for narrow facts, 6 for summaries, and 8 for comparisons, capped by its maximum. Chunk count controls evidence per request, not corpus size; saving retrieval settings requires neither reindexing nor a deployment. My [evaluation protocol](RAG_EVALUATION.md) and [offline results](RAG_EVALUATION_RESULTS.md) distinguish coverage from answer quality. This change does not activate adaptive mode in my production database.
 
 Read-only infrastructure status:
 

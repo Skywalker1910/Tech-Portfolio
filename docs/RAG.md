@@ -16,12 +16,15 @@ flowchart LR
     Embed --> Vectors[(Amazon S3 Vectors)]
 
     Question[Visitor question] --> Query[Latest two user messages]
+    Query --> Policy[Fixed or optional adaptive evidence limit]
+    Policy --> Merge
     Query --> Local
     Query --> QueryEmbed[OpenAI query embedding]
     QueryEmbed --> Vectors
     Local --> Merge[Hybrid merge + deduplication]
     Vectors --> Merge
-    Merge --> Prompt[Verified source context]
+    Merge --> Budget[Bounded whole-source context]
+    Budget --> Prompt[Verified source context]
     Prompt --> Responses[OpenAI Responses API]
     Responses --> Answer[Answer + routes + optional action]
 ```
@@ -85,7 +88,7 @@ The chat route constructs the retrieval query from the latest two user messages.
 2. S3 Vectors returns the nearest vectors with distance and metadata.
 3. Results beyond `maxDistance` are discarded.
 4. The deterministic lexical retriever contributes up to two strong exact-topic matches.
-5. Lexical and semantic results are deduplicated by chunk ID and limited to `topK`.
+5. Lexical and semantic results are deduplicated by chunk ID and normalized exact content, limited to the fixed/adaptive request maximum, and bounded by the source-context token budget.
 
 The lexical scorer tokenizes the question, removes stop words, expands portfolio concepts such as “career” to “experience/work/role,” weights rare terms, gives title and section matches three times the content weight, and rewards an exact normalized phrase.
 
@@ -145,7 +148,7 @@ Tool output is treated as untrusted until `actionFromToolCall` validates it. BB-
 | `RAG_TOP_K` | Retrieved context count | Range 1–10; default 4 |
 | `RAG_MAX_DISTANCE` | Cosine-distance cutoff | Range 0–2; lower is stricter |
 
-The deployed distance baseline is 0.65. The code-level fallback is 0.60 when no value is supplied. `enabled`, `topK`, and `maxDistance` can be overridden from RAG Control and are stored at `SETTINGS / RAG` in DynamoDB. Model, dimensions, bucket, and index remain deployment-level because changing them affects index compatibility.
+My recommended deployment baseline and code-level fallback are fixed maximum 4 chunks and distance 0.65. RAG Control stores `enabled`, `topK`, `maxDistance`, `strategy` (fixed/adaptive), `adaptiveMaxK`, and `contextTokenBudget` at `SETTINGS / RAG` in DynamoDB. Missing strategy preserves fixed mode. Retrieval setting changes do not require reindexing; chunk count controls evidence per request, not corpus size. Model, dimensions, bucket, and index remain deployment-level because changing them affects index compatibility.
 
 ## S3 Vectors and IAM
 
@@ -164,16 +167,18 @@ Creation-time permissions—`CreateVectorBucket`, `GetVectorBucket`, `CreateInde
 
 ## Evaluation
 
-The evaluation corpus contains 83 representative questions spanning career and availability, professional experience, research, education, projects, live applications and model repositories, skills, contact information, and social or source-code discovery. The question set is a regression test for retrieval behavior; it does not add knowledge by itself. Knowledge grows when verified source content is added to the corpus and reindexed.
+I preserve the original 83-case regression set and add 12 development plus 12 held-out cases. My comparison harness evaluates fixed 4/6/8 and optional adaptive retrieval without silently changing Hit@3. My [evaluation protocol](RAG_EVALUATION.md) explains the precise legacy predicate, category metrics, corpus isolation, live comparisons, budgeted opt-in generation/judging, and human-review rubric. My [offline comparison results](RAG_EVALUATION_RESULTS.md) support retaining fixed 4/0.65 pending approved live answer evaluation.
 
-Both lexical and semantic evaluations report:
+My original regression set contains 83 representative questions spanning career and availability, professional experience, research, education, projects, live applications and model repositories, skills, contact information, and social or source-code discovery. The question set tests retrieval behavior; it does not add knowledge by itself. My knowledge grows when verified source content is added to the corpus and reindexed.
+
+My legacy local and live-hybrid evaluations report:
 
 - Evidence-aware Hit@3. A case passes only when the top three retrieved chunks include an expected route and the required evidence terms.
 - Mean retrieval latency.
 - P95 retrieval latency.
 - Per-question category, retrieved routes, evidence coverage, and pass/fail result.
 
-Hit@3 is the percentage of evaluation questions for which relevant evidence appears within the first three retrieved chunks. It measures retrieval coverage, not final-answer quality: a perfect retrieval score does not guarantee that the language model will interpret or phrase every answer correctly. The suite therefore uses recruiter-style paraphrases and checks concrete evidence in addition to source routes.
+My existing Hit@3 requires any expected route plus all expected text fragments anywhere in the concatenated `searchText` of an independent three-chunk retrieval. Expected routes are alternatives, and fragments can occur in different source titles, sections, or bodies. It measures this retrieval proxy, not final-answer quality: a perfect score does not verify a generated answer. I report fragment and all-route coverage separately in the comparison harness.
 
 The GitHub quality gate runs the deterministic local evaluation without AWS or OpenAI secrets. Semantic evaluation is an operational check after corpus, embedding, index, or distance-threshold changes.
 

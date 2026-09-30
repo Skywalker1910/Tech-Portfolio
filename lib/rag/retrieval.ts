@@ -5,6 +5,8 @@ import { createS3VectorsClient, getEmbeddingConfig, getRagConfig } from "./confi
 import type { ChatSource, RetrievalResult, RetrievedChunk } from "./types";
 import { buildCurrentPortfolioChunks } from "./live-knowledge";
 import { getRagRuntimeSettings } from "@/lib/content/repository";
+import { budgetEvidence, qualifiesDistance, retrievalDecision, uniqueEvidence, type RetrievalPolicy } from "./policy";
+import type { PortfolioChunk } from "./types";
 
 const STOP_WORDS = new Set([
   "a", "about", "an", "and", "are", "as", "at", "be", "can", "did", "do", "does",
@@ -33,10 +35,14 @@ const QUERY_EXPANSIONS: Record<string, string[]> = {
   work: ["experience", "role", "career"],
 };
 
-type RetrievalOptions = {
-  mode?: "auto" | "local" | "s3";
+export type RetrievalOptions = RetrievalPolicy & {
+  mode?: "auto" | "local" | "s3" | "semantic";
   openai?: OpenAI;
-  topK?: number;
+  maxDistance?: number;
+  // Injection isolates offline evaluation/tests from DynamoDB and paid services.
+  corpus?: PortfolioChunk[];
+  settings?: RetrievalPolicy & { enabled?: boolean; maxDistance?: number };
+  semanticSearch?: (query: string, topK: number, maxDistance: number) => Promise<RetrievedChunk[]>;
 };
 
 function tokenize(value: string) {
@@ -94,25 +100,26 @@ function metadataString(metadata: unknown, key: string) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-async function createQueryEmbedding(openai: OpenAI, query: string) {
+async function createQueryEmbedding(openai: OpenAI, query: string, signal?: AbortSignal) {
   const { model, dimensions } = getEmbeddingConfig();
   const response = await openai.embeddings.create({
     model,
     input: query.replace(/\s+/g, " ").trim(),
     dimensions,
     encoding_format: "float",
-  });
+  }, { signal });
   return response.data[0]?.embedding ?? [];
 }
 
-async function retrieveFromS3Vectors(
+export async function retrieveFromS3Vectors(
   query: string,
   openai: OpenAI,
   topK: number,
   maxDistance: number,
+  signal?: AbortSignal,
 ): Promise<RetrievedChunk[]> {
   const config = getRagConfig();
-  const embedding = await createQueryEmbedding(openai, query);
+  const embedding = await createQueryEmbedding(openai, query, signal);
   if (embedding.length === 0) throw new Error("OpenAI returned an empty query embedding.");
 
   const client = createS3VectorsClient();
@@ -124,7 +131,7 @@ async function retrieveFromS3Vectors(
       topK,
       returnDistance: true,
       returnMetadata: true,
-    }));
+    }), { abortSignal:signal });
 
     return (response.vectors ?? []).flatMap((vector) => {
       const content = metadataString(vector.metadata, "content");
@@ -133,7 +140,7 @@ async function retrieveFromS3Vectors(
       const href = metadataString(vector.metadata, "href");
       const documentId = metadataString(vector.metadata, "documentId");
       if (!vector.key || !content || !title || !section || !href || !documentId) return [];
-      if (typeof vector.distance === "number" && vector.distance > maxDistance) return [];
+      if (!Number.isFinite(vector.distance) || vector.distance! > maxDistance) return [];
 
       const chunk: RetrievedChunk = {
         id: vector.key,
@@ -159,59 +166,40 @@ export async function retrievePortfolioContext(
   const startedAt = performance.now();
   const config = getRagConfig();
   const requestedMode = options.mode ?? "auto";
-  if (requestedMode === "local") {
-    return { mode:"local-keyword", chunks:retrieveLocally(query, options.topK ?? config.topK), durationMs:performance.now() - startedAt, fallbackReason:"disabled" };
-  }
-  const runtime = await getRagRuntimeSettings();
-  const topK = options.topK ?? runtime?.topK ?? config.topK;
+  const runtime = requestedMode === "local" ? null : options.settings ?? await getRagRuntimeSettings();
+  const policy = { ...config, ...runtime, ...options };
+  const { topK, reason } = retrievalDecision(query, policy);
   const enabled = runtime?.enabled ?? config.enabled;
-  const maxDistance = runtime?.maxDistance ?? config.maxDistance;
-  const liveChunks = await buildCurrentPortfolioChunks();
-  const useS3 = requestedMode === "s3" || (requestedMode === "auto" && enabled);
+  const maxDistance = options.maxDistance ?? runtime?.maxDistance ?? config.maxDistance;
+  const liveChunks = options.corpus ?? (requestedMode === "local" ? buildPortfolioChunks() : await buildCurrentPortfolioChunks());
+  const useS3 = requestedMode === "s3" || requestedMode === "semantic" || (requestedMode === "auto" && enabled);
+  const finish = (mode: RetrievalResult["mode"], candidates: RetrievedChunk[], fallbackReason?: RetrievalResult["fallbackReason"]): RetrievalResult => {
+    const unique = uniqueEvidence(candidates);
+    const budget = budgetEvidence(unique.slice(0, topK), policy.contextTokenBudget);
+    return { mode, chunks:budget.chunks, durationMs:performance.now() - startedAt, fallbackReason,
+      diagnostics:{ requestedK:topK, decision:reason, qualifyingCount:candidates.length,
+        duplicatesRemoved:candidates.length - unique.length, budgetDropped:Math.min(unique.length, topK) - budget.chunks.length,
+        contextTokenUpperBound:budget.tokenUpperBound, contextTokenBudget:budget.budget } };
+  };
 
   if (!useS3) {
-    return {
-      mode: "local-keyword",
-      chunks: retrieveLocally(query, topK, liveChunks),
-      durationMs: performance.now() - startedAt,
-      fallbackReason: "disabled",
-    };
+    return finish("local-keyword", retrieveLocally(query, liveChunks.length, liveChunks), "disabled");
   }
 
-  if (!config.vectorBucketName || !process.env.OPENAI_API_KEY) {
-    return {
-      mode: "local-keyword",
-      chunks: retrieveLocally(query, topK, liveChunks),
-      durationMs: performance.now() - startedAt,
-      fallbackReason: "missing-config",
-    };
+  if (!options.semanticSearch && (!config.vectorBucketName || !process.env.OPENAI_API_KEY)) {
+    return finish("local-keyword", retrieveLocally(query, liveChunks.length, liveChunks), "missing-config");
   }
 
   try {
-    const openai = options.openai ?? new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const semanticChunks = await retrieveFromS3Vectors(query, openai, topK, maxDistance);
+    const search = options.semanticSearch ?? ((q: string, k: number, distance: number) => retrieveFromS3Vectors(q, options.openai ?? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }), k, distance));
+    const semanticChunks = (await search(query, topK, maxDistance)).filter(chunk => qualifiesDistance(chunk, maxDistance));
     // Hybrid retrieval keeps exact page/topic matches (for example, "projects")
     // alongside semantic S3 Vector matches instead of letting generic summaries crowd them out.
-    const lexicalChunks = retrieveLocally(query, Math.min(2, topK), liveChunks);
-    const seen = new Set<string>();
-    const chunks = [...lexicalChunks, ...semanticChunks].filter((chunk) => {
-      if (seen.has(chunk.id)) return false;
-      seen.add(chunk.id);
-      return true;
-    }).slice(0, topK);
-    return {
-      mode: "s3-vectors",
-      chunks,
-      durationMs: performance.now() - startedAt,
-    };
-  } catch (error) {
-    console.error("[portfolio-rag] S3 Vectors query failed; using local retrieval.", error);
-    return {
-      mode: "local-keyword",
-      chunks: retrieveLocally(query, topK, liveChunks),
-      durationMs: performance.now() - startedAt,
-      fallbackReason: "query-failed",
-    };
+    const lexicalChunks = requestedMode === "semantic" ? [] : retrieveLocally(query, Math.min(2, topK), liveChunks);
+    return finish("s3-vectors", requestedMode === "semantic" ? semanticChunks : [...lexicalChunks, ...semanticChunks]);
+  } catch {
+    console.error("[portfolio-rag] S3 Vectors query failed; using local retrieval.");
+    return finish("local-keyword", retrieveLocally(query, liveChunks.length, liveChunks), "query-failed");
   }
 }
 
