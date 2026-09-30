@@ -50,6 +50,8 @@ jobs:
 
       - name: Evaluate local RAG retrieval
         run: npm run rag:evaluate
+      - name: Test retrieval policies and budgets (offline)
+        run: npm run rag:test
 
       - name: Build production application
         run: npm run build

@@ -1,0 +1,14 @@
+[
+  {"id":"dev-paraphrase-contact","category":"paraphrase","question":"What's the best way to get in touch with Aditya?","expectedRoutes":["/contact"],"expectedTerms":["email"]},
+  {"id":"dev-paraphrase-movies","category":"paraphrase","question":"Which recommender combines collaborative and content-based signals?","expectedRoutes":["/projects"],"expectedTerms":["FunkSVD","TF-IDF"]},
+  {"id":"dev-ambiguous-bb8","category":"ambiguous","question":"Is BB-8 the same as your trained Transformer?","expectedRoutes":["/projects"],"expectedTerms":["does not serve or power the live portfolio assistant"],"reviewNotes":"Distinguish live co-pilot from separate Transformer study."},
+  {"id":"dev-ambiguous-it","category":"ambiguous","question":"Can you explain it?","expectedRoutes":[],"answerable":false,"reviewNotes":"No antecedent: ask which project rather than invent one."},
+  {"id":"dev-compare","category":"comparison","question":"Compare the movie recommendation engine with Neural Log: goals, technologies and deployment.","expectedRoutes":["/projects"],"expectedTerms":["FunkSVD","Neural Log","Docker"]},
+  {"id":"dev-compare-rag","category":"comparison","question":"Compare the live portfolio co-pilot and the BB8 Transformer research project.","expectedRoutes":["/projects"],"expectedTerms":["Amazon S3 Vectors","PyTorch"]},
+  {"id":"dev-career","category":"summary","question":"Summarize his career across Amdocs and Clemson, including teaching and current research.","expectedRoutes":["/experience"],"expectedTerms":["Amdocs","nbgrader","LLM Agents"]},
+  {"id":"dev-summary-projects","category":"summary","question":"Give an overview of all projects that use machine learning and their outcomes.","expectedRoutes":["/projects"],"expectedTerms":["FunkSVD","PyTorch","NASA TEMPO"]},
+  {"id":"dev-followup-movie","category":"follow-up","history":[{"role":"user","content":"Tell me about the movie recommendation engine."},{"role":"assistant","content":"It explores recommendation models."}],"question":"Where can I try it?","expectedRoutes":["/projects"],"expectedTerms":["https://movies.adityamore.dev"]},
+  {"id":"dev-followup-role","category":"follow-up","history":[{"role":"user","content":"What is his current research at Clemson?"}],"question":"When did he start?","expectedRoutes":["/experience"],"expectedTerms":["April 2026"]},
+  {"id":"dev-missing-salary","category":"missing-evidence","question":"What was his exact annual salary at Amdocs?","expectedRoutes":[],"answerable":false,"reviewNotes":"Salary is not provided. Do not infer from title."},
+  {"id":"dev-missing-private","category":"missing-evidence","question":"What is Aditya's private home street address?","expectedRoutes":[],"answerable":false,"reviewNotes":"Do not infer street address from high-level location."}
+]

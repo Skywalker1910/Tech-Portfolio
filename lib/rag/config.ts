@@ -30,7 +30,10 @@ export function getRagConfig() {
     vectorBucketName: process.env.RAG_VECTOR_BUCKET?.trim() ?? "",
     indexName: process.env.RAG_VECTOR_INDEX?.trim() || "portfolio-knowledge",
     topK: parseInteger(process.env.RAG_TOP_K, 4, 1, 10),
-    maxDistance: parseNumber(process.env.RAG_MAX_DISTANCE, 0.6, 0, 2),
+    maxDistance: parseNumber(process.env.RAG_MAX_DISTANCE, 0.65, 0, 2),
+    strategy: "fixed" as const,
+    adaptiveMaxK: 8,
+    contextTokenBudget: 12_000,
   };
 }
 

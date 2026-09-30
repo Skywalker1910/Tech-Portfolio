@@ -5,6 +5,7 @@ import { getChatSources, retrievePortfolioContext } from "@/lib/rag/retrieval";
 import type { BB8Action, PortfolioRoute } from "@/lib/bb8-actions";
 import { getAnalyticsContext, recordChatUsage, sanitizeAnalyticsId, type AnalyticsClientHints, type ChatTokenUsage } from "@/lib/analytics";
 import { volatileRequestKey } from "@/lib/request-rate-limit";
+import { retrievalQuery } from "@/lib/rag/policy";
 
 export const dynamic = "force-dynamic";
 
@@ -221,12 +222,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const retrievalQuery = conversation
-      .filter((message) => message.role === "user")
-      .slice(-2)
-      .map((message) => message.content)
-      .join("\n");
-    const retrieval = await retrievePortfolioContext(retrievalQuery, { openai });
+    const retrieval = await retrievePortfolioContext(retrievalQuery(conversation), { openai });
     retrievalMode = retrieval.mode;
     retrievalFallback = Boolean(retrieval.fallbackReason);
     const response = await openai.responses.create({
@@ -290,7 +286,8 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error("[/api/chat] OpenAI error:", err);
+    // Provider error messages/bodies can include input; never log visitor text.
+    console.error("[/api/chat] OpenAI request failed.", { status:err instanceof OpenAI.APIError ? err.status : undefined });
     await trackUsage({ successful:false });
     return NextResponse.json({ error: "AI service temporarily unavailable." }, { status: 502 });
   }

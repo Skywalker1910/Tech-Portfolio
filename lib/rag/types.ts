@@ -32,6 +32,15 @@ export type RetrievalResult = {
   chunks: RetrievedChunk[];
   durationMs: number;
   fallbackReason?: "disabled" | "missing-config" | "query-failed";
+  diagnostics?: {
+    requestedK: number;
+    decision: string;
+    qualifyingCount: number;
+    duplicatesRemoved: number;
+    budgetDropped: number;
+    contextTokenUpperBound: number;
+    contextTokenBudget: number;
+  };
 };
 
 export type ChatSource = {

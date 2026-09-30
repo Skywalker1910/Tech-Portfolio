@@ -30,6 +30,7 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
   - Offer the resume as a direct download.
   - Prepare—but never submit—a contact-form draft from information explicitly provided by the visitor.
 - Evidence-aware RAG evaluation suite covering 83 representative questions across career, experience, education, projects, skills, contact, and social information, with Hit@3 and latency reporting.
+- My retrieval comparison retains those 83 cases, adds 12 development and 12 held-out cases, reports categories and coverage at fixed 4/6/8, and supports opt-in budgeted answer evaluation with an explicit rubric. My optional adaptive heuristic remains experimental; fixed 4/0.65 is the recommended baseline.
 
 ## Live content system
 
@@ -49,7 +50,7 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
   - Contact messages: search, filtering, read state, sender classification, deletion, and consent-aware links to enhanced visitor journeys.
   - Projects: create, edit, order, publish, draft, and delete.
   - Experience: create, edit, order, publish, draft, and delete.
-  - RAG Control: enable semantic retrieval, tune `topK` and maximum distance, inspect index status, and deliberately reindex published content.
+  - RAG Control: enable semantic retrieval, select fixed or experimental adaptive mode, tune evidence maximum/distance/context budget, inspect index status, and deliberately reindex published content. Retrieval tuning does not reindex or add corpus knowledge.
   - Traffic: 7-, 30-, and 90-day summaries, mandatory country/region reach, consented feature and page performance, optional device/OS/browser/viewport/source breakdowns, numbered returning visits, manual audience labels, timestamped journeys, and purpose-limited BB-8 activity.
   - API Usage: expandable provider hub with a branded OpenAI dashboard for protected request, embedding, token, model, and cost reporting through a server-only Admin API key, optionally scoped to BB-8’s dedicated OpenAI project.
 

@@ -2,6 +2,12 @@
 
 ## Conventions
 
+### Protected RAG evaluation
+
+`GET /api/admin/rag/evaluation` reads the last durable status/report. `POST` with `action: "dry-run"` and `preset: "retrieval" | "answers"` previews a plan without any AWS/OpenAI access. Paid `action: "run"` additionally requires `approved: true`, `budgetUsd: 0.05`, a fresh UUID v4 `requestId`, an allowlisted synthetic `caseId`, and `priceRevision` matching the JSON serialization of the preview's prices. Cross-origin POSTs are rejected. A duplicate ID, concurrent run, cooldown or unavailable durable lock prevents paid execution (409).
+
+Each run has a shared OpenAI reservation ledger, maximum 12 paid attempts and a 20-second abort deadline. The answer output cap is 500, including reasoning, so truncated output is flagged. `report.state: "incomplete"` must not be treated as a complete comparison. The report's source IDs and metrics may persist in my existing portfolio table; synthetic answer text is only returned to my authenticated browser and not saved. See [evaluation workflow](RAG_EVALUATION.md#command-center-production-evaluation).
+
 All application APIs return JSON and execute as dynamic Next.js route handlers unless explicitly replaced by the static GitHub Pages build. Public input is untrusted and validated before AWS or third-party access.
 
 Protected routes accept either:
@@ -236,7 +242,7 @@ Server validation bounds text, arrays, enums, numbers, IDs, and URLs. See [Live 
 | Method | Effect |
 |---|---|
 | `GET` | Return effective settings, vector connection/count, model/dimensions, and last synchronization |
-| `PATCH` | Save `enabled`, `topK`, and `maxDistance` runtime settings |
+| `PATCH` | Save `enabled`, `topK`, `maxDistance`, `strategy` (fixed/adaptive), `adaptiveMaxK`, and `contextTokenBudget` runtime settings; no reindex |
 | `POST` | Accept `{ "action": "reindex" }` to synchronize current published content, or `{ "action": "sync-profile" }` to publish the source-controlled profile to DynamoDB and then synchronize the corpus |
 
 The reindex response includes chunk count, stale-vector removal count, model, dimensions, bucket, and index. The profile-sync response also reports project, experience, and legacy-record counts. Failures are written to the RAG status record and returned as `503`.

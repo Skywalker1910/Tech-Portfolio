@@ -1,4 +1,5 @@
 import type { RetrievalResult } from "@/lib/rag/types";
+import { budgetEvidence, sourceText } from "@/lib/rag/policy";
 
 /**
  * Stable behavior and navigation policy for BB-8.
@@ -60,13 +61,7 @@ export function buildPortfolioContext(retrieval: RetrievalResult) {
     return `${PORTFOLIO_CONTEXT}\n\nVERIFIED PORTFOLIO SOURCES:\nNo relevant source was retrieved for this question.`;
   }
 
-  const sources = retrieval.chunks.map((chunk, index) => [
-    `[Source ${index + 1}]`,
-    `Page: ${chunk.title}`,
-    `Section: ${chunk.section}`,
-    `Route: ${chunk.href}`,
-    chunk.content,
-  ].join("\n")).join("\n\n");
+  const sources = budgetEvidence(retrieval.chunks, retrieval.diagnostics?.contextTokenBudget).chunks.map(sourceText).join("\n\n");
 
-  return `${PORTFOLIO_CONTEXT}\n\nVERIFIED PORTFOLIO SOURCES:\n${sources}`;
+  return `${PORTFOLIO_CONTEXT}\n\nVERIFIED PORTFOLIO SOURCES:\n${sources || "No relevant source fits the context budget for this question."}`;
 }
