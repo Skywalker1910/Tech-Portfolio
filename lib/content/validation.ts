@@ -20,7 +20,7 @@ export function validateContent(kind: ContentKind, input: unknown): PortfolioCon
   if (kind === "projects") {
     const statuses = new Set(["completed", "in-progress", "planned"]);
     const status = statuses.has(String(raw.status)) ? String(raw.status) as ProjectContent["status"] : "planned";
-    return { ...base, kind:"project", blurb:text(raw.blurb, 360), description:text(raw.description, 4_000), highlights:list(raw.highlights), tags:list(raw.tags, 24, 60), year:Math.min(2100, Math.max(1900, Number(raw.year) || new Date().getFullYear())), status, featured:Boolean(raw.featured), github:safeUrl(raw.github), demo:safeUrl(raw.demo), link:safeUrl(raw.link) };
+    return { ...base, kind:"project", blurb:text(raw.blurb, 360), description:text(raw.description, 4_000), highlights:list(raw.highlights), tags:list(raw.tags, 24, 60), year:Math.min(2100, Math.max(1900, Number(raw.year) || new Date().getFullYear())), status, featured:Boolean(raw.featured), github:safeUrl(raw.github), demo:safeUrl(raw.demo), huggingface:safeUrl(raw.huggingface), link:safeUrl(raw.link) };
   }
   const accents = new Set(["orange","violet","teal","blue","pink","purple"]);
   const accent = accents.has(String(raw.accent)) ? String(raw.accent) as ExperienceContent["accent"] : "orange";

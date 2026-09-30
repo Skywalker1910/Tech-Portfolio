@@ -7,7 +7,7 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
 - Responsive Next.js App Router interface with light-first theming, an optional dark theme for the current visit, reduced-motion support, keyboard focus states, and a skip link.
 - Wide desktop navigation preview that summarizes each destination before navigation, plus a compact theme-aware mobile menu.
 - About page with animated introduction, career/education timeline, featured projects, technology highlights, career status, and the BB-8 call-to-action banner.
-- Filterable Projects gallery with search, technology and status filters, featured-only filtering, project details, source links, and case-study cards.
+- Filterable Projects gallery with search, technology and status filters, featured-only filtering, project-specific animated previews, project details, GitHub and live-application links, Hugging Face repositories, and case-study cards.
 - Detailed Experience, Education, Skills, Socials, Contact, Notice, and Privacy pages, including mobile timeline layouts that preserve institution branding and content readability.
 - Pointer-only custom cursor behavior so touch devices retain native mobile interaction.
 - Live GitHub profile and repository summary through a cached server-side proxy with authenticated-to-public retry and unavailable-state actions.
@@ -29,7 +29,7 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
   - Navigate to a relevant portfolio page without closing chat.
   - Offer the resume as a direct download.
   - Prepare—but never submit—a contact-form draft from information explicitly provided by the visitor.
-- Evidence-aware RAG evaluation suite covering 77 representative questions across career, experience, education, projects, skills, contact, and social information, with Hit@3 and latency reporting.
+- Evidence-aware RAG evaluation suite covering 83 representative questions across career, experience, education, projects, skills, contact, and social information, with Hit@3 and latency reporting.
 
 ## Live content system
 

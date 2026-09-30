@@ -20,6 +20,7 @@ export type ProjectContent = BaseContent & {
   featured: boolean;
   github?: string;
   demo?: string;
+  huggingface?: string;
   link?: string;
 };
 

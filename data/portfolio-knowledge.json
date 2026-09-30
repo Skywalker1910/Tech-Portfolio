@@ -62,16 +62,16 @@
     "route": "/projects",
     "sections": [
       {
-        "heading": "BB-8 portfolio co-pilot — RAG architecture",
+        "heading": "BB8 Co-Pilot x Tech Portfolio — RAG architecture",
         "content": "BB-8 is the active RAG-powered co-pilot for Aditya's Tech Portfolio. It uses the OpenAI Responses API and OpenAI embeddings with retrieval-augmented generation over structured, verified portfolio knowledge. Amazon S3 Vectors provides semantic retrieval, while a deterministic local keyword retriever provides an availability fallback. BB-8 retrieves relevant chunks, grounds the model with only that evidence, and returns source-page links."
       },
       {
-        "heading": "BB-8 portfolio co-pilot — agent capabilities and operations",
+        "heading": "BB8 Co-Pilot x Tech Portfolio — agent capabilities and operations",
         "content": "The live BB-8 co-pilot preserves chat state while navigating, offers the current resume, and prepares contact-form drafts for visitor review without sending them. The Next.js and TypeScript application includes retrieval evaluation, OpenAI usage telemetry, privacy-aware first-party analytics, DynamoDB-backed content administration, and AWS Amplify SSR deployment. Source: https://github.com/Skywalker1910/Tech-Portfolio. Live system: https://www.adityamore.dev."
       },
       {
-        "heading": "Live BB-8 co-pilot versus BB8 Transformer",
-        "content": "The BB8 Transformer repository is a separate LLM engineering study and does not serve or power the live portfolio assistant. The live BB-8 chat uses OpenAI models plus portfolio RAG; the research project implements and evaluates Transformer language models from scratch."
+        "heading": "BB8 Co-Pilot x Tech Portfolio versus BB-8: Transformer Language Model",
+        "content": "BB-8: Transformer Language Model is a separate LLM engineering study and does not serve or power the live portfolio assistant. BB8 Co-Pilot x Tech Portfolio uses OpenAI models plus portfolio RAG; the research project implements and evaluates Transformer language models from scratch."
       },
       {
         "heading": "Movie Recommendation Engine — data and baseline results",
@@ -79,7 +79,7 @@
       },
       {
         "heading": "Movie Recommendation Engine — NeuMF v2 improvements",
-        "content": "In September 2026, NeuMF v2 improved validation RMSE from 1.0725 to 0.8543, improved MAE from 0.8078 to 0.6452, and reduced parameters from 26.3 million to 13.1 million. Versioned model artifacts now live on Hugging Face and download automatically when absent."
+        "content": "In September 2026, NeuMF v2 improved validation RMSE from 1.0725 to 0.8543, improved MAE from 0.8078 to 0.6452, and reduced parameters from 26.3 million to 13.1 million. Versioned model artifacts live at https://huggingface.co/Skywalker1910/movie-rec-models and download automatically when absent."
       },
       {
         "heading": "Movie Recommendation Engine — product and deployment",
@@ -90,16 +90,16 @@
         "content": "Completed in 2025, Skynet is an end-to-end machine-learning pipeline for forecasting Air Quality Index. It integrated NASA TEMPO, OpenAQ, weather, and traffic APIs; implemented ingestion and preprocessing pipelines; engineered environmental and traffic features; and modeled temporal and spatial AQI patterns. Technologies included Python, scikit-learn, pandas, and NumPy."
       },
       {
-        "heading": "BB8 Transformer — architecture and experiment progression",
+        "heading": "BB-8: Transformer Language Model — architecture and experiment progression",
         "content": "BB8 is Aditya's 2026 graduate-level LLM engineering project, separate from the live BB-8 portfolio co-pilot. He implemented a decoder-only GPT-style Transformer in PyTorch from first principles: embeddings, learned positional embeddings, scaled dot-product attention, multi-head attention, GELU feed-forward layers, Pre-LN decoder blocks, causal masking, character, word, and BPE tokenizers, training and evaluation loops, and decoding strategies. Across 11 documented experiments, the project progressed from 112,320-parameter character models through BPE models, Qwen2.5-0.5B LoRA fine-tuning, and grounded retrieval with citations and abstention."
       },
       {
-        "heading": "BB8 Transformer — chat evaluation findings",
+        "heading": "BB-8: Transformer Language Model — chat evaluation findings",
         "content": "An 80-case, five-configuration chat evaluation suite traced failures to a prompt-format mismatch and a preprocessing bug that truncated 29 percent of training examples. An 88-case grounded-QA benchmark with an 80 percent promotion gate rejected a model with perplexity 1.03 because it passed only 22 percent of content and citation checks."
       },
       {
-        "heading": "BB8 Transformer — reproducibility and deployment",
-        "content": "After detecting a tokenizer data leak, Aditya added dataset hashing, commit pinning, versioned configurations, and a model registry. The project includes an interactive Token Lab, Hugging Face artifacts, and a CPU AWS Lambda and API Gateway deployment path. Source: https://github.com/Skywalker1910/BB-8. Model artifacts: https://huggingface.co/Skywalker1910/BB8."
+        "heading": "BB-8: Transformer Language Model — reproducibility and deployment",
+        "content": "After detecting a tokenizer data leak, Aditya added dataset hashing, commit pinning, versioned configurations, and a model registry. The project includes an interactive Token Lab, Hugging Face artifacts, and a CPU AWS Lambda and API Gateway deployment path. Source: https://github.com/Skywalker1910/BB-8. Live application: https://chat.adityamore.dev/. Model artifacts: https://huggingface.co/Skywalker1910/BB8."
       },
       {
         "heading": "Adversarial Attacks — Experimentation and Case Study",

@@ -237,9 +237,9 @@ Server validation bounds text, arrays, enums, numbers, IDs, and URLs. See [Live 
 |---|---|
 | `GET` | Return effective settings, vector connection/count, model/dimensions, and last synchronization |
 | `PATCH` | Save `enabled`, `topK`, and `maxDistance` runtime settings |
-| `POST` | Accept `{ "action": "reindex" }` and synchronize the current corpus |
+| `POST` | Accept `{ "action": "reindex" }` to synchronize current published content, or `{ "action": "sync-profile" }` to publish the source-controlled profile to DynamoDB and then synchronize the corpus |
 
-The reindex response includes chunk count, stale-vector removal count, model, dimensions, bucket, and index. Failures are written to the RAG status record and returned as `503`.
+The reindex response includes chunk count, stale-vector removal count, model, dimensions, bucket, and index. The profile-sync response also reports project, experience, and legacy-record counts. Failures are written to the RAG status record and returned as `503`.
 
 ## Protected analytics operations
 

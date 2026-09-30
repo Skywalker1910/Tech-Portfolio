@@ -2,7 +2,7 @@ import type { ExperienceContent, ProjectContent } from "./types";
 
 export const DEFAULT_PROJECTS: ProjectContent[] = [
   {
-    id:"bb8-rag", kind:"project", title:"BB-8 — RAG-Powered Portfolio Co-Pilot",
+    id:"bb8-rag", kind:"project", title:"BB8 Co-Pilot x Tech Portfolio",
     blurb:"A live, source-grounded portfolio assistant that retrieves verified evidence before answering visitors.",
     description:"Built the AI co-pilot for this portfolio with OpenAI Responses and Embeddings, Amazon S3 Vectors, and a persistent Next.js chat overlay. BB-8 retrieves only relevant, verified portfolio evidence, cites the matching pages, supports navigation and contact workflows, and falls back to deterministic local retrieval when vector search is unavailable.",
     highlights:["Designed section-aware chunking and retrieval over a verified knowledge corpus","Implemented OpenAI embeddings with Amazon S3 Vectors semantic search","Added grounded answers, source links, page navigation, resume delivery, and contact-form drafting","Built retrieval evaluation, usage telemetry, and privacy-aware first-party analytics","Deployed the SSR application through AWS Amplify with DynamoDB-backed content and administration"],
@@ -26,16 +26,16 @@ export const DEFAULT_PROJECTS: ProjectContent[] = [
     highlights:["Processed 26M+ ratings across 270K users and 45K movies","Achieved RMSE 0.7600 with FunkSVD, about 21% better than the baseline","Improved NeuMF validation RMSE from 1.0725 to 0.8543 while reducing parameters from 26.3M to 13.1M","Combined collaborative, neural, content, and popularity signals for coverage-aware ranking","Moved versioned model artifacts to Hugging Face with automatic download when absent","Deployed Flask, React, Docker, nginx, gunicorn, SSL, and GitHub Actions on AWS EC2"],
     tags:["Python","scikit-learn","PyTorch","Flask","React","SQLite","Docker","AWS","Hugging Face","Recommender Systems"],
     year:2024, status:"completed", featured:true, published:true, sortOrder:2,
-    github:"https://github.com/Skywalker1910/Movies-Recommendation-Engine", demo:"https://movies.adityamore.dev"
+    github:"https://github.com/Skywalker1910/Movies-Recommendation-Engine", demo:"https://movies.adityamore.dev", huggingface:"https://huggingface.co/Skywalker1910/movie-rec-models"
   },
   {
-    id:"bb8-transformer", kind:"project", title:"BB8 — Transformer Language Model Built from Scratch",
+    id:"bb8-transformer", kind:"project", title:"BB-8: Transformer Language Model",
     blurb:"An 11-experiment LLM engineering study from a 112K-parameter character model through Qwen LoRA and grounded retrieval.",
     description:"This separate LLM engineering study does not serve the live portfolio assistant. It builds a decoder-only GPT-style Transformer in PyTorch from first principles, then extends the work into Qwen2.5 LoRA fine-tuning and grounded retrieval with its own tokenizers, training and evaluation loops, decoding strategies, experiment tracking, and CPU Lambda deployment path.",
     highlights:["Implemented embeddings, causal multi-head attention, Pre-LN decoder blocks, and language-model heads from first principles","Ran 11 documented experiments from 112K parameters to Qwen2.5-0.5B LoRA fine-tuning","Built an 80-case, five-configuration chat suite that exposed a prompt-format mismatch and 29% training-example truncation","Used an 88-case grounded-QA benchmark and 80% promotion gate to reject a perplexity-1.03 model that passed only 22% of content and citation checks","Added dataset hashing, commit pinning, versioned configs, a model registry, Hugging Face artifacts, and AWS deployment"],
     tags:["Python","PyTorch","Transformers","NLP","LoRA","BPE","Hugging Face","AWS Lambda"],
     year:2026, status:"in-progress", featured:true, published:true, sortOrder:3,
-    github:"https://github.com/Skywalker1910/BB-8", demo:"https://huggingface.co/Skywalker1910/BB8"
+    github:"https://github.com/Skywalker1910/BB-8", demo:"https://chat.adityamore.dev/", huggingface:"https://huggingface.co/Skywalker1910/BB8"
   },
   {
     id:"fifa-world-cup-2026", kind:"project", title:"FIFA World Cup 2026 Prediction Platform",
@@ -53,7 +53,7 @@ export const DEFAULT_PROJECTS: ProjectContent[] = [
     highlights:["Implemented API-based login, fixture retrieval, prediction submission, logout, and transient-lock retries","Enforced structured output, valid teams and match IDs, lock windows, and conservative score forecasts","Captured model, response ID, token usage, reasoning, confidence, and request metadata","Added dry-run, due-window, next-match, and update-existing execution modes","Automated scheduled runs with GitHub Actions and provider-specific adapters"],
     tags:["JavaScript","Node.js","OpenAI API","AI Agents","Structured Outputs","GitHub Actions"],
     year:2026, status:"in-progress", featured:false, published:true, sortOrder:5,
-    github:"https://github.com/Skywalker1910/FIFA-World-Cup-2026-AI-Agents", link:"https://game.adityamore.dev"
+    github:"https://github.com/Skywalker1910/FIFA-World-Cup-2026-AI-Agents", demo:"https://game.adityamore.dev"
   },
   {
     id:"skynet-aqi", kind:"project", title:"Skynet — AQI Prediction System",
