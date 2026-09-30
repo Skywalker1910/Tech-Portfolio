@@ -50,7 +50,7 @@ Project records include:
 - Highlights and technology tags.
 - Year and status: completed, in progress, or planned.
 - Featured flag for the About page.
-- Optional HTTPS or application-relative source, demo, and detail links.
+- Optional HTTPS or application-relative GitHub, live-application, Hugging Face, and detail links.
 - Published state and display order.
 - Created and updated timestamps.
 
@@ -143,6 +143,8 @@ npm run rag:index
 ```
 
 The apply command upserts the source-controlled project and experience records and removes the known legacy `r2d2-transformer` project. It does not delete unrelated records, messages, analytics, or settings. I refresh the RAG index afterward so BB-8 retrieves the same profile shown on the public pages.
+
+For a deployed release, RAG Control provides **Publish source profile + reindex**, which performs both steps inside the authenticated Amplify SSR application. I do not need SSH or host access. This action intentionally replaces DynamoDB records with matching source-controlled IDs, while the ordinary **Reindex published content** action leaves DynamoDB unchanged and only refreshes vectors from the content already published.
 
 ## Related documentation
 

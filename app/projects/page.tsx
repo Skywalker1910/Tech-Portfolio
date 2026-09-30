@@ -1,8 +1,8 @@
 ﻿"use client";
-import { useMemo, useState, useEffect, type ComponentType } from "react";
+import { useMemo, useState, useEffect, useRef, type ComponentType } from "react";
 import { FlaskConical, ExternalLink, FolderOpen, Brain, ShieldAlert, Languages, Eye, BookOpen, Phone, Workflow, TestTube2, Cpu, Bot, Swords, Car, Star, ClipboardList, Shield, Database, Layers, GitBranch, Search, X, ChevronDown, SlidersHorizontal, MessageSquare, Zap, CheckCircle2 } from "lucide-react";
-import { SiGithub, SiPython, SiTensorflow, SiOpencv, SiJupyter, SiCoursera, SiSelenium, SiPytorch, SiOpenai, SiScikitlearn, SiPandas, SiNumpy, SiDocker, SiPostman, SiNasa, SiFastapi, SiReact } from "react-icons/si";
-import { motion, AnimatePresence } from "framer-motion";
+import { SiGithub, SiHuggingface, SiPython, SiTensorflow, SiOpencv, SiJupyter, SiCoursera, SiSelenium, SiPytorch, SiOpenai, SiScikitlearn, SiPandas, SiNumpy, SiDocker, SiPostman, SiNasa, SiFastapi, SiReact } from "react-icons/si";
+import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
 import { trackBasicAnalyticsEvent } from "@/lib/client-analytics";
 
 const projectFeature = (title:string) => `project:${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "unknown"}`;
@@ -82,6 +82,7 @@ type Project = {
   link?: string;
   github?: string;
   demo?: string;
+  huggingface?: string;
   status: "completed" | "in-progress" | "planned";
   featured?: boolean;
 };
@@ -132,7 +133,7 @@ const CASE_STUDIES: CaseStudy[] = [
 const ALL: Project[] = [
   // ⭐ Featured Projects
   {
-    title: "BB-8 — RAG-Powered Portfolio Co-Pilot",
+    title: "BB8 Co-Pilot x Tech Portfolio",
     blurb: "A live, source-grounded portfolio assistant that retrieves verified evidence before answering visitors.",
     description: "Built the AI co-pilot for this portfolio with OpenAI Responses and Embeddings, Amazon S3 Vectors, and a persistent Next.js chat overlay. BB-8 retrieves only relevant, verified portfolio evidence, cites the matching pages, supports navigation and contact workflows, and falls back to deterministic local retrieval when vector search is unavailable.",
     highlights: [
@@ -186,9 +187,10 @@ const ALL: Project[] = [
     featured: true,
     github: "https://github.com/Skywalker1910/Movies-Recommendation-Engine",
     demo: "https://movies.adityamore.dev",
+    huggingface: "https://huggingface.co/Skywalker1910/movie-rec-models",
   },
   {
-    title: "BB8 — Transformer Language Model Built from Scratch",
+    title: "BB-8: Transformer Language Model",
     blurb: "An 11-experiment LLM engineering study from a 112K-parameter character model through Qwen LoRA and grounded retrieval.",
     description: "This separate LLM engineering study does not serve the live portfolio assistant. It builds a decoder-only GPT-style Transformer in PyTorch from first principles, then extends the work into Qwen2.5 LoRA fine-tuning and grounded retrieval with its own tokenizers, training and evaluation loops, decoding strategies, experiment tracking, and CPU Lambda deployment path.",
     highlights: [
@@ -203,7 +205,8 @@ const ALL: Project[] = [
     status: "in-progress",
     featured: true,
     github: "https://github.com/Skywalker1910/BB-8",
-    demo: "https://huggingface.co/Skywalker1910/BB8",
+    demo: "https://chat.adityamore.dev/",
+    huggingface: "https://huggingface.co/Skywalker1910/BB8",
   },
   {
     title: "FIFA World Cup 2026 Prediction Platform",
@@ -238,7 +241,7 @@ const ALL: Project[] = [
     year: 2026,
     status: "in-progress",
     github: "https://github.com/Skywalker1910/FIFA-World-Cup-2026-AI-Agents",
-    link: "https://game.adityamore.dev",
+    demo: "https://game.adityamore.dev",
   },
   {
     title: "Skynet — AQI Prediction System",
@@ -603,6 +606,80 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
   );
 }
 
+function ProjectPreview({ project }: { project: Project }) {
+  const previewRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(previewRef);
+  const reduceMotion = useReducedMotion();
+  const title = project.title.toLowerCase();
+  const animate = inView && !reduceMotion;
+
+  if (title.includes("movie recommendation")) {
+    return <div ref={previewRef} className="absolute inset-x-8 bottom-4 top-9 flex items-end gap-3" aria-hidden="true">
+      {[58, 82, 68, 94, 76].map((height, index) => <motion.div key={height} className="relative flex-1 rounded-t-md border border-white/15 bg-white/10"
+        style={{ height:`${height}%` }}
+        animate={animate ? { y:[0, -5, 0], opacity:[0.65, 1, 0.65] } : { y:0, opacity:0.85 }}
+        transition={{ duration:2.8, repeat:animate ? Infinity : 0, delay:index * 0.18, ease:"easeInOut" }}>
+        <div className="absolute inset-x-1 bottom-2 h-1 rounded-full bg-violet-300/60" />
+      </motion.div>)}
+      <motion.div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-transparent via-orange-300 to-transparent"
+        animate={animate ? { scaleX:[0.35, 1, 0.35], opacity:[0.25, 0.9, 0.25] } : { scaleX:1, opacity:0.6 }}
+        transition={{ duration:3.4, repeat:animate ? Infinity : 0, ease:"easeInOut" }} />
+    </div>;
+  }
+
+  if (title.includes("co-pilot")) {
+    return <div ref={previewRef} className="absolute inset-x-7 bottom-4 top-10" aria-hidden="true">
+      <motion.div className="absolute left-0 top-0 rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-[9px] text-white/70"
+        animate={animate ? { x:[0, 5, 0], opacity:[0.6, 1, 0.6] } : { x:0, opacity:1 }}
+        transition={{ duration:3, repeat:animate ? Infinity : 0, ease:"easeInOut" }}>Ask about my work</motion.div>
+      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 gap-1.5">
+        {[0, 1, 2].map((index) => <motion.span key={index} className="h-2 w-2 rounded-full bg-orange-300"
+          animate={animate ? { scale:[0.6, 1.25, 0.6], opacity:[0.35, 1, 0.35] } : { scale:1, opacity:0.75 }}
+          transition={{ duration:1.6, repeat:animate ? Infinity : 0, delay:index * 0.2 }} />)}
+      </div>
+      <motion.div className="absolute bottom-0 right-0 w-3/5 rounded-lg border border-orange-300/30 bg-orange-300/10 px-3 py-2 text-[9px] text-orange-100"
+        animate={animate ? { y:[3, 0, 3], opacity:[0.55, 1, 0.55] } : { y:0, opacity:1 }}
+        transition={{ duration:3, repeat:animate ? Infinity : 0, delay:0.8, ease:"easeInOut" }}>Grounded answer + sources</motion.div>
+    </div>;
+  }
+
+  if (title.includes("transformer")) {
+    return <div ref={previewRef} className="absolute inset-x-8 bottom-5 top-10 flex items-center justify-between" aria-hidden="true">
+      {['B', 'B', '-', '8'].map((token, index) => <motion.div key={`${token}-${index}`} className="grid h-8 w-8 place-items-center rounded-md border border-orange-300/30 bg-black/25 font-mono text-xs text-orange-100"
+        animate={animate ? { x:[-4, 5, -4], rotateY:[0, 180, 360], opacity:[0.45, 1, 0.45] } : { x:0, rotateY:0, opacity:1 }}
+        transition={{ duration:3.6, repeat:animate ? Infinity : 0, delay:index * 0.22, ease:"easeInOut" }}>{token}</motion.div>)}
+      <motion.div className="absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-orange-400/10 via-orange-200/80 to-orange-400/10"
+        animate={animate ? { scaleX:[0.2, 1, 0.2] } : { scaleX:1 }}
+        transition={{ duration:2.4, repeat:animate ? Infinity : 0 }} />
+    </div>;
+  }
+
+  if (title.includes("neural log")) {
+    return <div ref={previewRef} className="absolute inset-x-8 bottom-4 top-9 flex items-center gap-5" aria-hidden="true">
+      <motion.div className="grid h-16 w-16 shrink-0 place-items-center rounded-full border-[6px] border-teal-300/20 border-t-teal-300 text-[10px] font-bold text-teal-100"
+        animate={animate ? { rotate:[0, 360] } : { rotate:0 }}
+        transition={{ duration:7, repeat:animate ? Infinity : 0, ease:"linear" }}>XP</motion.div>
+      <div className="flex flex-1 flex-col gap-2.5">{[82, 63, 91].map((width, index) => <div key={width} className="h-2 overflow-hidden rounded-full bg-white/10"><motion.div className="h-full rounded-full bg-gradient-to-r from-teal-400 to-cyan-200" style={{ width:`${width}%`, transformOrigin:"left" }} animate={animate ? { scaleX:[0.45, 1, 0.45] } : { scaleX:1 }} transition={{ duration:3.2, repeat:animate ? Infinity : 0, delay:index * 0.3 }} /></div>)}</div>
+    </div>;
+  }
+
+  if (title.includes("fifa")) {
+    return <div ref={previewRef} className="absolute inset-x-8 bottom-4 top-9 grid place-items-center" aria-hidden="true">
+      <motion.div className="w-full rounded-xl border border-emerald-300/20 bg-black/25 p-3 shadow-lg"
+        animate={animate ? { y:[2, -3, 2], boxShadow:["0 0 0 rgba(52,211,153,0)", "0 0 24px rgba(52,211,153,.2)", "0 0 0 rgba(52,211,153,0)"] } : { y:0, boxShadow:"0 0 0 rgba(52,211,153,0)" }}
+        transition={{ duration:3.2, repeat:animate ? Infinity : 0, ease:"easeInOut" }}>
+        <div className="flex items-center justify-between text-[9px] font-bold tracking-[.18em] text-white/55"><span>TEAM A</span><span className="text-base text-white">2 : 1</span><span>TEAM B</span></div>
+        <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10"><motion.div className="h-full bg-emerald-300" animate={animate ? { width:["28%", "78%", "28%"] } : { width:"64%" }} transition={{ duration:3.8, repeat:animate ? Infinity : 0, ease:"easeInOut" }} /></div>
+      </motion.div>
+    </div>;
+  }
+
+  return <div ref={previewRef} className="absolute inset-x-8 bottom-4 top-10 rounded-lg border border-white/10 bg-black/20 p-3" aria-hidden="true">
+    {[72, 90, 58].map((width, index) => <motion.div key={width} className="mb-2 h-1.5 rounded-full bg-white/30" style={{ width:`${width}%` }} animate={animate ? { opacity:[0.25, 0.8, 0.25], x:[0, 5, 0] } : { opacity:0.75, x:0 }} transition={{ duration:2.6, repeat:animate ? Infinity : 0, delay:index * 0.28 }} />)}
+    <motion.div className="mt-3 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" animate={animate ? { scaleX:[0.2, 1, 0.2] } : { scaleX:1 }} transition={{ duration:3, repeat:animate ? Infinity : 0 }} />
+  </div>;
+}
+
 function ProjectFancyCard({ project, index, onClick }: { project: Project; index: number; onClick?: () => void }) {
   const accentCycle = ["violet", "teal", "orange", "pink", "sky", "emerald"] as const;
   type AccentKey = typeof accentCycle[number];
@@ -645,18 +722,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
       {/* ── Gradient preview header ── */}
       <div className="relative h-36 overflow-hidden shrink-0">
         <div className={`absolute inset-0 bg-gradient-to-br ${a.bg}`} />
-        {/* Orb 1 */}
-        <motion.div
-          className={`absolute top-3 left-6 w-24 h-24 rounded-full ${a.orb1} blur-3xl opacity-50`}
-          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.3, 0.5] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 }}
-        />
-        {/* Orb 2 */}
-        <motion.div
-          className={`absolute bottom-2 right-6 w-16 h-16 rounded-full ${a.orb2} blur-2xl opacity-40`}
-          animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0.2, 0.4] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 + 1 }}
-        />
+        <ProjectPreview project={project} />
         {/* Grid overlay */}
         <div
           className="absolute inset-0 opacity-[0.05]"
@@ -712,7 +778,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
         </div>
 
         {/* Footer links */}
-        <div className="flex items-center gap-3 pt-3 border-t border-[var(--border)]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-3 border-t border-[var(--border)]">
           {project.github ? (
             <a
               href={project.github}
@@ -737,14 +803,21 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
           {project.demo && (
             <a href={project.demo} target="_blank" rel="noopener noreferrer"
               onClick={(e) => { e.stopPropagation(); trackBasicAnalyticsEvent("demo_started", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"demo" } }); }}
-              className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors ml-auto">
-              Demo <ExternalLink size={10} />
+              className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors">
+              Live app <ExternalLink size={10} />
+            </a>
+          )}
+          {project.huggingface && (
+            <a href={project.huggingface} target="_blank" rel="noopener noreferrer"
+              onClick={(e) => { e.stopPropagation(); trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"huggingface" } }); }}
+              className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors">
+              <SiHuggingface size={11} /> Models
             </a>
           )}
           {project.link && (
             <a href={project.link} target="_blank" rel="noopener noreferrer"
               onClick={(e) => { e.stopPropagation(); trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"other" } }); }}
-              className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors ml-auto">
+              className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors">
               View <ExternalLink size={10} />
             </a>
           )}
@@ -807,17 +880,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
           {/* ── Gradient header ── */}
           <div className="relative h-40 md:h-44 overflow-hidden shrink-0">
             <div className={`absolute inset-0 bg-gradient-to-br ${a.bg}`} />
-            {/* Orbs */}
-            <motion.div
-              className={`absolute top-4 left-8 w-32 h-32 rounded-full ${a.orb1} blur-3xl opacity-50`}
-              animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.3, 0.5] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className={`absolute bottom-4 right-8 w-24 h-24 rounded-full ${a.orb2} blur-2xl opacity-40`}
-              animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0.2, 0.4] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            />
+            <ProjectPreview project={project} />
             {/* Grid overlay */}
             <div
               className="absolute inset-0 opacity-[0.05]"
@@ -908,7 +971,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-4 pt-4 border-t border-[var(--border)]">
+            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-[var(--border)]">
               {project.github ? (
                 <a
                   href={project.github}
@@ -938,7 +1001,18 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                   onClick={() => trackBasicAnalyticsEvent("demo_started", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"demo" } })}
                   className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
                 >
-                  Demo <ExternalLink size={12} />
+                  Live application <ExternalLink size={12} />
+                </a>
+              )}
+              {project.huggingface && (
+                <a
+                  href={project.huggingface}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"huggingface" } })}
+                  className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
+                >
+                  <SiHuggingface size={15} /> Hugging Face
                 </a>
               )}
               {project.link && (

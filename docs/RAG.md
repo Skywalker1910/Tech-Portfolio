@@ -164,7 +164,7 @@ Creation-time permissions—`CreateVectorBucket`, `GetVectorBucket`, `CreateInde
 
 ## Evaluation
 
-The evaluation corpus contains 77 representative questions spanning career and availability, professional experience, research, education, projects, skills, contact information, and social or source-code discovery. The question set is a regression test for retrieval behavior; it does not add knowledge by itself. Knowledge grows when verified source content is added to the corpus and reindexed.
+The evaluation corpus contains 83 representative questions spanning career and availability, professional experience, research, education, projects, live applications and model repositories, skills, contact information, and social or source-code discovery. The question set is a regression test for retrieval behavior; it does not add knowledge by itself. Knowledge grows when verified source content is added to the corpus and reindexed.
 
 Both lexical and semantic evaluations report:
 
@@ -187,7 +187,7 @@ RAG Control reads:
 - Current vector count.
 - Last synchronization state, timestamps, counts, model, dimensions, bucket, index, or error message.
 
-Status is stored at `STATUS / RAG` in the portfolio table. Reindex transitions it from `running` to `ready` or `error`.
+Status is stored at `STATUS / RAG` in the portfolio table. Reindex transitions it from `running` to `ready` or `error`. The authenticated source-profile action can first upsert the bundled project and experience catalog into DynamoDB and then reindex in the same Amplify SSR request; ordinary reindexing never changes published content.
 
 ## Related documentation
 

@@ -87,7 +87,7 @@ GitHub Actions defines the production quality gate. It uses Node.js 20 and a loc
 
 1. ESLint.
 2. TypeScript checking without emission.
-3. The deterministic 77-question, evidence-aware RAG evaluation.
+3. The deterministic 83-question, evidence-aware RAG evaluation.
 4. A production Next.js build.
 
 The CI environment deliberately disables semantic retrieval and does not receive AWS or OpenAI secrets. This keeps pull-request validation deterministic, low-cost, and safe for untrusted changes. Semantic retrieval verification is an operational check when the indexed corpus, embedding configuration, or distance threshold changes.

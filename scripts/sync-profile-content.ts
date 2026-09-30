@@ -1,7 +1,6 @@
 import { DEFAULT_EXPERIENCE, DEFAULT_PROJECTS } from "../lib/content/defaults";
-import { deleteContent, saveContent } from "../lib/content/repository";
+import { LEGACY_PROFILE_PROJECT_IDS, syncSourceControlledProfile } from "../lib/content/profile-sync";
 
-const LEGACY_PROJECT_IDS = ["r2d2-transformer"];
 const apply = process.argv.includes("--apply");
 
 async function main() {
@@ -12,7 +11,7 @@ async function main() {
   for (const role of DEFAULT_EXPERIENCE) {
     console.log(`  upsert experience ${role.id}: ${role.title}`);
   }
-  for (const id of LEGACY_PROJECT_IDS) {
+  for (const id of LEGACY_PROFILE_PROJECT_IDS) {
     console.log(`  delete legacy project ${id}`);
   }
 
@@ -21,18 +20,10 @@ async function main() {
     return;
   }
 
-  for (const project of DEFAULT_PROJECTS) {
-    await saveContent("projects", project);
-  }
-  for (const role of DEFAULT_EXPERIENCE) {
-    await saveContent("experience", role);
-  }
-  for (const id of LEGACY_PROJECT_IDS) {
-    await deleteContent("projects", id);
-  }
+  const result = await syncSourceControlledProfile();
 
-  console.log(`\nSynchronized ${DEFAULT_PROJECTS.length} projects and ${DEFAULT_EXPERIENCE.length} experience records.`);
-  console.log(`Removed ${LEGACY_PROJECT_IDS.length} legacy project record.`);
+  console.log(`\nSynchronized ${result.projects} projects and ${result.experience} experience records.`);
+  console.log(`Removed ${result.removed} legacy project record.`);
   console.log("Reindex RAG after the content sync so BB-8 retrieves the updated profile.");
 }
 

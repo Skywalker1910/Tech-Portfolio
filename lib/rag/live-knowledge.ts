@@ -6,7 +6,8 @@ import type { KnowledgeDocument } from "./types";
 function projectDocument(project: ProjectContent): KnowledgeDocument {
   const links = [
     project.github ? `Source code: ${project.github}.` : "",
-    project.demo ? `Live demo: ${project.demo}.` : "",
+    project.demo ? `Live application: ${project.demo}.` : "",
+    project.huggingface ? `Hugging Face repository: ${project.huggingface}.` : "",
     project.link ? `Related link: ${project.link}.` : "",
   ].filter(Boolean).join(" ");
 

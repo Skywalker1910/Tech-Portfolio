@@ -3,6 +3,7 @@ import { isValidAdminRequest } from "@/lib/adminAuth";
 import { getRagRuntimeSettings, getRagStatus, saveRagRuntimeSettings, saveRagStatus } from "@/lib/content/repository";
 import { getEmbeddingConfig, getRagConfig } from "@/lib/rag/config";
 import { countIndexedVectors, indexPortfolioKnowledge } from "@/lib/rag/indexing";
+import { syncSourceControlledProfile } from "@/lib/content/profile-sync";
 
 export const dynamic = "force-dynamic";
 const unauthorized = () => NextResponse.json({ error:"Unauthorized" }, { status:401 });
@@ -27,12 +28,13 @@ export async function PATCH(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!isValidAdminRequest(req)) return unauthorized();
   const body = await req.json().catch(() => ({}));
-  if (body.action !== "reindex") return NextResponse.json({ error:"Unknown action." }, { status:400 });
+  if (body.action !== "reindex" && body.action !== "sync-profile") return NextResponse.json({ error:"Unknown action." }, { status:400 });
   try {
     await saveRagStatus({ state:"running", startedAt:new Date().toISOString() });
+    const content = body.action === "sync-profile" ? await syncSourceControlledProfile() : undefined;
     const result = await indexPortfolioKnowledge();
-    await saveRagStatus({ state:"ready", completedAt:new Date().toISOString(), ...result });
-    return NextResponse.json(result);
+    await saveRagStatus({ state:"ready", completedAt:new Date().toISOString(), ...result, ...(content ? { content } : {}) });
+    return NextResponse.json({ ...result, content });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Indexing failed.";
     try { await saveRagStatus({ state:"error", completedAt:new Date().toISOString(), message }); } catch {}

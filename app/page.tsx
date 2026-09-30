@@ -161,7 +161,7 @@ const featuredProjects = [
   {
     num: "01",
     type: "RAG System",
-    title: "BB-8 — RAG-Powered Portfolio Co-Pilot",
+    title: "BB8 Co-Pilot x Tech Portfolio",
     year: "2026",
     tags: ["OpenAI", "RAG", "S3 Vectors", "Next.js", "AWS"],
     blurb:

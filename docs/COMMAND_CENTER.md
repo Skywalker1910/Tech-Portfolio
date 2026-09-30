@@ -93,6 +93,8 @@ Read-only infrastructure status:
 
 The deliberate **Reindex published content** operation rebuilds the current corpus, creates embeddings, upserts vectors, removes stale vector keys, and records running/ready/error status. Saving content does not trigger this operation automatically.
 
+The guarded **Publish source profile + reindex** operation is intended for source-controlled profile releases. It upserts the bundled project and experience catalog into DynamoDB, removes only the explicitly listed legacy project IDs, and performs the same vector synchronization in one authenticated server operation. It replaces matching source-controlled records, so the confirmation warns me before overwriting corresponding Command Center edits. Neither operation requires host access or SSH; Amplify SSR performs it with the attached compute role.
+
 See [BB-8 RAG System](RAG.md) for the retrieval and indexing architecture.
 
 ## Traffic analytics
@@ -136,7 +138,7 @@ The API Usage area is a provider hub so additional AI APIs can receive isolated 
 | Projects | `portfolio-content` | `/api/admin/content/projects` |
 | Experience | `portfolio-content` | `/api/admin/content/experience` |
 | RAG settings/status | `portfolio-content` | `/api/admin/rag` |
-| Vector synchronization | S3 Vectors + OpenAI | `/api/admin/rag` reindex action |
+| Profile publication and vector synchronization | DynamoDB + S3 Vectors + OpenAI | `/api/admin/rag` reindex and sync-profile actions |
 | Traffic report/classification | `portfolio-content` | `/api/admin/analytics` |
 | OpenAI requests/tokens/costs | OpenAI organization APIs | `/api/admin/openai-usage` |
 
