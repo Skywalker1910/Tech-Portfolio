@@ -125,6 +125,25 @@ Deleting a live content record removes it from public reads immediately. Its vec
 - Local keyword retrieval builds from the current repository at request time, so it can reflect live published content before the vector index is refreshed.
 - Draft records never appear in public APIs or the RAG corpus.
 
+## Source-controlled profile synchronization
+
+Major portfolio-wide project and experience revisions are maintained in `lib/content/defaults.ts` so the SSR application and static fallback remain aligned. Because production prefers existing DynamoDB records, deploying new defaults alone does not replace already populated content.
+
+I preview the repository-to-DynamoDB synchronization with:
+
+```bash
+npm run content:sync:profile
+```
+
+After I confirm the AWS account, region, and `PORTFOLIO_TABLE`, I apply it and rebuild the RAG index with:
+
+```bash
+npm run content:sync:profile:apply
+npm run rag:index
+```
+
+The apply command upserts the source-controlled project and experience records and removes the known legacy `r2d2-transformer` project. It does not delete unrelated records, messages, analytics, or settings. I refresh the RAG index afterward so BB-8 retrieves the same profile shown on the public pages.
+
 ## Related documentation
 
 - [Command Center](COMMAND_CENTER.md) describes my editing and operational surfaces.

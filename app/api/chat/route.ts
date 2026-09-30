@@ -88,7 +88,7 @@ function actionFromToolCall(call: { name: string; arguments: string }): BB8Actio
       const routes = ["/", "/projects", "/experience", "/skills", "/contact", "/education", "/socials"];
       if (routes.includes(args.href)) return { type: "navigate", href: args.href as PortfolioRoute, label };
     }
-    if (call.name === "offer_resume") return { type: "resume", href: "/resume.pdf", label };
+    if (call.name === "offer_resume") return { type: "resume", href: "/Aditya%20More%20-%20Resume.pdf", label };
     if (call.name === "prepare_contact_draft") {
       const clean = (key: string, max: number) => typeof args[key] === "string" ? args[key].slice(0, max) : "";
       return {

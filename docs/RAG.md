@@ -126,7 +126,7 @@ The Responses API can select at most one strict tool per reply:
 | Tool | Server validation | Browser effect |
 |---|---|---|
 | `navigate_portfolio` | Route and label allow lists | Opens the relevant portfolio page while the overlay remains live |
-| `offer_resume` | Fixed action type and bounded label | Renders a download control for `/resume.pdf` |
+| `offer_resume` | Fixed action type and bounded label | Renders a download control for `/Aditya%20More%20-%20Resume.pdf` |
 | `prepare_contact_draft` | Bounded first name, last name, email, message, and label | Stores a same-tab draft and opens `/contact` for review |
 
 Tool output is treated as untrusted until `actionFromToolCall` validates it. BB-8 cannot submit the contact form, send an email, choose an arbitrary URL, or perform more than one tool action in a response.
@@ -164,14 +164,16 @@ Creation-time permissions—`CreateVectorBucket`, `GetVectorBucket`, `CreateInde
 
 ## Evaluation
 
-The evaluation corpus contains 27 representative questions spanning availability, experience, research, education, projects, skills, contact information, and source-code discovery.
+The evaluation corpus contains 77 representative questions spanning career and availability, professional experience, research, education, projects, skills, contact information, and social or source-code discovery. The question set is a regression test for retrieval behavior; it does not add knowledge by itself. Knowledge grows when verified source content is added to the corpus and reindexed.
 
 Both lexical and semantic evaluations report:
 
-- Hit@3 against one or more expected routes.
+- Evidence-aware Hit@3. A case passes only when the top three retrieved chunks include an expected route and the required evidence terms.
 - Mean retrieval latency.
 - P95 retrieval latency.
-- Per-question retrieved routes and pass/fail result.
+- Per-question category, retrieved routes, evidence coverage, and pass/fail result.
+
+Hit@3 is the percentage of evaluation questions for which relevant evidence appears within the first three retrieved chunks. It measures retrieval coverage, not final-answer quality: a perfect retrieval score does not guarantee that the language model will interpret or phrase every answer correctly. The suite therefore uses recruiter-style paraphrases and checks concrete evidence in addition to source routes.
 
 The GitHub quality gate runs the deterministic local evaluation without AWS or OpenAI secrets. Semantic evaluation is an operational check after corpus, embedding, index, or distance-threshold changes.
 

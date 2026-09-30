@@ -4,10 +4,17 @@ import { buildChunksFromDocuments, PORTFOLIO_DOCUMENTS } from "./knowledge";
 import type { KnowledgeDocument } from "./types";
 
 function projectDocument(project: ProjectContent): KnowledgeDocument {
+  const links = [
+    project.github ? `Source code: ${project.github}.` : "",
+    project.demo ? `Live demo: ${project.demo}.` : "",
+    project.link ? `Related link: ${project.link}.` : "",
+  ].filter(Boolean).join(" ");
+
   return { id:`project-${project.id}`, title:project.title, route:"/projects", sections:[
     { heading:"Overview", content:`${project.blurb} ${project.description}` },
     { heading:"Highlights", content:project.highlights.join(" ") },
     { heading:"Technologies", content:`${project.tags.join(", ")}. Status: ${project.status}. Year: ${project.year}.` },
+    { heading:"Links", content:links },
   ].filter((section) => section.content.trim()) };
 }
 

@@ -16,6 +16,8 @@
     "rag:evaluate:s3": "tsx --env-file-if-exists=.env.local scripts/evaluate-rag.ts --s3",
     "content:setup": "tsx --env-file-if-exists=.env.local scripts/setup-content.ts",
     "content:seed": "tsx --env-file-if-exists=.env.local scripts/seed-content.ts",
+    "content:sync:profile": "tsx --env-file-if-exists=.env.local scripts/sync-profile-content.ts",
+    "content:sync:profile:apply": "tsx --env-file-if-exists=.env.local scripts/sync-profile-content.ts --apply",
     "analytics:purge-city": "tsx --env-file-if-exists=.env.local scripts/purge-analytics-city.ts",
     "analytics:audit": "tsx --env-file-if-exists=.env.local scripts/audit-analytics-history.ts",
     "analytics:test": "tsx --test tests/analytics-privacy.test.ts",

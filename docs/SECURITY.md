@@ -78,7 +78,7 @@ BB-8 receives verified retrieved context plus a short conversation window. OpenA
 Model-generated function calls are treated as untrusted suggestions. The server validates them into one of three constrained actions:
 
 - Navigate to an allow-listed portfolio route.
-- Offer the fixed `/resume.pdf` asset.
+- Offer the fixed `/Aditya%20More%20-%20Resume.pdf` asset.
 - Prefill bounded contact fields for visitor review.
 
 Actions execute in the browser. Contact submission always requires the visitor’s explicit final action.
