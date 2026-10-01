@@ -13,10 +13,23 @@ export function projectCapture(demo?:string):Capture|null {
   if(!demo)return null;
   try {const url=new URL(demo);return url.protocol==="https:" && url.pathname==="/" && !url.search && !url.hash ? CAPTURES[url.hostname] ?? null : null;}catch{return null;}
 }
-// Older published DB records retain their admin-authored text; verified technical
-// supplements are used only when these newly introduced fields are absent.
-export function withProjectPresentation<T extends ProjectPresentation>(project:T):T & Pick<ProjectContent,"technicalDetails"|"evaluation"|"limitations"> {
-  const bundled=DEFAULT_PROJECTS.find(p=>(project.id && p.id===project.id) || (project.github && p.github===project.github));
-  return {...project,technicalDetails:project.technicalDetails ?? bundled?.technicalDetails,
+const LEGACY_TITLES:Record<string,string>={
+  "AI-Powered Tech Portfolio (RAG-based System)":"bb8-rag",
+  "AI-Powered Tech Portfolio (RAG Based System)":"bb8-rag",
+  "Personalized Movie Recommendation System":"movie-recommendation",
+};
+// Narrow compatibility handling: preserve custom titles, publication choices,
+// rankings and prose. Only known superseded names and absent URLs are repaired.
+export function withProjectPresentation<T extends ProjectPresentation>(project:T):T & Pick<ProjectContent,"demo"|"technicalDetails"|"evaluation"|"limitations"> {
+  const legacyId=LEGACY_TITLES[project.title];
+  const bundled=DEFAULT_PROJECTS.find(p=>(project.id && p.id===project.id) || (project.github && p.github===project.github) || p.id===legacyId);
+  return {...project,title:legacyId && bundled ? bundled.title : project.title,
+    demo:project.demo ?? bundled?.demo,technicalDetails:project.technicalDetails ?? bundled?.technicalDetails,
     evaluation:project.evaluation ?? bundled?.evaluation,limitations:project.limitations ?? bundled?.limitations};
+}
+
+export function featuredWork(projects:ProjectContent[]):ProjectContent[] {
+  return projects.filter(p=>p.published && p.featured)
+    .sort((a,b)=>(a.featuredOrder ?? a.sortOrder)-(b.featuredOrder ?? b.sortOrder) || a.sortOrder-b.sortOrder || a.id.localeCompare(b.id))
+    .map(withProjectPresentation);
 }

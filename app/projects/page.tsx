@@ -280,7 +280,7 @@ export default function Projects() {
 
           {/* Result count */}
           <span className="ml-auto text-[11px] font-mono text-[var(--sub-muted)]">
-            {filtered.length}&thinsp;/&thinsp;{ALL.length} projects
+            {filtered.length}&thinsp;/&thinsp;{projects.length} projects
           </span>
 
           {/* Clear all */}
@@ -450,7 +450,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, ease: "easeOut", delay: (index % 3) * 0.07 }}
       onClick={onClick}
-      className={`group relative rounded-2xl border ${a.border} bg-[var(--surface)] overflow-hidden flex flex-col shadow-lg hover:shadow-xl ${a.glow} card-elevated transition-all duration-300 hover:-translate-y-1 cursor-pointer`}
+      className={`group relative h-[560px] rounded-2xl border ${a.border} bg-[var(--surface)] overflow-hidden flex flex-col shadow-lg hover:shadow-xl ${a.glow} card-elevated transition-all duration-300 hover:-translate-y-1 cursor-pointer`}
     >
       {/* Keep numbering and metadata outside the actual application capture. */}
       <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-3">
@@ -460,23 +460,25 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
         <span className="font-mono text-[10px] text-[var(--muted)]">{project.year}</span>
       </div>
       {/* ── Deployed application preview ── */}
-      <div className="relative h-56 overflow-hidden shrink-0">
+      <div className="relative h-44 overflow-hidden shrink-0">
         <ProjectApplicationPreview title={project.title} demo={project.demo}/>
       </div>
 
       {/* ── Card body ── */}
-      <div className="flex flex-col flex-1 p-5">
-        <h3 className="text-base font-bold text-[var(--text)] leading-snug mb-2 group-hover:text-[var(--text)] transition-colors">
+      <div className="flex min-h-0 flex-col flex-1 p-5">
+        <h3 className="line-clamp-2 min-h-11 shrink-0 text-base font-bold text-[var(--text)] leading-snug mb-2 group-hover:text-[var(--text)] transition-colors">
           {project.title}
         </h3>
-        <p className="text-xs text-[var(--muted)] leading-relaxed mb-4 flex-1">
+        <p className="line-clamp-2 shrink-0 text-xs text-[var(--muted)] leading-relaxed mb-3">
           {project.blurb}
         </p>
 
-        <ProjectTechnicalDetails project={project} compact />
+        <ul className="mb-3 space-y-1 text-[11px] leading-relaxed text-[var(--muted)]">
+          {project.highlights?.slice(0,2).map(highlight=><li key={highlight} className="flex gap-1.5"><CheckCircle2 size={11} className="mt-1 shrink-0 text-[var(--accent)]"/><span className="line-clamp-1">{highlight}</span></li>)}
+        </ul>
         {/* Tags */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {project.tags.slice(0, 5).map((t) => {
+        <div className="flex h-14 shrink-0 flex-wrap content-start gap-1.5 overflow-hidden mb-3">
+          {project.tags.slice(0, 3).map((t) => {
             const TagIcon = TAG_ICONS[t];
             return (
               <span key={t} className={`inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full ${a.tag}`}>
@@ -485,15 +487,15 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
               </span>
             );
           })}
-          {project.tags.length > 5 && (
+          {project.tags.length > 3 && (
             <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-[var(--tag-bg)] text-[var(--muted)] border border-[var(--border)]">
-              +{project.tags.length - 5}
+              +{project.tags.length - 3}
             </span>
           )}
         </div>
 
         {/* Footer links */}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-3 border-t border-[var(--border)]">
+        <div className="mt-auto flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 pt-3 border-t border-[var(--border)]">
           {project.github ? (
             <a
               href={project.github}
@@ -537,6 +539,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
             </a>
           )}
         </div>
+        <button type="button" onClick={event=>{event.stopPropagation();onClick?.();}} className="mt-2 text-left text-[11px] font-semibold text-[var(--text)] hover:text-[var(--accent)]">Explore project details →</button>
       </div>
     </motion.article>
   );

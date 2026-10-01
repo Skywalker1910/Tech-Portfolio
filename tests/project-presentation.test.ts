@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import sharp from "sharp";
 import { DEFAULT_PROJECTS } from "../lib/content/defaults";
 import { validateContent } from "../lib/content/validation";
-import { projectCapture, withProjectPresentation } from "../lib/project-presentation";
+import { projectCapture, withProjectPresentation, featuredWork } from "../lib/project-presentation";
 
 test("every project has technical implementation with scoped metrics rather than invented outcomes",()=>{
   assert.equal(DEFAULT_PROJECTS.length,12);
@@ -19,6 +19,24 @@ test("older published records get technical supplements without overwriting admi
   assert.equal(project.title,"Custom title");assert.equal(project.description,"Admin prose");assert.ok(project.technicalDetails?.length);
   assert.deepEqual(withProjectPresentation({id:"movie-recommendation",title:"Custom",technicalDetails:[]}).technicalDetails,[]);
   assert.equal(withProjectPresentation({id:"unknown",title:"Unknown"}).technicalDetails,undefined);
+});
+test("known stale titles and missing hosted URLs resolve without replacing custom admin choices",()=>{
+  const bb8=withProjectPresentation({id:"bb8-rag",title:"AI-Powered Tech Portfolio (RAG-based System)"});
+  assert.equal(bb8.title,"BB8 Co-Pilot x Tech Portfolio");assert.ok(projectCapture(bb8.demo));
+  const movie=withProjectPresentation({title:"Personalized Movie Recommendation System"});
+  assert.equal(movie.title,"Movie Recommendation Engine");assert.ok(projectCapture(movie.demo)?.motion);
+  const custom=withProjectPresentation({id:"movie-recommendation",title:"My edited project",demo:"https://example.com/demo"});
+  assert.equal(custom.title,"My edited project");assert.equal(custom.demo,"https://example.com/demo");
+});
+test("featured selection respects independent rank, publication and empty selection with no arbitrary cap",()=>{
+  const items=DEFAULT_PROJECTS.map((p,i)=>({...p,featured:true,featuredOrder:20-i,published:true}));
+  assert.equal(featuredWork(items).length,12);
+  assert.equal(featuredWork(items)[0].id,items[11].id);
+  assert.deepEqual(featuredWork(items.map(p=>({...p,featured:false}))),[]);
+  assert.equal(featuredWork(items.map(p=>({...p,published:false}))).length,0);
+  assert.equal(validateContent("projects",{...items[0],featuredOrder:-5})?.kind,"project");
+  const saved=validateContent("projects",{...items[0],featuredOrder:8.4});
+  assert.equal(saved?.kind === "project" ? saved.featuredOrder : undefined,8);
 });
 test("only captured exact HTTPS application roots receive media; no fake FIFA preview",()=>{
   assert.equal(projectCapture("https://game.adityamore.dev"),null);

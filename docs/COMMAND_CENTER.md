@@ -65,6 +65,8 @@ Contact sender classification remains separate from analytics audience classific
 
 The project editor manages title, descriptions, highlights, technologies, year, status, links, ordering, featured placement, and draft/published state. Published records feed the Projects page and featured records feed the About page.
 
+My **Featured work · About page** panel lets me select projects from the entire catalog and save independent homepage ranks. `featuredOrder` controls homepage order without changing gallery `sortOrder`; drafts stay hidden and clearing all selections leaves no featured cards. I save selections explicitly; failed saves retain remaining changes for retry. The project editor also exposes homepage rank. These placement changes do not require reindexing. Known legacy names and missing hosted URLs are supplemented consistently in public and admin reads; custom names and authored URLs remain untouched.
+
 All fields are normalized by the server. URLs must be application-relative or HTTPS, statuses are allow-listed, arrays and text are bounded, and IDs are safe slugs.
 
 ## Experience

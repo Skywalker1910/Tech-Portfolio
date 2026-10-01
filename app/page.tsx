@@ -10,7 +10,7 @@ import Link from "next/link";
 import BB8Banner from "../components/BB8Banner";
 import ProjectApplicationPreview from "@/components/ProjectApplicationPreview";
 import { DEFAULT_PROJECTS } from "@/lib/content/defaults";
-import { withProjectPresentation } from "@/lib/project-presentation";
+import { withProjectPresentation, featuredWork } from "@/lib/project-presentation";
 import type { ExperienceContent, ProjectContent } from "@/lib/content/types";
 
 // ─── Tag icon map ────────────────────────────────────────────────────────────
@@ -161,7 +161,7 @@ const timelineItems: {
 
 // ─── Featured projects data ─────────────────────────────────────────────────
 const homeProject = (item:ProjectContent,index:number) => ({ ...withProjectPresentation(item),num:String(index+1).padStart(2,"0"),type:item.status === "in-progress" ? "In progress" : "Project",href:"/projects" });
-const featuredProjects = DEFAULT_PROJECTS.filter(item=>item.featured).slice(0,5).map(homeProject);
+const featuredProjects = featuredWork(DEFAULT_PROJECTS).map(homeProject);
 
 // ─── Timeline item component ─────────────────────────────────────────────────
 function TimelineItem({ item, index }: { item: (typeof timelineItems)[0]; index: number }) {
@@ -356,8 +356,7 @@ export default function Home() {
       if (work.length) setHomeTimeline([...work, ...education]);
     }).catch(() => {});
     fetch("/api/content/projects").then((r) => r.ok ? r.json() : Promise.reject()).then((items:ProjectContent[]) => {
-      const featured = items.filter(item=>item.featured).slice(0,5).map(homeProject);
-      if (featured.length) setHomeProjects(featured);
+      setHomeProjects(featuredWork(items).map(homeProject));
     }).catch(() => {});
   }, []);
   const scrollRef = useRef<HTMLDivElement>(null);
