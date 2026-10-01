@@ -15,6 +15,9 @@ function projectDocument(project: ProjectContent): KnowledgeDocument {
     { heading:"Overview", content:`${project.blurb} ${project.description}` },
     { heading:"Highlights", content:project.highlights.join(" ") },
     { heading:"Technologies", content:`${project.tags.join(", ")}. Status: ${project.status}. Year: ${project.year}.` },
+    { heading:"Technical implementation", content:(project.technicalDetails ?? []).map(item=>`${item.label}: ${item.detail}`).join(" ") },
+    { heading:"Evaluation", content:(project.evaluation ?? []).map(item=>`${item.metric}: ${item.value}. ${item.context}${item.source ? ` Methodology: ${item.source}.` : ""}`).join(" ") },
+    { heading:"Limitations", content:(project.limitations ?? []).join(" ") },
     { heading:"Links", content:links },
   ].filter((section) => section.content.trim()) };
 }

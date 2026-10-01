@@ -1,0 +1,10 @@
+import type { ProjectPresentation } from "@/lib/project-presentation";
+
+export default function ProjectTechnicalDetails({project,compact=false}:{project:ProjectPresentation;compact?:boolean}) {
+  if(compact)return <div className="mb-4 space-y-2">{project.technicalDetails?.slice(0,2).map(item=><p key={item.label} className="text-xs leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{item.label}: </span>{item.detail}</p>)}{project.evaluation?.slice(0,2).map(item=><p key={item.metric} className="text-xs leading-relaxed"><span className="font-semibold">{item.metric} {item.value}</span><span className="text-[var(--muted)]"> · {item.context}</span></p>)}</div>;
+  return <div className="mb-6 space-y-6">
+    {!!project.technicalDetails?.length&&<section><h3 className="mb-3 text-sm font-semibold">ML, data & implementation</h3><dl className="space-y-3">{project.technicalDetails.map(item=><div key={item.label}><dt className="text-xs font-semibold">{item.label}</dt><dd className="mt-1 text-xs leading-relaxed text-[var(--muted)]">{item.detail}</dd></div>)}</dl></section>}
+    {!!project.evaluation?.length&&<section><h3 className="mb-3 text-sm font-semibold">Measured results & evaluation</h3><div className="space-y-3">{project.evaluation.map(item=><div key={item.metric} className="rounded-xl border border-[var(--border)] p-3"><p className="text-sm font-semibold">{item.metric}: {item.value}</p><p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">{item.context}</p>{item.source&&<a href={item.source} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[10px] text-[var(--accent)] underline">Methodology / source</a>}</div>)}</div></section>}
+    {!!project.limitations?.length&&<section><h3 className="mb-2 text-sm font-semibold">Interpretation & limitations</h3><ul className="list-disc space-y-2 pl-4 text-xs leading-relaxed text-[var(--muted)]">{project.limitations.map(note=><li key={note}>{note}</li>)}</ul></section>}
+  </div>;
+}

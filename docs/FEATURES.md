@@ -7,7 +7,7 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
 - Responsive Next.js App Router interface with light-first theming, an optional dark theme for the current visit, reduced-motion support, keyboard focus states, and a skip link.
 - Wide desktop navigation preview that summarizes each destination before navigation, plus a compact theme-aware mobile menu.
 - About page with animated introduction, career/education timeline, featured projects, technology highlights, career status, and the BB-8 call-to-action banner.
-- Filterable Projects gallery with search, technology and status filters, featured-only filtering, project-specific animated previews, project details, GitHub and live-application links, Hugging Face repositories, and case-study cards.
+- Filterable Projects gallery with search, technology and status filters, featured-only filtering, actual deployed-screen capture previews, project details, GitHub and live-application links, Hugging Face repositories, and case-study cards. My featured About-page projects use the same previews. Technical summaries distinguish implementation details, scoped evaluation results, and limitations; [Project showcase](PROJECT_SHOWCASE.md) documents capture coverage and methodology.
 - Detailed Experience, Education, Skills, Socials, Contact, Notice, and Privacy pages, including mobile timeline layouts that preserve institution branding and content readability.
 - Pointer-only custom cursor behavior so touch devices retain native mobile interaction.
 - Live GitHub profile and repository summary through a cached server-side proxy with authenticated-to-public retry and unavailable-state actions.

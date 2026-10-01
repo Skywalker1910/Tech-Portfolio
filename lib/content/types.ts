@@ -22,6 +22,9 @@ export type ProjectContent = BaseContent & {
   demo?: string;
   huggingface?: string;
   link?: string;
+  technicalDetails?: Array<{label:string;detail:string}>;
+  evaluation?: Array<{metric:string;value:string;context:string;source?:string}>;
+  limitations?: string[];
 };
 
 export type ExperienceContent = BaseContent & {

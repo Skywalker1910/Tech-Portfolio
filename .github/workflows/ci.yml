@@ -52,6 +52,8 @@ jobs:
         run: npm run rag:evaluate
       - name: Test retrieval policies and budgets (offline)
         run: npm run rag:test
+      - name: Test verified project details and preview assets
+        run: npm run projects:test
 
       - name: Build production application
         run: npm run build

@@ -8,6 +8,9 @@ import { ShieldCheck, GraduationCap, Briefcase, ArrowRight, Brain, Eye, ShieldAl
 import { SiPython, SiTensorflow, SiOpencv, SiJupyter, SiCoursera, SiSelenium, SiPytorch, SiOpenai, SiScikitlearn, SiPandas, SiNumpy, SiDocker, SiPostgresql, SiGit, SiPostman, SiFastapi, SiMysql, SiCplusplus, SiPlotly } from "react-icons/si";
 import Link from "next/link";
 import BB8Banner from "../components/BB8Banner";
+import ProjectApplicationPreview from "@/components/ProjectApplicationPreview";
+import { DEFAULT_PROJECTS } from "@/lib/content/defaults";
+import { withProjectPresentation } from "@/lib/project-presentation";
 import type { ExperienceContent, ProjectContent } from "@/lib/content/types";
 
 // ─── Tag icon map ────────────────────────────────────────────────────────────
@@ -157,53 +160,8 @@ const timelineItems: {
 ];
 
 // ─── Featured projects data ─────────────────────────────────────────────────
-const featuredProjects = [
-  {
-    num: "01",
-    type: "RAG System",
-    title: "BB8 Co-Pilot x Tech Portfolio",
-    year: "2026",
-    tags: ["OpenAI", "RAG", "S3 Vectors", "Next.js", "AWS"],
-    blurb:
-      "Source-grounded co-pilot with semantic retrieval, citations, navigation tools, evaluation, and privacy-aware usage telemetry.",
-    href: "/projects",
-    preview: {
-      bg: "from-violet-950 via-purple-900/60 to-indigo-950",
-      orb1: "bg-violet-500",
-      orb2: "bg-indigo-400",
-    },
-  },
-  {
-    num: "02",
-    type: "Live System",
-    title: "Neural Log — Personal Activity & Progress System",
-    year: "2026",
-    tags: ["Flask", "React", "TypeScript", "SQLite", "AWS"],
-    blurb:
-      "Multi-workspace activity tracker with an auditable XP ledger, analytics, AI weekly reviews, and long-term progress tools.",
-    href: "/projects",
-    preview: {
-      bg: "from-teal-950 via-cyan-900/60 to-emerald-950",
-      orb1: "bg-teal-400",
-      orb2: "bg-cyan-400",
-    },
-  },
-  {
-    num: "03",
-    type: "ML Product",
-    title: "Movie Recommendation Engine",
-    year: "2024–26",
-    tags: ["PyTorch", "Flask", "React", "Docker", "AWS"],
-    blurb:
-      "Production hybrid recommender over 26M+ ratings with FunkSVD RMSE 0.7600, NeuMF, TF-IDF, live TMDB enrichment, and CI/CD.",
-    href: "/projects",
-    preview: {
-      bg: "from-orange-950 via-amber-900/60 to-red-950",
-      orb1: "bg-orange-400",
-      orb2: "bg-amber-300",
-    },
-  },
-];
+const homeProject = (item:ProjectContent,index:number) => ({ ...withProjectPresentation(item),num:String(index+1).padStart(2,"0"),type:item.status === "in-progress" ? "In progress" : "Project",href:"/projects" });
+const featuredProjects = DEFAULT_PROJECTS.filter(item=>item.featured).slice(0,5).map(homeProject);
 
 // ─── Timeline item component ─────────────────────────────────────────────────
 function TimelineItem({ item, index }: { item: (typeof timelineItems)[0]; index: number }) {
@@ -398,12 +356,7 @@ export default function Home() {
       if (work.length) setHomeTimeline([...work, ...education]);
     }).catch(() => {});
     fetch("/api/content/projects").then((r) => r.ok ? r.json() : Promise.reject()).then((items:ProjectContent[]) => {
-      const palettes = [
-        { bg:"from-violet-950 via-purple-900/60 to-indigo-950", orb1:"bg-violet-500", orb2:"bg-indigo-400" },
-        { bg:"from-teal-950 via-cyan-900/60 to-emerald-950", orb1:"bg-teal-400", orb2:"bg-cyan-400" },
-        { bg:"from-orange-950 via-amber-900/60 to-red-950", orb1:"bg-orange-400", orb2:"bg-amber-300" },
-      ];
-      const featured = items.filter((item) => item.featured).slice(0, 5).map((item, index) => ({ num:String(index + 1).padStart(2,"0"), type:item.status === "in-progress" ? "In progress" : "Project", title:item.title, year:String(item.year), tags:item.tags.slice(0, 5), blurb:item.blurb, href:"/projects", preview:palettes[index % palettes.length] }));
+      const featured = items.filter(item=>item.featured).slice(0,5).map(homeProject);
       if (featured.length) setHomeProjects(featured);
     }).catch(() => {});
   }, []);
@@ -635,16 +588,9 @@ export default function Home() {
                   </Link>
                 </div>
 
-                {/* Clean preview panel — no animated orbs */}
-                <Link
-                  href={project.href}
-                  className="md:w-60 lg:w-72 h-44 md:h-auto rounded-xl overflow-hidden shrink-0 relative bg-[var(--surface)] border border-[var(--border)] hover:border-zinc-600 transition-colors flex items-center justify-center"
-                  tabIndex={-1}
-                >
-                  <span className="text-[var(--sub-muted)] text-xs font-medium tracking-widest uppercase">
-                    {project.type}
-                  </span>
-                </Link>
+                <div className="w-full md:w-[40%] lg:w-[42%] h-64 md:h-72 rounded-xl overflow-hidden shrink-0 border border-[var(--border)]">
+                  <ProjectApplicationPreview title={project.title} demo={project.demo}/>
+                </div>
               </motion.div>
             ))}
           </div>
