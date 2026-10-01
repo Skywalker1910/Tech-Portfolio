@@ -1,10 +1,26 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { RESUME_SKILL_CATEGORIES, RESUME_SKILLS_SOURCE } from "../lib/resume-skills";
 import sharp from "sharp";
 import { DEFAULT_PROJECTS } from "../lib/content/defaults";
 import { validateContent } from "../lib/content/validation";
 import { projectCapture, withProjectPresentation, featuredWork } from "../lib/project-presentation";
+
+test("Skills page uses the reviewed current resume, not the older alias",async()=>{
+  assert.equal(RESUME_SKILLS_SOURCE,"/Aditya More - Resume.pdf");
+  assert.equal(createHash("sha256").update(await readFile(`public${RESUME_SKILLS_SOURCE}`)).digest("hex"),"0577cedc6e43fab93b980a4dd07b80c3d66fb23b6c8f38e806ec1de8f0f86239","Resume changed: review the Skills section before updating this pinned hash.");
+});
+test("Skills inventory contains only the current resume Skills-section entries",()=>{
+  assert.deepEqual(RESUME_SKILL_CATEGORIES.map(category=>[category.title,...category.skills]),[
+    ["Programming","Python","SQL"],
+    ["ML & Statistics","PyTorch","scikit-learn","Hugging Face Transformers"],
+    ["Data & Visualization","pandas","NumPy","seaborn","matplotlib"],
+    ["Tools & Infrastructure","AWS (EC2, S3, Lambda, Amplify, DynamoDB)","Docker","Git/GitHub","GitHub Actions (CI/CD)"],
+    ["Core Areas","Machine Learning","Deep Learning","LLMs","GenAI","RAG","MLOps","Computer Vision"],
+  ]);
+});
 
 test("every project has technical implementation with scoped metrics rather than invented outcomes",()=>{
   assert.equal(DEFAULT_PROJECTS.length,12);
