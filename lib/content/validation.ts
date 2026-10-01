@@ -9,6 +9,14 @@ const safeUrl = (value: unknown) => {
   try { const url = new URL(candidate); return url.protocol === "https:" ? url.toString() : undefined; } catch { return undefined; }
 };
 const slug = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 72) || crypto.randomUUID();
+const technicalDetails = (value:unknown) => Array.isArray(value) ? value.slice(0,10).flatMap(item=>{
+  if(!item || typeof item!=="object")return [];const label=text(item.label,120),detail=text(item.detail,1500);
+  return label&&detail ? [{label,detail}] : [];
+}) : undefined;
+const evaluation = (value:unknown) => Array.isArray(value) ? value.slice(0,10).flatMap(item=>{
+  if(!item || typeof item!=="object")return [];const metric=text(item.metric,160),result=text(item.value,160),context=text(item.context,1500);
+  return metric&&result&&context ? [{metric,value:result,context,...(safeUrl(item.source)?{source:safeUrl(item.source)}:{})}] : [];
+}) : undefined;
 
 export function validateContent(kind: ContentKind, input: unknown): PortfolioContent | null {
   if (!input || typeof input !== "object") return null;
@@ -20,7 +28,7 @@ export function validateContent(kind: ContentKind, input: unknown): PortfolioCon
   if (kind === "projects") {
     const statuses = new Set(["completed", "in-progress", "planned"]);
     const status = statuses.has(String(raw.status)) ? String(raw.status) as ProjectContent["status"] : "planned";
-    return { ...base, kind:"project", blurb:text(raw.blurb, 360), description:text(raw.description, 4_000), highlights:list(raw.highlights), tags:list(raw.tags, 24, 60), year:Math.min(2100, Math.max(1900, Number(raw.year) || new Date().getFullYear())), status, featured:Boolean(raw.featured), github:safeUrl(raw.github), demo:safeUrl(raw.demo), huggingface:safeUrl(raw.huggingface), link:safeUrl(raw.link) };
+    return { ...base, kind:"project", blurb:text(raw.blurb, 360), description:text(raw.description, 4_000), highlights:list(raw.highlights), tags:list(raw.tags, 24, 60), year:Math.min(2100, Math.max(1900, Number(raw.year) || new Date().getFullYear())), status, featured:Boolean(raw.featured), github:safeUrl(raw.github), demo:safeUrl(raw.demo), ...(Array.isArray(raw.technicalDetails)?{technicalDetails:technicalDetails(raw.technicalDetails)}:{}), ...(Array.isArray(raw.evaluation)?{evaluation:evaluation(raw.evaluation)}:{}), ...(Array.isArray(raw.limitations)?{limitations:list(raw.limitations,12,1500)}:{}), huggingface:safeUrl(raw.huggingface), link:safeUrl(raw.link) };
   }
   const accents = new Set(["orange","violet","teal","blue","pink","purple"]);
   const accent = accents.has(String(raw.accent)) ? String(raw.accent) as ExperienceContent["accent"] : "orange";

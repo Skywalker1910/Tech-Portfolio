@@ -100,6 +100,7 @@ Detailed system, sequence, trust-boundary, and data-model diagrams are available
 | [AWS Infrastructure](docs/AWS_INFRASTRUCTURE.md) | Amplify, Route 53, compute role, DynamoDB, S3 Vectors, environment delivery, IAM, and resource lifecycle |
 | [BB-8 RAG System](docs/RAG.md) | Corpus assembly, chunking, embeddings, indexing, hybrid retrieval, generation, tools, tuning, and evaluation |
 | [RAG Evaluation Protocol](docs/RAG_EVALUATION.md) | Fixed/adaptive comparison, exact metric semantics, split datasets, budgeted opt-in answer rubric, and limitations |
+| [Project Showcase](docs/PROJECT_SHOWCASE.md) | Real deployed-screen previews, capture provenance, verified ML/data metrics, and technical narrative boundaries |
 | [RAG Evaluation Results](docs/RAG_EVALUATION_RESULTS.md) | Offline and approved live coverage at 4/6/8/adaptive, budgeted production-index smoke test, and my fixed 4/0.65 recommendation |
 | [Visitor Analytics](docs/ANALYTICS.md) | Measurement tiers, attributes, traffic sources, engagement, storage model, privacy controls, and dashboard semantics |
 | [Live Content System](docs/CONTENT_SYSTEM.md) | Project and experience models, publishing, validation, fallback behavior, DynamoDB layout, and RAG synchronization |
