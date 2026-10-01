@@ -36,7 +36,7 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
 
 - One serializable content model for projects and experience.
 - Published content is served through public APIs and updates the Projects, Experience, and About pages.
-- Project controls include draft/published state, ordering, status, tags, highlights, links, and featured placement.
+- Project controls include draft/published state, gallery ordering, status, tags, highlights, links, and a Featured Work panel for independently selecting and ranking homepage projects. Compact equal-height gallery cards show highlights; expanded views retain full technical evidence. Non-public projects use labelled, reduced-motion-aware concept animations rather than fake application captures.
 - Experience controls include draft/published state, ordering, organization details, contributions, technologies, visual accent, and About-timeline placement.
 - Bundled content remains available if DynamoDB has not been provisioned or is temporarily unavailable.
 - Published live content is incorporated into BB-8’s current RAG corpus during indexing.

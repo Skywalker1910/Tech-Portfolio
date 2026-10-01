@@ -18,6 +18,7 @@ export type ProjectContent = BaseContent & {
   year: number;
   status: "completed" | "in-progress" | "planned";
   featured: boolean;
+  featuredOrder?: number;
   github?: string;
   demo?: string;
   huggingface?: string;

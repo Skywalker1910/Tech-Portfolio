@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Edit3, Loader2, Plus, Save, Trash2, X } from "lucide-react";
 import type { ContentKind, ExperienceContent, PortfolioContent, ProjectContent } from "@/lib/content/types";
+import { featuredWork } from "@/lib/project-presentation";
 
 const projectBlank:ProjectContent = { id:"", kind:"project", title:"", blurb:"", description:"", highlights:[], tags:[], year:new Date().getFullYear(), status:"planned", featured:false, published:false, sortOrder:0 };
 const experienceBlank:ExperienceContent = { id:"", kind:"experience", title:"", organization:"", department:"", location:"", period:"", type:"", bullets:[], tags:[], accent:"orange", showOnTimeline:true, published:false, sortOrder:0 };
@@ -14,12 +15,32 @@ export default function AdminContentManager({ kind }:{ kind:ContentKind }) {
   const [editing, setEditing] = useState<PortfolioContent | null>(null);
   const [status, setStatus] = useState<"loading"|"ready"|"saving"|"error">("loading");
   const [message, setMessage] = useState("");
+  const [featuredDirty, setFeaturedDirty] = useState<string[]>([]);
   const title = kind === "projects" ? "Projects" : "Experience";
   const endpoint = `/api/admin/content/${kind}`;
 
   const load = useCallback(async () => { setStatus("loading"); const response = await fetch(endpoint); if (response.status === 401) return location.assign("/admin/login"); if (!response.ok) { setStatus("error"); setMessage("Could not load content."); return; } setItems(await response.json()); setStatus("ready"); }, [endpoint]);
   useEffect(() => { void load(); }, [load]);
   const sorted = useMemo(() => [...items].sort((a,b) => a.sortOrder - b.sortOrder), [items]);
+  const featuredProjects = featuredWork(items.filter((item):item is ProjectContent=>item.kind === "project"));
+  const changeFeatured = (id:string, patch:Partial<ProjectContent>) => {
+    setItems(current=>current.map(item=>item.id === id ? {...item,...patch} as PortfolioContent : item));
+    setFeaturedDirty(current=>current.includes(id)?current:[...current,id]);
+  };
+  const saveFeatured = async () => {
+    setStatus("saving"); setMessage("");
+    const saved:string[]=[];
+    try {
+      for(const item of items.filter(item=>featuredDirty.includes(item.id))) {
+        const response=await fetch(endpoint,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(item)});
+        if(!response.ok)throw new Error("Save failed");
+        saved.push(item.id);
+      }
+      setStatus("ready");setMessage("Featured selection and homepage ranks saved. Draft projects remain hidden; no reindex is needed for ordering changes.");
+    } catch {
+      setStatus("error");setMessage(`${saved.length} changes saved; remaining changes could not be saved. Retry to save the remaining selections.`);
+    } finally {setFeaturedDirty(current=>current.filter(id=>!saved.includes(id)));}
+  };
   const update = (patch:Record<string, unknown>) => setEditing((current) => current ? ({ ...current, ...patch } as PortfolioContent) : current);
 
   const save = async () => {
@@ -41,6 +62,18 @@ export default function AdminContentManager({ kind }:{ kind:ContentKind }) {
       <button onClick={() => setEditing({ ...(kind === "projects" ? projectBlank : experienceBlank), sortOrder:items.length })} className="cta-primary flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"><Plus size={15}/> Add {kind === "projects" ? "project" : "role"}</button>
     </div>
     {message && <div className={`mb-5 rounded-xl border px-4 py-3 text-sm ${status === "error" ? "border-red-500/30 bg-red-500/10 text-red-500" : "border-emerald-500/25 bg-emerald-500/10 text-emerald-600"}`}>{message}</div>}
+    {kind === "projects" && status !== "loading" && <section className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+      <h2 className="font-semibold">Featured work · About page</h2>
+      <p className="mt-1 text-xs text-[var(--muted)]">Choose from the full project list and set homepage ranks independently of gallery order. Lower ranks appear first; drafts never appear publicly.</p>
+      <fieldset disabled={status === "saving"} className="mt-4 space-y-2">
+        {sorted.filter((item):item is ProjectContent=>item.kind === "project").map(item=><div key={item.id} className="flex flex-wrap items-center gap-3 rounded-xl bg-[var(--bg)] p-3">
+          <label className="flex min-w-0 flex-1 items-center gap-2 text-xs"><input type="checkbox" checked={item.featured} onChange={e=>changeFeatured(item.id,{featured:e.target.checked})}/><span>{item.title}{!item.published && <span className="ml-2 text-[var(--muted)]">(draft)</span>}</span></label>
+          <label className="flex items-center gap-2 text-[10px] text-[var(--muted)]">Homepage rank<input type="number" min="0" max="9999" value={item.featuredOrder ?? item.sortOrder} onChange={e=>changeFeatured(item.id,{featuredOrder:Math.max(0,Math.min(9999,Math.round(Number(e.target.value)||0)))})} className="w-16 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-[var(--text)]"/></label>
+        </div>)}
+      </fieldset>
+      <p className="mt-4 text-xs text-[var(--muted)]">Order preview (save to publish): {featuredProjects.length ? featuredProjects.map((item,i)=>`${i+1}. ${item.title}`).join(" → ") : "No featured projects selected"}</p>
+      <button type="button" disabled={!featuredDirty.length || status === "saving"} onClick={()=>void saveFeatured()} className="cta-primary mt-4 rounded-xl px-4 py-2 text-xs font-semibold disabled:opacity-50">{status === "saving"?"Saving…":"Save featured work"}</button>
+    </section>}
     {status === "loading" ? <div className="flex items-center gap-2 py-16 text-sm text-[var(--muted)]"><Loader2 className="animate-spin" size={16}/> Loading {title.toLowerCase()}…</div> : <div className="grid gap-3">
       {sorted.map((item) => <div key={item.id} className="flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm">
         <div className={`h-2.5 w-2.5 rounded-full ${item.published ? "bg-emerald-500" : "bg-amber-500"}`}/><div className="min-w-0 flex-1"><p className="truncate font-medium">{item.title}</p><p className="mt-1 text-xs text-[var(--muted)]">Order {item.sortOrder} · {item.published ? "Published" : "Draft"}{item.kind === "project" ? ` · ${item.year} · ${item.status}` : ` · ${item.period} · ${item.organization}`}</p></div>
@@ -65,6 +98,7 @@ export default function AdminContentManager({ kind }:{ kind:ContentKind }) {
           <label className="text-xs font-medium">GitHub URL<input className={`${inputClass} mt-1.5`} value={editing.github ?? ""} onChange={(e) => update({ github:e.target.value })}/></label><label className="text-xs font-medium">Live application URL<input className={`${inputClass} mt-1.5`} value={editing.demo ?? ""} onChange={(e) => update({ demo:e.target.value })}/></label>
           <label className="md:col-span-2 text-xs font-medium">Hugging Face repository<input className={`${inputClass} mt-1.5`} value={editing.huggingface ?? ""} onChange={(e) => update({ huggingface:e.target.value })}/></label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.featured} onChange={(e) => update({ featured:e.target.checked })}/> Featured on About page</label>
+          <label className="text-xs font-medium">Homepage rank (independent of gallery order)<input type="number" min="0" max="9999" className={`${inputClass} mt-1.5`} value={editing.featuredOrder ?? editing.sortOrder} onChange={e=>update({featuredOrder:Number(e.target.value)})}/></label>
         </> : <>
           <label className="text-xs font-medium">Organization *<input className={`${inputClass} mt-1.5`} value={editing.organization} onChange={(e) => update({ organization:e.target.value })}/></label><label className="text-xs font-medium">Period *<input className={`${inputClass} mt-1.5`} value={editing.period} onChange={(e) => update({ period:e.target.value })}/></label>
           <label className="text-xs font-medium">Department<input className={`${inputClass} mt-1.5`} value={editing.department} onChange={(e) => update({ department:e.target.value })}/></label><label className="text-xs font-medium">School / subdepartment<input className={`${inputClass} mt-1.5`} value={editing.subdepartment ?? ""} onChange={(e) => update({ subdepartment:e.target.value })}/></label>
