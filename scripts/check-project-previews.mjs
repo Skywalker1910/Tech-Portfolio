@@ -4,6 +4,7 @@ import { writeFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 import { DEFAULT_PROJECTS, DEFAULT_EXPERIENCE } from "../lib/content/defaults.ts";
 import { withProjectPresentation } from "../lib/project-presentation.ts";
+import { RESUME_SKILL_CATEGORIES } from "../lib/resume-skills.ts";
 
 // Reproduce the production legacy-record failure: hosted projects lack demo URLs.
 const fixtures=DEFAULT_PROJECTS.map(item=>item.id === "bb8-rag" ? {...item,title:"AI-Powered Tech Portfolio (RAG-based System)",demo:undefined} : item.id === "movie-recommendation" ? {...item,title:"Personalized Movie Recommendation System",demo:undefined} : item);
@@ -80,6 +81,31 @@ try {
   await delay(900);
   await screenshot("details");
   console.log("details", (await evaluate("JSON.stringify({methodology:document.body.innerText.includes('Evaluation'),ranking:document.body.innerText.includes('NDCG')})")).result.value);
+  for(const width of [1366,390]) {
+    await send("Emulation.setDeviceMetricsOverride",{width,height:844,deviceScaleFactor:1,mobile:width===390});await delay(500);
+    const start=JSON.parse((await evaluate("(()=>{const e=document.querySelector('[data-project-overlay]');const d=e.querySelector('[role=dialog]');return JSON.stringify({scrollable:e.scrollHeight>e.clientHeight,width:d.getBoundingClientRect().width,overflow:d.getBoundingClientRect().right>innerWidth});})()")).result.value);
+    assert.equal(start.scrollable,true);assert.equal(start.overflow,false);if(width===1366)assert.ok(start.width>=1000);
+    await evaluate("(()=>{const e=document.querySelector('[data-project-overlay]');e.scrollTop=e.scrollHeight;})()");await delay(200);
+    const bottom=JSON.parse((await evaluate("(()=>{const e=document.querySelector('[data-project-overlay]');const links=e.querySelectorAll('a');const last=links[links.length-1].getBoundingClientRect();const close=e.querySelector('button[aria-label=\"Close project details\"]').getBoundingClientRect();return JSON.stringify({lastActionVisible:last.top>=0&&last.bottom<=innerHeight,closeVisible:close.top>=0&&close.bottom<=innerHeight,scroll:e.scrollTop});})()")).result.value);
+    console.log("expanded overlay",{viewport:width,...start,...bottom});assert.equal(bottom.lastActionVisible,true);assert.equal(bottom.closeVisible,true);await screenshot(`details-bottom-${width}`);
+  }
+  await evaluate("document.querySelector('button[aria-label=\"Close project details\"]')?.click()");await delay(400);
+  assert.equal((await evaluate("document.body.style.overflow==='hidden'")).result.value,false);
+  await send("Page.navigate", { url:"http://localhost:3007/skills" });await delay(1500);
+  for(const theme of ["light","dark"])for(const width of [1366,390,320]) {
+    await send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:width<500});
+    await evaluate(`document.documentElement.classList.toggle('dark',${theme==="dark"})`);await delay(400);
+    const skills=JSON.parse((await evaluate(`(()=>{
+      const luminance=color=>{const c=color.match(/[\\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
+      const contrast=(foreground,background)=>{const a=luminance(foreground),b=luminance(background);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);};
+      const titles=Array.from(document.querySelectorAll('[data-skill-card] h2')).map(e=>contrast(getComputedStyle(e).color,getComputedStyle(e.closest('[data-skill-card]')).backgroundColor));
+      const chips=Array.from(document.querySelectorAll('[data-skill-chip]')).map(e=>contrast(getComputedStyle(e).color,getComputedStyle(e).backgroundColor));
+      return JSON.stringify({overflow:document.documentElement.scrollWidth>innerWidth,cards:titles.length,skills:Array.from(document.querySelectorAll('[data-skill-chip] span')).map(e=>e.textContent),minimumTitleContrast:Math.min(...titles),minimumChipContrast:Math.min(...chips)});
+    })()`)).result.value);
+    assert.equal(skills.overflow,false);assert.equal(skills.cards,5);assert.deepEqual(skills.skills,RESUME_SKILL_CATEGORIES.flatMap(c=>[...c.skills]));assert.ok(skills.minimumTitleContrast>=4.5);assert.ok(skills.minimumChipContrast>=4.5);
+    console.log("skills",{theme,width,titleContrast:skills.minimumTitleContrast,chipContrast:skills.minimumChipContrast,overflow:skills.overflow});await screenshot(`skills-${theme}-${width}`);
+  }
+  await evaluate("document.documentElement.classList.remove('dark')");
   await send("Page.navigate", { url:"http://localhost:3007/admin/projects" });await delay(3000);
   await send("Emulation.setDeviceMetricsOverride", { width:1366,height:900,deviceScaleFactor:1,mobile:false });await delay(700);
   await screenshot("admin");

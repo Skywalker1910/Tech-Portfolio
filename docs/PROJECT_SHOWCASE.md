@@ -25,6 +25,8 @@ Existing DynamoDB records continue to control custom titles, summaries, publicat
 
 ## Featured work controls
 
+My expanded project view is a spacious, full-height document within a viewport-scrolling overlay, rather than a clipped height-capped card. The panel grows with its content; the overlay handles scrolling, including the bottom actions and spacing. A sticky close control stays accessible, and the background page remains scroll-locked until I close the view. Desktop uses a wider panel; mobile retains safe side margins.
+
 In Command Center → Projects, I select featured projects from the complete list and assign an independent `featuredOrder`. Lower ranks appear first on About; missing ranks fall back to `sortOrder`, with deterministic ties. Drafts remain hidden. Clearing every selection shows no featured cards, and there is no hidden five-project cap. I save changes explicitly; failures retain unsaved changes and report any partial saves. Gallery ordering and numbering still use `sortOrder`. Updating homepage selection or rank does not require RAG reindexing.
 
 ### Selected source-backed results

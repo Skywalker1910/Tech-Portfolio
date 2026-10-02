@@ -592,20 +592,20 @@ function ProjectModal({ project, number, onClose }: { project: Project; number: 
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.92, y: 20 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-[101] md:w-full md:max-w-2xl md:max-h-[85vh] overflow-hidden"
+        onClick={event=>{if(event.target===event.currentTarget)onClose();}}
+        data-project-overlay
+        className="fixed inset-0 z-[101] overflow-y-auto overscroll-contain px-3 py-5 sm:px-6 md:py-10"
       >
-        <div className={`relative h-full bg-[var(--surface)] rounded-2xl border ${a.border} shadow-2xl card-elevated ${a.glow} flex flex-col overflow-hidden`}>
+        <div role="dialog" aria-modal="true" aria-labelledby="expanded-project-title" className={`relative mx-auto w-full max-w-5xl bg-[var(--surface)] rounded-2xl border ${a.border} shadow-2xl card-elevated ${a.glow}`}>
+          <div className="sticky top-0 z-20 flex items-center gap-3 rounded-t-2xl border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
+            <span className="shrink-0 font-mono text-xs text-[var(--muted)]">PROJECT {number}</span>
+            <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[var(--text)]">{project.title}</span>
+            <button type="button" aria-label="Close project details" onClick={onClose} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--tag-bg)] text-[var(--text)] hover:text-[var(--accent)]"><X size={16}/></button>
+          </div>
           {/* ── Gradient header ── */}
-          <div className="relative h-64 overflow-hidden shrink-0">
+          <div className="relative h-64 overflow-hidden md:h-80">
             <div className={`absolute inset-0 bg-gradient-to-br ${a.bg}`} />
             <ProjectApplicationPreview title={project.title} demo={project.demo}/>
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-[var(--text)] hover:bg-black/60 transition-all"
-            >
-              <X size={16} />
-            </button>
             {/* Status + featured badges */}
             <div className="absolute top-4 left-4 flex gap-2">
               <span className="text-[10px] font-bold tracking-[0.2em] uppercase bg-black/40 backdrop-blur-sm text-white/70 border border-white/10 px-2.5 py-1 rounded-full">
@@ -621,11 +621,11 @@ function ProjectModal({ project, number, onClose }: { project: Project; number: 
             <span className="absolute bottom-4 right-4 text-sm font-mono text-white/50">{project.year}</span>
           </div>
 
-          {/* ── Scrollable content ── */}
-          <div className="flex-1 overflow-y-auto p-6 md:p-8">
+          {/* The full overlay scrolls; no nested height-capped content pane. */}
+          <div className="space-y-2 p-6 pb-10 sm:p-8 md:p-12 md:pb-14">
             {/* Title */}
             <p className="mb-2 font-mono text-xs tracking-widest text-[var(--muted)]">PROJECT {number}</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-[var(--text)] mb-3 leading-tight">
+            <h2 id="expanded-project-title" className="text-2xl md:text-4xl font-bold text-[var(--text)] mb-5 leading-tight">
               {project.title}
             </h2>
             

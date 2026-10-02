@@ -1,5 +1,7 @@
 # My Tech Portfolio
 
+[LLM](https://github.com/topics/llm) · [RAG](https://github.com/topics/rag) · [Retrieval-Augmented Generation](https://github.com/topics/retrieval-augmented-generation) · [Generative AI](https://github.com/topics/generative-ai) · [Semantic Search](https://github.com/topics/semantic-search)
+
 An interactive, production-hosted portfolio for presenting my AI/ML engineering work, research, experience, and technical capabilities. The application combines a responsive public experience, BB-8 as my RAG-powered portfolio co-pilot, live content I manage, a private operations dashboard, and privacy-conscious first-party analytics.
 
 - Primary application: [adityamore.dev](https://adityamore.dev)
