@@ -7,7 +7,7 @@ This document is the source-of-truth inventory for the portfolio’s shipped app
 - Responsive Next.js App Router interface with light-first theming, an optional dark theme for the current visit, reduced-motion support, keyboard focus states, and a skip link.
 - Wide desktop navigation preview that summarizes each destination before navigation, plus a compact theme-aware mobile menu.
 - About page with animated introduction, career/education timeline, featured projects, technology highlights, career status, and the BB-8 call-to-action banner.
-- Filterable Projects gallery with search, technology and status filters, featured-only filtering, actual deployed-screen capture previews, project details, GitHub and live-application links, Hugging Face repositories, and case-study cards. My featured About-page projects use the same previews. Technical summaries distinguish implementation details, scoped evaluation results, and limitations; [Project showcase](PROJECT_SHOWCASE.md) documents capture coverage and methodology.
+- Filterable Projects gallery with search, technology and status filters, featured-only filtering, distinct project illustrations with gentle animation, project details, GitHub and live-application links, Hugging Face repositories, and case-study cards. My featured About-page projects use the same previews. Technical summaries distinguish implementation details, scoped evaluation results, and limitations; [Project showcase](PROJECT_SHOWCASE.md) documents artwork, historical captures, and methodology.
 - Detailed Experience, Education, Skills, Socials, Contact, Notice, and Privacy pages, including mobile timeline layouts that preserve institution branding and content readability.
 - My Skills page mirrors only the Skills section of the linked `public/Aditya More - Resume.pdf`, not additional tools inferred from projects. Its five categories use solid theme-aware surfaces and readable labels. `lib/resume-skills.ts` is the reviewed transcription; regression tests pin the current PDF hash and inventory so I review both when my resume changes. Local browser checks cover title/chip contrast and wrapping at desktop, 390px and 320px widths in light and dark themes.
 - Pointer-only custom cursor behavior so touch devices retain native mobile interaction.
@@ -100,3 +100,13 @@ The following remain roadmap items and should not be presented as current functi
 - Precise geographic analytics, device fingerprinting, advertising attribution, or cross-site behavioral profiling.
 - Multi-user admin accounts or role-based access control.
 - Automated visitor-message submission by BB-8.
+
+## October 2026 experience and learning update
+
+- Experience and skills cards use plain neutral title panels in both themes.
+- Twelve distinct optimized project illustrations use gentle motion, pause controls and reduced-motion stills. The exact prompts are recorded in `PROJECT_ILLUSTRATIONS.json`.
+- Legacy live project records regain bundled Hugging Face model repository URLs.
+- Compact mobile analytics choices renew optional consent at version 3.
+- Mandatory visits include source category/referring hostname and country/state, with a local GeoLite fallback, stable retries, atomic writes and paginated reporting.
+- Command Center exposes location coverage and private, consented prompt review with common contact-detail redaction, outcome/retrieval context, reviewed state, pagination, deletion and 90-day default retention.
+- Privacy and Notice explain uses and boundaries. Reviewed visitor text does not automatically become verified RAG knowledge.

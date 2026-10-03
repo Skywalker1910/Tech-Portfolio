@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, ShieldCheck, X } from "lucide-react";
+import { ShieldCheck, X } from "lucide-react";
 import {
   browserPrivacySignal,
   clearOptionalAnalyticsStorage,
@@ -73,15 +73,21 @@ export default function TrafficTracker() {
     if (!ready || pathname?.startsWith("/admin")) return;
     const identity = getOrCreateAnalyticsIdentity({ sessionStorage, localStorage, preference, privacySignal });
     if (identity.reported) return;
-    fetch("/api/analytics", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ eventType:"visitor_session_started", eventId:crypto.randomUUID(), visitorId:identity.visitorId, sessionId:identity.sessionId }),
-      keepalive:true,
-    }).then(async (response) => {
-      const body = await response.json().catch(() => ({}));
-      if (response.ok && body.accepted === true) markAnalyticsIdentityReported(sessionStorage, identity);
-    }).catch(() => {});
+    let cancelled=false;
+    const body=JSON.stringify({eventType:"visitor_session_started",eventId:identity.sessionId,visitorId:identity.visitorId,sessionId:identity.sessionId,source:trafficSource()});
+    const report=async()=>{
+      for(let attempt=0;attempt<3&&!cancelled;attempt++) {
+        try {
+          const response=await fetch("/api/analytics",{method:"POST",headers:{"Content-Type":"application/json"},body,keepalive:true});
+          const result=await response.json().catch(()=>({}));
+          if(response.ok&&result.accepted===true){markAnalyticsIdentityReported(sessionStorage,identity);return;}
+          if(response.status===400 || response.status===413 || response.status===429)return;
+        }catch{/* Retry transient network failures with the same idempotency key. */}
+        if(attempt<2)await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)));
+      }
+    };
+    void report();
+    return ()=>{cancelled=true;};
   }, [pathname, preference, privacySignal, ready]);
 
   const reportEngagement = useCallback((preferBeacon = false) => {
@@ -149,20 +155,17 @@ export default function TrafficTracker() {
   if (!showChoice) return null;
 
   return (
-    <aside className="fixed bottom-3 left-1/2 z-[120] w-[calc(100%-1.5rem)] max-w-2xl -translate-x-1/2 rounded-2xl border border-[var(--border)] bg-[var(--surface)]/95 p-3 shadow-2xl backdrop-blur-xl sm:bottom-4 sm:p-3.5" aria-label="Privacy and analytics preferences" role="dialog" aria-modal="false">
+    <aside className="fixed bottom-3 left-1/2 z-[120] w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2 rounded-2xl border border-[var(--border)] bg-[var(--surface)]/95 p-3 shadow-2xl backdrop-blur-xl sm:bottom-4 sm:p-3.5" aria-label="Privacy and analytics preferences" role="dialog" aria-modal="false">
       {preferencesOpen && <button onClick={() => setPreferencesOpen(false)} className="absolute right-2 top-2 rounded-full p-1.5 text-[var(--muted)] transition hover:bg-[var(--tag-bg)] hover:text-[var(--text)]" aria-label="Close analytics preferences"><X size={14}/></button>}
-      <div className="flex items-start gap-3 pr-6">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500"><BarChart3 size={15}/></div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-[var(--text)]">Privacy &amp; analytics</h2>
-          <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--muted)]">Essential anonymous visitor/session IDs and country/region measurement are always on; raw IP addresses are not stored. Basic adds page and device metrics. Enhanced adds return visits and journeys.</p>
-          {privacySignal && <p className="mt-1.5 flex items-center gap-1.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"><ShieldCheck size={11} className="shrink-0"/>Your browser privacy signal keeps optional analytics off.</p>}
-        </div>
+      <div className="pr-5">
+        <h2 className="sr-only">Privacy &amp; analytics</h2>
+        <p className="text-[11px] leading-relaxed text-[var(--muted)]">We measure country/state and visit sources. Optional analytics and saved BB-8 prompts help improve the site.</p>
+        {privacySignal && <p className="mt-1 flex items-center gap-1.5 text-[10px] text-[var(--muted)]"><ShieldCheck size={11}/>Your browser keeps optional collection off.</p>}
       </div>
-      <div className="mt-2.5 flex flex-wrap items-center gap-1.5 pl-0 sm:pl-11">
-        <button disabled={privacySignal} onClick={() => choose("enhanced")} className="rounded-lg bg-black px-3 py-1.5 text-[10px] font-semibold text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-black">Allow enhanced</button>
-        <button disabled={privacySignal} onClick={() => choose("basic")} className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-[10px] font-semibold text-[var(--text)] transition hover:bg-[var(--tag-bg)] disabled:opacity-40">Basic only</button>
-        <button onClick={() => choose("essential")} className="rounded-lg px-2.5 py-1.5 text-[10px] font-medium text-[var(--muted)] transition hover:bg-[var(--tag-bg)] hover:text-[var(--text)]">Mandatory only</button>
+      <div className="mt-2 flex flex-wrap items-center gap-1">
+        <button disabled={privacySignal} onClick={() => choose("enhanced")} className="rounded-lg bg-black px-3 py-1.5 text-[10px] font-semibold text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-black">Enhanced</button>
+        <button disabled={privacySignal} onClick={() => choose("basic")} className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-[10px] font-semibold text-[var(--text)] transition hover:bg-[var(--tag-bg)] disabled:opacity-40">Basic</button>
+        <button onClick={() => choose("essential")} className="rounded-lg px-2.5 py-1.5 text-[10px] font-medium text-[var(--muted)] transition hover:bg-[var(--tag-bg)] hover:text-[var(--text)]">Essential</button>
         <Link href="/privacy" className="ml-auto px-2 py-1.5 text-[10px] font-medium text-[var(--muted)] underline decoration-orange-500/50 underline-offset-4">Details</Link>
       </div>
     </aside>

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { BatchGetCommand, GetCommand, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { BatchGetCommand, GetCommand, PutCommand, QueryCommand, UpdateCommand, TransactWriteCommand, paginateQuery, type QueryCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { docClient, PORTFOLIO_TABLE } from "@/lib/dynamodb";
 import { retentionEpoch } from "@/lib/analytics-policy";
 
@@ -40,7 +40,7 @@ export type ChatTelemetryRecordInput = {
 };
 export const BASIC_EVENT_NAMES = ["project_opened", "demo_started", "demo_completed", "external_link_clicked", "contact_form_started", "contact_form_submitted"] as const;
 export type BasicEventName = typeof BASIC_EVENT_NAMES[number];
-export type BasicFeatureEvent = { eventName:BasicEventName; page:string; feature:string; metadata:{ targetCategory?:"github"|"linkedin"|"demo"|"resume"|"other" } };
+export type BasicFeatureEvent = { eventName:BasicEventName; page:string; feature:string; metadata:{ targetCategory?:"github"|"linkedin"|"demo"|"resume"|"huggingface"|"other" } };
 
 type OperationalPageViewInput = {
   path:string;
@@ -83,7 +83,7 @@ export function sanitizeBasicFeatureEvent(value:unknown):BasicFeatureEvent|null 
   const feature = typeof input.feature === "string" && /^[a-z0-9:_-]{1,80}$/.test(input.feature) ? input.feature : null;
   if (!page || !feature) return null;
   const metadataInput = input.metadata && typeof input.metadata === "object" ? input.metadata as { targetCategory?:unknown } : {};
-  const targetCategories = new Set(["github", "linkedin", "demo", "resume", "other"]);
+  const targetCategories = new Set(["github", "linkedin", "demo", "resume", "huggingface", "other"]);
   const targetCategory = typeof metadataInput.targetCategory === "string" && targetCategories.has(metadataInput.targetCategory) ? metadataInput.targetCategory as BasicFeatureEvent["metadata"]["targetCategory"] : undefined;
   return { eventName:input.eventName as BasicEventName, page, feature, metadata:targetCategory ? { targetCategory } : {} };
 }
@@ -118,6 +118,7 @@ export function buildMandatoryTelemetryRecord(input:{
   visitorId:string;
   sessionId:string;
   location:AnalyticsLocation;
+  source?:TrafficSource|null;
   timestamp:string;
   expiresAt:number;
 }) {
@@ -136,7 +137,8 @@ export function buildMandatoryTelemetryRecord(input:{
     visitorKey,
     sessionId:sessionKey.slice(0, 12),
     sessionKey,
-    location:input.location,
+    location:{ countryCode:input.location.countryCode, country:input.location.country, region:input.location.region, regionCode:input.location.regionCode },
+    source:sanitizeTrafficSource(input.source),
     expiresAt:input.expiresAt,
   };
 }
@@ -235,7 +237,7 @@ function locationKey(location: AnalyticsLocation) {
   return hashId(JSON.stringify([location.countryCode, location.country, location.region, location.regionCode])).slice(0, 24);
 }
 
-export async function recordMandatoryVisitorSession(input:{ eventId:string; visitorId:string; sessionId:string; location:AnalyticsLocation }) {
+export async function recordMandatoryVisitorSession(input:{ eventId:string; visitorId:string; sessionId:string; location:AnalyticsLocation; source?:TrafficSource|null }) {
   const now = new Date();
   const timestamp = now.toISOString();
   const day = isoDay(now);
@@ -244,36 +246,38 @@ export async function recordMandatoryVisitorSession(input:{ eventId:string; visi
   const sessionKey = hashId(input.sessionId);
   const event = buildMandatoryTelemetryRecord({ ...input, timestamp, expiresAt:expiration });
 
-  try {
-    await docClient.send(new PutCommand({
-      TableName:PORTFOLIO_TABLE,
-      Item:event,
-      ConditionExpression:"attribute_not_exists(pk)",
-    }));
-  } catch (error) {
-    if (isConditionalFailure(error)) return { duplicate:true, day };
-    throw error;
+  const uniqueKey={pk:`MANDATORY_VISITORS#${day}`,sk:`${locationKey(input.location)}#${visitorKey}`};
+  const source=sanitizeTrafficSource(input.source);
+  for(let attempt=0;attempt<3;attempt++) {
+    const existing=await docClient.send(new GetCommand({TableName:PORTFOLIO_TABLE,Key:uniqueKey,ConsistentRead:true}));
+    const uniqueVisitor=existing.Item ? 0 : 1;
+    try {
+      await docClient.send(new TransactWriteCommand({TransactItems:[
+        {Put:{TableName:PORTFOLIO_TABLE,Item:event,ConditionExpression:"attribute_not_exists(pk)"}},
+        ...(uniqueVisitor ? [{Put:{TableName:PORTFOLIO_TABLE,Item:{...uniqueKey,expiresAt:expiration},ConditionExpression:"attribute_not_exists(pk)"}}] : []),
+        {Update:{
+          TableName:PORTFOLIO_TABLE,Key:{pk:`ANALYTICS#${day}`,sk:`GEO#${locationKey(input.location)}`},
+          UpdateExpression:"SET #day = :day, #location = :location, updatedAt = :now, expiresAt = :expires ADD #visits :one, #visitors :visitor",
+          ExpressionAttributeNames:{"#day":"day","#location":"location","#visits":"visits","#visitors":"visitors"},
+          ExpressionAttributeValues:{":day":day,":location":event.location,":now":timestamp,":expires":expiration,":one":1,":visitor":uniqueVisitor},
+        }},
+        {Update:{
+          TableName:PORTFOLIO_TABLE,Key:{pk:`ANALYTICS#${day}`,sk:`SOURCE#${source?.category ?? "other"}#${hashId(source?.host ?? "").slice(0,16)}`},
+          UpdateExpression:"SET #day = :day, #source = :source, expiresAt = :expires ADD visits :one",
+          ExpressionAttributeNames:{"#day":"day","#source":"source"},
+          ExpressionAttributeValues:{":day":day,":source":source,":expires":expiration,":one":1},
+        }},
+      ]}));
+      break;
+    }catch(error){
+      const failure=error as {name?:string;CancellationReasons?:Array<{Code?:string}>};
+      if(failure.name!=="TransactionCanceledException")throw error;
+      if(failure.CancellationReasons?.[0]?.Code==="ConditionalCheckFailed")return {duplicate:true,day};
+      // A competing request may have claimed this daily visitor. Re-read and
+      // retry atomically, so events cannot outlive missing reach/source counts.
+      if(attempt===2 || !failure.CancellationReasons?.some(reason=>reason.Code==="ConditionalCheckFailed" || reason.Code==="TransactionConflict"))throw error;
+    }
   }
-
-  let uniqueVisitor = 0;
-  try {
-    await docClient.send(new PutCommand({
-      TableName:PORTFOLIO_TABLE,
-      Item:{ pk:`MANDATORY_VISITORS#${day}`, sk:`${locationKey(input.location)}#${visitorKey}`, expiresAt:expiration },
-      ConditionExpression:"attribute_not_exists(pk)",
-    }));
-    uniqueVisitor = 1;
-  } catch (error) {
-    if (!isConditionalFailure(error)) throw error;
-  }
-
-  await docClient.send(new UpdateCommand({
-    TableName:PORTFOLIO_TABLE,
-    Key:{ pk:`ANALYTICS#${day}`, sk:`GEO#${locationKey(input.location)}` },
-    UpdateExpression:"SET #day = :day, #location = :location, updatedAt = :now, expiresAt = :expires ADD #visits :one, #visitors :visitor",
-    ExpressionAttributeNames:{ "#day":"day", "#location":"location", "#visits":"visits", "#visitors":"visitors" },
-    ExpressionAttributeValues:{ ":day":day, ":location":input.location, ":now":timestamp, ":expires":expiration, ":one":1, ":visitor":uniqueVisitor },
-  }));
   return { duplicate:false, day, timestamp, visitorId:visitorKey.slice(0, 12), sessionId:sessionKey.slice(0, 12) };
 }
 
@@ -764,11 +768,17 @@ function finishBreakdown(map: Map<string, BreakdownValue>) {
   })).sort((left, right) => right.count - left.count);
 }
 
+async function queryReportPartition(pk:string) {
+  const items:NonNullable<QueryCommandOutput["Items"]>=[];
+  for await(const page of paginateQuery({client:docClient},{TableName:PORTFOLIO_TABLE,KeyConditionExpression:"pk = :pk",ExpressionAttributeValues:{":pk":pk}})) items.push(...(page.Items ?? []));
+  return {Items:items,Count:items.length};
+}
+
 export async function getTrafficReport(days = 30) {
   const dates = Array.from({ length:days }, (_, index) => isoDay(new Date(Date.now() - (days - 1 - index) * DAY_MS)));
   const [analyticsResponses, visitResponses] = await Promise.all([
-    Promise.all(dates.map((day) => docClient.send(new QueryCommand({ TableName:PORTFOLIO_TABLE, KeyConditionExpression:"pk = :pk", ExpressionAttributeValues:{ ":pk":`ANALYTICS#${day}` } })))),
-    Promise.all(dates.map((day) => docClient.send(new QueryCommand({ TableName:PORTFOLIO_TABLE, KeyConditionExpression:"pk = :pk", ExpressionAttributeValues:{ ":pk":`ANALYTICS_VISITS#${day}` } })))),
+    Promise.all(dates.map((day) => queryReportPartition(`ANALYTICS#${day}`))),
+    Promise.all(dates.map((day) => queryReportPartition(`ANALYTICS_VISITS#${day}`))),
   ]);
 
   const daily = analyticsResponses.map((response, index) => {
@@ -871,12 +881,22 @@ export async function getTrafficReport(days = 30) {
     addBreakdown(contextLocations, context.location?.countryCode ?? context.location?.country ?? "Unknown", views, engagementMs, engagedViews);
     const region = context.location?.region ?? context.location?.regionCode;
     if (region) addBreakdown(contextRegions, `${context.location?.countryCode ?? context.location?.country ?? "Unknown"} · ${region}`, views, engagementMs, engagedViews);
-    addBreakdown(sources, context.source?.category ?? "Basic measurement", views, engagementMs, engagedViews);
+
   });
   analyticsResponses.flatMap((response) => response.Items ?? []).filter((item) => String(item.sk).startsWith("FEATURE#")).forEach((item) => {
     addBreakdown(featureEvents, `${String(item.eventName ?? "event")} · ${String(item.feature ?? "unknown")}`, Number(item.count ?? 0), 0, 0);
   });
 
+  analyticsResponses.flatMap(response=>response.Items ?? []).filter(item=>String(item.sk).startsWith("SOURCE#")).forEach(item=>{
+    const source=item.source as TrafficSource|null;
+    addBreakdown(sources, `${source?.category ?? "other"}${source?.host ? ` · ${source.host}` : ""}`, Number(item.visits ?? 0), 0, 0);
+  });
+  const geoRecords=analyticsResponses.flatMap(response=>response.Items ?? []).filter(item=>String(item.sk).startsWith("GEO#"));
+  const geography={
+    measuredVisits:geoRecords.reduce((sum,item)=>sum+Number(item.visits ?? 0),0),
+    countryVisits:geoRecords.reduce((sum,item)=>sum+(item.location?.countryCode || item.location?.country ? Number(item.visits ?? 0) : 0),0),
+    regionVisits:geoRecords.reduce((sum,item)=>sum+(item.location?.regionCode || item.location?.region ? Number(item.visits ?? 0) : 0),0),
+  };
   const chatActions = new Map<string, BreakdownValue>();
   const chatRetrievalModes = new Map<string, BreakdownValue>();
   const chatDevices = new Map<string, BreakdownValue>();
@@ -980,6 +1000,7 @@ export async function getTrafficReport(days = 30) {
   const totalEngagedViews = daily.reduce((sum, entry) => sum + entry.engagedViews, 0);
   const journeyViews = allIndexedVisits.reduce((sum, visit) => sum + Number(visit.pageViews ?? 0), 0);
   return {
+    geography,
     daily:daily.map(({ pages:unused, ...entry }) => { void unused; return entry; }),
     pages:[...byPath.values()].map((page) => ({
       ...page,

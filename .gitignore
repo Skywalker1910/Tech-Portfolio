@@ -57,3 +57,10 @@ next-env.d.ts
 # deployment logs — informational only, not part of source
 Deployment-*/
 /artifacts/project-preview-*.png
+
+/artifacts/ui-qa-profile/
+/artifacts/dependency-audit.json
+/artifacts/project-illustration-contact-sheet.png
+
+/artifacts/project-illustration-male-contact-sheet.png
+/artifacts/project-illustration-technical-contact-sheet.png

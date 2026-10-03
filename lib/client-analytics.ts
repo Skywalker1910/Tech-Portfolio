@@ -1,4 +1,4 @@
-export const ANALYTICS_CONSENT_VERSION = "2";
+export const ANALYTICS_CONSENT_VERSION = "3";
 export const ANALYTICS_PREFERENCE_KEY = "portfolio-analytics-preference";
 export const ANALYTICS_CONSENT_VERSION_KEY = "portfolio-analytics-consent-version";
 export const ANALYTICS_VISITOR_KEY = "portfolio-analytics-visitor";
@@ -16,13 +16,12 @@ export type AnalyticsIdentity = { visitorId:string; sessionId:string; lastActivi
 type StorageLike = Pick<Storage, "getItem"|"setItem"|"removeItem">;
 
 export function readAnalyticsPreference(storage:StorageLike):AnalyticsPreference|null {
+  // Prompt retention changes the purpose of optional consent. Ask again;
+  // never migrate old permissions into the expanded collection scope.
+  if (storage.getItem(ANALYTICS_CONSENT_VERSION_KEY) !== ANALYTICS_CONSENT_VERSION) return null;
   const current = storage.getItem(ANALYTICS_PREFERENCE_KEY);
   if (current === "essential" || current === "basic" || current === "enhanced") return current;
 
-  const legacy = storage.getItem(LEGACY_CONSENT_KEY);
-  const legacyOptOut = storage.getItem(LEGACY_OPT_OUT_KEY) === "true";
-  if (legacy === "accepted") return "enhanced";
-  if (legacy === "declined") return legacyOptOut ? "essential" : "basic";
   return null;
 }
 

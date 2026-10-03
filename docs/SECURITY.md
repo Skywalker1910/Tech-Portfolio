@@ -89,7 +89,7 @@ Actions execute in the browser. Contact submission always requires the visitorâ€
 - Basic page/device analytics is optional and does not create a persistent visitor profile.
 - Enhanced journey analytics requires opt-in and stores hashes of random browser UUIDs.
 - Do Not Track and Global Privacy Control disable the optional tiers; mandatory country/region measurement remains active.
-- Analytics excludes raw IP persistence, city, county, postal code, coordinates, hardware model, device fingerprint, form content, keystrokes, and chat prompt/response text.
+- Analytics excludes raw IP persistence, city, county, postal code, coordinates, hardware model, device fingerprint, form content, keystrokes, and chat responses. Consented redacted latest prompts use an isolated review family without identity or location fields.
 - Contact submissions are stored separately from content and analytics.
 - Audience classification is a manual annotation I apply, never an automated inference.
 - Centralized configurable TTL defaults are 90 days for mandatory and BB-8 telemetry, 180 days for Basic and Enhanced Analytics, and 365 days for contacts.
@@ -114,3 +114,5 @@ See [Visitor Analytics](ANALYTICS.md) and the public `/privacy` page for the com
 - Static GitHub Pages cannot enforce server-side feature parity and therefore disables backend-dependent behavior.
 
 Material security changes must update this document, [API Reference](API.md), [AWS Infrastructure](AWS_INFRASTRUCTURE.md), and the public Notice/Privacy pages when data handling changes.
+
+Prompt review is protected by the same admin-session checks as the Command Center. It stores only the latest submitted prompt after current-version Basic/Enhanced consent, with pattern-based redaction and BB-8 TTL. User text is never automatically treated as verified knowledge. Storage failures do not break chat and do not log prompt-bearing provider errors.

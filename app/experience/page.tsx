@@ -19,15 +19,6 @@ type Role = {
   logo: string;
   logoSize?: number;
   logoFilter?: string;
-  gradient: string;
-  orb1: string;
-  orb2: string;
-  border: string;
-  glow: string;
-  accent: string;
-  accentBg: string;
-  accentBorder: string;
-  tag: string;
   Icon: ComponentType<{ size?: number; className?: string }>;
   summary?: ReactNode;
   researchAreas?: string;
@@ -48,15 +39,6 @@ const roles: Role[] = [
     type: "Research",
     logo: "/soc-logo.png",
     logoSize: 150,
-    gradient: "from-orange-950 via-amber-900/40 to-stone-950",
-    orb1: "bg-orange-500",
-    orb2: "bg-amber-400",
-    border: "border-orange-500/20",
-    glow: "hover:shadow-orange-500/15",
-    accent: "text-orange-400",
-    accentBg: "bg-orange-500/10",
-    accentBorder: "border-orange-500/20",
-    tag: "bg-orange-500/10 text-orange-300 border border-orange-500/20",
     Icon: Bot,
     researchAreas: "Large Language Models · LLM Agents · Multi-Agent Systems · Generative AI · Human Behavior Simulation · AI Evaluation",
     summary: (
@@ -97,15 +79,6 @@ const roles: Role[] = [
     type: "Teaching",
     logo: "/soc-logo.png",
     logoSize: 150,
-    gradient: "from-violet-950 via-purple-900/40 to-indigo-950",
-    orb1: "bg-violet-500",
-    orb2: "bg-indigo-400",
-    border: "border-violet-500/20",
-    glow: "hover:shadow-violet-500/15",
-    accent: "text-violet-400",
-    accentBg: "bg-violet-500/10",
-    accentBorder: "border-violet-500/20",
-    tag: "bg-violet-500/10 text-violet-300 border border-violet-500/20",
     Icon: GraduationCap,
     bullets: [
       "Designed Jupyter labs and assignments covering data preprocessing, supervised learning, unsupervised learning, model evaluation, and visualization",
@@ -133,15 +106,6 @@ const roles: Role[] = [
     type: "Software Engineering & QA",
     logo: "/amdocs-logo.png",
     logoSize: 135,
-    gradient: "from-teal-950 via-emerald-900/40 to-cyan-950",
-    orb1: "bg-teal-500",
-    orb2: "bg-emerald-400",
-    border: "border-teal-500/20",
-    glow: "hover:shadow-teal-500/15",
-    accent: "text-teal-400",
-    accentBg: "bg-teal-500/10",
-    accentBorder: "border-teal-500/20",
-    tag: "bg-teal-500/10 text-teal-300 border border-teal-500/20",
     Icon: Code2,
     bullets: [
       "Performed end-to-end, regression, and integration testing for enterprise telecom systems supporting AT&T",
@@ -157,19 +121,10 @@ const roles: Role[] = [
   },
 ];
 
-const roleThemes: Record<ExperienceContent["accent"], Pick<Role, "gradient" | "orb1" | "orb2" | "border" | "glow" | "accent" | "accentBg" | "accentBorder" | "tag">> = {
-  orange:{ gradient:"from-orange-950 via-amber-900/40 to-stone-950", orb1:"bg-orange-500", orb2:"bg-amber-400", border:"border-orange-500/20", glow:"hover:shadow-orange-500/15", accent:"text-orange-400", accentBg:"bg-orange-500/10", accentBorder:"border-orange-500/20", tag:"bg-orange-500/10 text-orange-300 border border-orange-500/20" },
-  violet:{ gradient:"from-violet-950 via-purple-900/40 to-indigo-950", orb1:"bg-violet-500", orb2:"bg-indigo-400", border:"border-violet-500/20", glow:"hover:shadow-violet-500/15", accent:"text-violet-400", accentBg:"bg-violet-500/10", accentBorder:"border-violet-500/20", tag:"bg-violet-500/10 text-violet-300 border border-violet-500/20" },
-  purple:{ gradient:"from-violet-950 via-purple-900/40 to-indigo-950", orb1:"bg-purple-500", orb2:"bg-violet-400", border:"border-purple-500/20", glow:"hover:shadow-purple-500/15", accent:"text-purple-400", accentBg:"bg-purple-500/10", accentBorder:"border-purple-500/20", tag:"bg-purple-500/10 text-purple-300 border border-purple-500/20" },
-  teal:{ gradient:"from-teal-950 via-emerald-900/40 to-cyan-950", orb1:"bg-teal-500", orb2:"bg-emerald-400", border:"border-teal-500/20", glow:"hover:shadow-teal-500/15", accent:"text-teal-400", accentBg:"bg-teal-500/10", accentBorder:"border-teal-500/20", tag:"bg-teal-500/10 text-teal-300 border border-teal-500/20" },
-  blue:{ gradient:"from-blue-950 via-sky-900/40 to-indigo-950", orb1:"bg-blue-500", orb2:"bg-sky-400", border:"border-blue-500/20", glow:"hover:shadow-blue-500/15", accent:"text-blue-400", accentBg:"bg-blue-500/10", accentBorder:"border-blue-500/20", tag:"bg-blue-500/10 text-blue-300 border border-blue-500/20" },
-  pink:{ gradient:"from-pink-950 via-rose-900/40 to-purple-950", orb1:"bg-pink-500", orb2:"bg-rose-400", border:"border-pink-500/20", glow:"hover:shadow-pink-500/15", accent:"text-pink-400", accentBg:"bg-pink-500/10", accentBorder:"border-pink-500/20", tag:"bg-pink-500/10 text-pink-300 border border-pink-500/20" },
-};
-
 function roleFromContent(item: ExperienceContent): Role {
   const Icon = item.title.toLowerCase().includes("research") ? Bot : item.organization.toLowerCase().includes("clemson") ? GraduationCap : Code2;
   const iconForTag = (label:string) => label.toLowerCase().includes("python") ? SiPython : label.toLowerCase().includes("jupyter") ? SiJupyter : label.toLowerCase().includes("postman") ? SiPostman : label.toLowerCase().includes("selenium") ? SiSelenium : Bot;
-  return { title:item.title, dept:item.department, subdept:item.subdepartment ?? "", org:item.organization, location:item.location, period:item.period, type:item.type, logo:item.logo ?? "/soc-logo.png", logoSize:item.organization === "Amdocs" ? 135 : 150, ...roleThemes[item.accent], Icon, summary:item.summary, researchAreas:item.researchAreas, bulletHeading:item.bulletHeading, tagHeading:item.tagHeading, bullets:item.bullets, tags:item.tags.map((label) => ({ label, Icon:iconForTag(label) })) };
+  return { title:item.title, dept:item.department, subdept:item.subdepartment ?? "", org:item.organization, location:item.location, period:item.period, type:item.type, logo:item.logo ?? "/soc-logo.png", logoSize:item.organization === "Amdocs" ? 135 : 150, Icon, summary:item.summary, researchAreas:item.researchAreas, bulletHeading:item.bulletHeading, tagHeading:item.tagHeading, bullets:item.bullets, tags:item.tags.map((label) => ({ label, Icon:iconForTag(label) })) };
 }
 
 export default function Experience() {
@@ -185,7 +140,7 @@ export default function Experience() {
         className="mb-14"
       >
         <div className="flex items-center gap-2 mb-3">
-          <Briefcase size={15} className="text-violet-400" />
+          <Briefcase size={15} className="text-[var(--muted)]" />
           <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[var(--muted)]">Career & Experience</p>
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-[var(--text)]">Professional Experience</h1>
@@ -202,30 +157,10 @@ export default function Experience() {
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: "easeOut", delay: i * 0.12 }}
-            className={`group relative rounded-2xl border ${r.border} bg-[var(--surface)] overflow-hidden shadow-lg hover:shadow-xl ${r.glow} card-elevated transition-all duration-300 hover:-translate-y-0.5`}
+            className={`group relative rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5`}
           >
-            {/* Gradient header */}
-            <div className={`relative min-h-28 overflow-hidden bg-gradient-to-br ${r.gradient}`}>
-              {/* Animated orbs */}
-              <motion.div
-                className={`absolute top-2 right-16 w-28 h-28 rounded-full ${r.orb1} blur-3xl opacity-35`}
-                animate={{ scale: [1, 1.4, 1], opacity: [0.35, 0.2, 0.35] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: i * 0.7 }}
-              />
-              <motion.div
-                className={`absolute bottom-0 right-4 w-16 h-16 rounded-full ${r.orb2} blur-2xl opacity-25`}
-                animate={{ scale: [1, 1.5, 1], opacity: [0.25, 0.12, 0.25] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: i * 0.7 + 1.2 }}
-              />
-              {/* Grid overlay */}
-              <div
-                className="absolute inset-0 opacity-[0.05]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)",
-                  backgroundSize: "18px 18px",
-                }}
-              />
+            {/* Neutral title panel */}
+            <div className="relative min-h-28 overflow-hidden border-b border-[var(--border)] bg-[var(--bg)]">
               {/* Header content */}
               <div className="relative z-10 flex min-h-28 flex-col items-start gap-3 px-4 py-5 sm:flex-row sm:items-center sm:gap-4 sm:px-6">
                 <Image
@@ -233,18 +168,20 @@ export default function Experience() {
                   alt={r.org}
                   width={r.logoSize ?? 90}
                   height={r.logoSize ?? 90}
-                  className="h-10 w-auto max-w-[140px] shrink-0 object-contain object-left sm:h-auto"
+                  className={r.logo === "/soc-logo.png"
+                    ? "h-auto w-40 shrink-0 object-contain object-left sm:w-[180px]"
+                    : "h-10 w-auto max-w-[140px] shrink-0 object-contain object-left sm:h-auto"}
                   style={r.logoFilter ? { filter: r.logoFilter } : undefined}
                 />
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg font-bold text-[var(--text)] leading-tight">{r.title}</h2>
-                  <p className={`text-sm font-semibold ${r.accent}`}>{r.org}</p>
+                  <p className={`text-sm font-semibold text-[var(--muted)]`}>{r.org}</p>
                   <div className="flex items-center gap-1 mt-0.5">
-                    <MapPin size={9} className="text-white/40 shrink-0" />
-                    <span className="text-[10px] text-white/40">{r.location}</span>
+                    <MapPin size={9} className="text-[var(--sub-muted)] shrink-0" />
+                    <span className="text-[10px] text-[var(--sub-muted)]">{r.location}</span>
                   </div>
                 </div>
-                <span className="shrink-0 rounded-full border border-white/10 bg-black/40 px-2.5 py-1 font-mono text-[10px] text-white/70 backdrop-blur-sm sm:ml-auto">
+                <span className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 font-mono text-[10px] text-[var(--muted)] backdrop-blur-sm sm:ml-auto">
                   {r.period}
                 </span>
               </div>
@@ -255,7 +192,7 @@ export default function Experience() {
               {/* Type + dept badge row */}
               <div className="mb-4 flex flex-wrap items-center gap-2">
                 <span
-                  className={`${r.accentBg} ${r.accent} text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded border ${r.accentBorder}`}
+                  className={`bg-[var(--tag-bg)] text-[var(--muted)] text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded border border-[var(--border)]`}
                 >
                   {r.type}
                 </span>
@@ -290,7 +227,7 @@ export default function Experience() {
                     viewport={{ once: true }}
                     transition={{ delay: 0.1 + j * 0.06 }}
                   >
-                    <CheckCircle2 size={13} className={`${r.accent} shrink-0 mt-0.5`} />
+                    <CheckCircle2 size={13} className={`text-[var(--muted)] shrink-0 mt-0.5`} />
                     {b}
                   </motion.li>
                 ))}
@@ -304,7 +241,7 @@ export default function Experience() {
                 {r.tags.map((tag) => (
                   <span
                     key={tag.label}
-                    className={`${r.tag} text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5`}
+                    className={`border border-[var(--border)] bg-[var(--tag-bg)] text-[var(--muted)] text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5`}
                   >
                     <tag.Icon size={10} />
                     {tag.label}

@@ -5,6 +5,8 @@ import { getChatSources, retrievePortfolioContext } from "@/lib/rag/retrieval";
 import type { BB8Action, PortfolioRoute } from "@/lib/bb8-actions";
 import { getAnalyticsContext, recordChatUsage, sanitizeAnalyticsId, type AnalyticsClientHints, type ChatTokenUsage } from "@/lib/analytics";
 import { volatileRequestKey } from "@/lib/request-rate-limit";
+import { promptReviewAllowed, recordPromptForReview } from "@/lib/chat-review";
+import { resolveAnalyticsLocation } from "@/lib/analytics-location";
 import { retrievalQuery } from "@/lib/rag/policy";
 
 export const dynamic = "force-dynamic";
@@ -172,6 +174,7 @@ export async function POST(req: NextRequest) {
   let conversation: ConversationMessage[] | null;
   let telemetry:ChatTelemetry|null = null;
   let clientHints: AnalyticsClientHints = {};
+  let reviewAllowed = false;
   try {
     const body = await req.json();
     conversation = parseMessages(body);
@@ -183,6 +186,7 @@ export async function POST(req: NextRequest) {
       const tier = candidate.tier === "enhanced" ? "enhanced" : candidate.tier === "basic" ? "basic" : null;
       if (visitorId && sessionId && chatSessionId && tier) telemetry = { visitorId, sessionId, chatSessionId, tier };
     }
+    reviewAllowed = Boolean(telemetry && promptReviewAllowed(body?.promptReviewConsentVersion, telemetry.tier, req.headers.get("sec-gpc")==="1" || req.headers.get("dnt")==="1"));
     clientHints = body?.client && typeof body.client === "object" ? body.client : {};
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
@@ -194,10 +198,15 @@ export async function POST(req: NextRequest) {
 
   const startedAt = Date.now();
   const analyticsContext = telemetry ? getAnalyticsContext(req.headers, clientHints) : null;
+  if (analyticsContext) analyticsContext.location = await resolveAnalyticsLocation(req.headers, analyticsContext.location);
   let retrievalMode: string | null = null;
   let retrievalFallback = false;
 
   const trackUsage = async (input: { successful:boolean; usage?:ChatTokenUsage|null; actionType?:string|null }) => {
+    if (reviewAllowed) {
+      try { await recordPromptForReview({prompt:conversation!.at(-1)!.content,successful:input.successful,model:CHAT_MODEL,retrievalMode,retrievalFallback}); }
+      catch { console.error("[/api/chat] Prompt review storage unavailable."); }
+    }
     if (!telemetry || !analyticsContext) return;
     try {
       await recordChatUsage({

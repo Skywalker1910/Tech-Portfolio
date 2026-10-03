@@ -4,18 +4,18 @@
 
 I use a first-party, purpose-limited analytics system to understand portfolio reach, geographic distribution, returning visits, content engagement, traffic sources, and BB-8 reliability. It is not an advertising, cross-site tracking, fingerprinting, or identity-resolution system.
 
-I never persist raw IP addresses, city, county, postal/ZIP code, coordinates, GPS data, browser fingerprints, advertising identifiers, form contents, keystrokes, mouse movement, clipboard contents, or BB-8 prompt/response text as analytics. Audience labels are assigned manually; geography and behavior never classify a visitor automatically.
+I never persist raw IP addresses, city, county, postal/ZIP code, coordinates, GPS data, browser fingerprints, advertising identifiers, form contents, keystrokes, mouse movement, clipboard contents, or BB-8 responses as analytics. Redacted latest user prompts, enabled by current Basic/Enhanced consent, use a separate private review family. Audience labels are assigned manually; geography and behavior never classify a visitor automatically.
 
 ## Data purposes and consent
 
 | Purpose | Activation | Data |
 |---|---|---|
-| Mandatory telemetry | Every public visit | Random visitor ID, random session ID, server timestamp, country, country code, region/state, region code |
-| Basic Analytics | Explicit Basic or Enhanced choice | Page views, engagement duration, coarse device/OS/browser/viewport, controlled feature events, BB-8 adoption/performance |
-| Enhanced Analytics | Explicit Enhanced choice | Persistent random visitor recognition, visit number, first/last seen, journey, traffic-source category, sanitized referring hostname, detailed BB-8 agent action |
+| Mandatory telemetry | Every public visit | Random visitor ID, random session ID, server timestamp, country, country code, region/state, region code, traffic-source category and referring hostname |
+| Basic Analytics | Explicit Basic or Enhanced choice | Page views, engagement duration, coarse device/OS/browser/viewport, controlled feature events, BB-8 adoption/performance, separate redacted latest-prompt reviews |
+| Enhanced Analytics | Explicit Enhanced choice | Persistent random visitor recognition, visit number, first/last seen, journey, detailed BB-8 agent action |
 | Contact processing | Visitor submits the form | Name, email, message, submission timestamp; optional one-way analytics link only under Enhanced |
 
-Mandatory telemetry is deliberately small. It is never used to justify page, device, source, journey, or feature collection before consent. Do Not Track and Global Privacy Control disable both optional tiers.
+Mandatory telemetry is deliberately small. It is never used to justify page, device, journey, or feature collection before consent. Do Not Track and Global Privacy Control disable both optional tiers.
 
 ## Identity lifecycle
 
@@ -63,6 +63,10 @@ The runtime reads only:
 
 If a provider supplies city, county, postal code, latitude, longitude, or other precise fields, the application does not read or persist them. The raw IP may be temporarily available to infrastructure. Request handlers convert it to a short-lived one-way process-local rate-limit key that is never persisted or used as visitor identity.
 
+When country/state headers are missing, `lib/analytics-location.ts` performs a local `geoip-lite` lookup using the viewer IP transiently. Only country and region codes leave the resolver; city, postal codes and coordinates are dropped. No external IP lookup is made. Private/malformed addresses stay unknown. Edge location takes precedence, and country mismatches never combine a header country with a different database region. VPN/proxy geography reflects the egress network, not a guaranteed visitor residence. IPv6/state coverage depends on the dataset.
+
+The Traffic dashboard reports measured visits, known countries, and known states. Historical unknown geography cannot be repaired without stored IPs. The resolver uses the database bundled with the pinned package; refresh GeoLite data periodically using the package updater with a MaxMind license, then rebuild. This product includes GeoLite data created by MaxMind, available from https://www.maxmind.com. Hosting data files are explicitly traced into API builds. Build and SSR runtime use Node 24.
+
 ## Controlled event model
 
 Events use an allow-listed envelope rather than arbitrary analytics payloads:
@@ -93,7 +97,7 @@ The system does not track every click, cursor position, scroll position, or keys
 
 ## Traffic attribution
 
-Attribution is Enhanced-only. The client converts a referrer to a controlled category and sanitized hostname. It never stores the full referrer URL or query string.
+Attribution is part of mandatory visitor/session measurement. The client converts a referrer to a controlled category and sanitized hostname. Hidden referrers can appear as direct traffic; attribution is directional rather than guaranteed. Mandatory submission retries transient failures using the session UUID as a stable event key, and event, unique-visitor, geography and source writes commit in a single transaction. Report queries consume all DynamoDB pages. It never stores the full referrer URL or query string.
 
 Supported categories are `direct`, `internal`, `search`, `social`, `professional_network`, `github`, `referral`, and `other`.
 
@@ -107,6 +111,12 @@ BB-8 remains fully usable without optional analytics. With Basic or Enhanced con
 - detailed agent-action type only under Enhanced consent.
 
 The chat route sends a short conversation window to OpenAI for the requested response with `store: false`. Neither the analytics event writer nor the telemetry builder accepts full prompt or response fields. The visible transcript stays in same-tab `sessionStorage`.
+
+## Private prompt review
+
+Consent version 3 requires a renewed Basic/Enhanced choice before prompt collection. The chat client supplies `promptReviewConsentVersion`; the route requires the current version plus valid Basic/Enhanced telemetry. Only the newest user message is saved once per request, including failures after validation. It is limited to 1,000 characters and redacts common emails, phone numbers, links and credential patterns. Names and uncommon personal details may remain; redaction is not complete anonymization.
+
+Records have submission time, model, outcome, retrieval mode/fallback, status and TTL, with no visitor/session IDs, geography, assistant responses or full conversation. The authenticated `/admin/chat-review` queue supports date selection, pagination, marking reviewed and deletion. Review does not automatically index text or train models. Verified content edits and deliberate RAG reindex remain separate. Essential-only visitors and privacy signals stop future collection; existing records expire or can be deleted on request.
 
 ## Contact separation
 
@@ -129,6 +139,8 @@ The server is the authoritative analytics store. Full histories are never placed
 | `MANDATORY_EVENT#...` | Idempotent mandatory visitor/session event |
 | `MANDATORY_VISITORS#<day>` | Daily unique-visitor deduplication by coarse location |
 | `ANALYTICS#<day> / GEO#...` | Mandatory country/region visit and visitor aggregates |
+| `ANALYTICS#<day> / SOURCE#...` | Mandatory source category/hostname visit aggregates |
+| `CHAT_REVIEW#<day>` | Separate consented latest-prompt review queue with BB-8 TTL |
 | `OP_EVENT#...` | Basic page or controlled feature event |
 | `ANALYTICS#<day> / PAGE#...` | Basic page aggregates |
 | `ANALYTICS#<day> / CONTEXT#...` | Basic coarse device/location aggregates |
@@ -145,7 +157,7 @@ All periods are centralized in `lib/analytics-policy.ts` and configurable throug
 | Mandatory telemetry | 90 days | `ANALYTICS_MANDATORY_RETENTION_DAYS` |
 | Basic Analytics | 180 days | `ANALYTICS_BASIC_RETENTION_DAYS` |
 | Enhanced Analytics | 180 days | `ANALYTICS_ENHANCED_RETENTION_DAYS` |
-| BB-8 telemetry | 90 days | `ANALYTICS_BB8_RETENTION_DAYS` |
+| BB-8 telemetry and prompt reviews | 90 days | `ANALYTICS_BB8_RETENTION_DAYS` |
 | Contact submissions | 365 days | `CONTACT_RETENTION_DAYS` |
 
 DynamoDB TTL is asynchronous: `expiresAt` marks deletion eligibility, not an exact deletion time. Aggregates currently follow their category’s retention window; detailed records are not retained indefinitely.
@@ -156,7 +168,8 @@ The Traffic dashboard separates mandatory reach from consented behavior:
 
 - mandatory visitors, visits, countries, and regions;
 - Basic page, engagement, feature, device, OS, browser, and viewport metrics;
-- Enhanced sources, return visits, timestamped journeys, and manual audience labels;
+- mandatory visit-source category/hostname counts and country/state coverage diagnostics;
+- Enhanced return visits, timestamped journeys, and manual audience labels;
 - BB-8 opens, sessions, outcomes, latency, token totals, retrieval behavior, and region/device summaries.
 
 The OpenAI usage page is a separate provider dashboard based on OpenAI organization/project usage APIs. It is not derived from stored chat content.

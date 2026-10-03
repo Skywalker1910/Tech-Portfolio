@@ -83,7 +83,7 @@ See [Security Model](SECURITY.md) and [Command Center](COMMAND_CENTER.md).
 
 ## Quality gate
 
-GitHub Actions defines the production quality gate. It uses Node.js 20 and a locked dependency install, then executes:
+GitHub Actions defines the production quality gate. It uses Node.js 24 and a locked dependency install, then executes:
 
 1. ESLint.
 2. TypeScript checking without emission.

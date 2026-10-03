@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ANALYTICS_IDENTITY_KEY,
+  ANALYTICS_CONSENT_VERSION_KEY,
   ANALYTICS_VISITOR_KEY,
   clearOptionalAnalyticsStorage,
   enhancedAnalyticsAllowed,
@@ -15,6 +16,8 @@ import {
   buildMandatoryTelemetryRecord,
   buildChatTelemetryRecord,
   getAnalyticsContext,
+  getTrafficReport,
+  recordMandatoryVisitorSession,
   getAnalyticsVisitorReference,
   sanitizeBasicFeatureEvent,
 } from "../lib/analytics";
@@ -172,4 +175,83 @@ test("retention is category-specific, configurable, and bounded", () => {
   assert.notEqual(retentionDays("mandatory", {}), retentionDays("basic", {}));
   assert.equal(retentionDays("bb8", { ANALYTICS_BB8_RETENTION_DAYS:"30" }), 30);
   assert.equal(retentionDays("contacts", { CONTACT_RETENTION_DAYS:"99999" }), 365);
+});
+
+import { buildPromptReviewRecord, promptReviewAllowed, redactReviewPrompt, validReviewDay, validReviewId } from "../lib/chat-review";
+import { resolveAnalyticsLocation, publicViewerIp } from "../lib/analytics-location";
+
+test("expanded prompt-review consent cannot reuse old permissions",()=>{
+  const storage=new MemoryStorage();
+  writeAnalyticsPreference(storage,"enhanced");
+  storage.setItem(ANALYTICS_CONSENT_VERSION_KEY,"2");
+  assert.equal(readAnalyticsPreference(storage),null);
+  assert.equal(promptReviewAllowed("2","enhanced"),false);
+  assert.equal(promptReviewAllowed("3","essential"),false);
+  assert.equal(promptReviewAllowed("3","basic"),true);
+  assert.equal(promptReviewAllowed("3","basic",true),false);
+  assert.equal(promptReviewAllowed("3","enhanced"),true);
+});
+test("prompt reviews are separate, redacted, bounded, and cannot retain identities or responses",()=>{
+  const record=buildPromptReviewRecord({prompt:"Which projects use React? email me at user@example.com or +1 (412) 555-0123. https://example.com/?token=secret sk-123456789abcdefghijkl",successful:false,model:"test",retrievalMode:"keyword",retrievalFallback:true,response:"private response",visitorId:UUIDS[0],location:{city:"Private"}} as Parameters<typeof buildPromptReviewRecord>[0],Date.parse("2026-10-02T12:00:00Z"),UUIDS[0]);
+  assert.ok(record.prompt.includes("Which projects use React?"));
+  for(const secret of ["user@example.com","555-0123","token=secret","sk-123456789abcdefghijkl","private response","Private"])assert.equal(JSON.stringify(record).includes(secret),false);
+  assert.equal("visitorId" in record,false);assert.equal("location" in record,false);assert.equal(record.successful,false);
+  assert.ok(record.expiresAt>Date.parse(record.occurredAt)/1000);assert.equal(redactReviewPrompt("a".repeat(2000)).length,1000);
+  assert.equal(validReviewDay("2026-02-30"),false);assert.equal(validReviewId("2026-10-02",record.sk),true);
+  assert.equal(validReviewId("2026-10-01",record.sk),false);
+});
+test("local geography fallback keeps only country/state and never mixes countries",async()=>{
+  const headers=new Headers({"x-forwarded-for":"8.8.8.8, 10.0.0.1"});
+  const local=()=>({country:"US",region:"CA",city:"Mountain View",ll:[37,-122],postal:"94043"});
+  const result=await resolveAnalyticsLocation(headers,undefined,local);
+  assert.deepEqual(result,{countryCode:"US",country:"United States",region:null,regionCode:"CA"});
+  const existing={countryCode:"IN",country:"India",region:null,regionCode:null};
+  assert.deepEqual(await resolveAnalyticsLocation(headers,existing,local),existing);
+  const complete={countryCode:"US",country:"United States",region:"Pennsylvania",regionCode:"PA"};
+  assert.deepEqual(await resolveAnalyticsLocation(headers,complete,()=>{throw new Error("Must not lookup");}),complete);
+  assert.equal(publicViewerIp(new Headers({"x-forwarded-for":"10.0.0.1"})),null);
+  assert.equal(publicViewerIp(new Headers({"x-forwarded-for":"::ffff:127.0.0.1"})),null);
+  assert.equal(publicViewerIp(new Headers({"cloudfront-viewer-address":"[2606:4700::1111]:443"})),"2606:4700::1111");
+  assert.equal(publicViewerIp(new Headers({"x-forwarded-for":"not-an-ip"})),null);
+});
+test("mandatory source records discard referring paths and arbitrary payloads",()=>{
+  const record=buildMandatoryTelemetryRecord({eventId:UUIDS[2],visitorId:UUIDS[0],sessionId:UUIDS[1],location:{countryCode:"US",country:"United States",region:null,regionCode:"PA"},source:{category:"professional_network",host:"linkedin.com",url:"https://linkedin.com/private?secret=1"} as never,timestamp:"2026-10-02T12:00:00Z",expiresAt:1800000000});
+  assert.deepEqual(record.source,{category:"professional_network",host:"linkedin.com"});assert.equal(JSON.stringify(record).includes("secret=1"),false);
+});
+
+import { docClient } from "../lib/dynamodb";
+import { QueryCommand, GetCommand, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
+test("traffic report includes later DynamoDB pages in mandatory geography and sources",async()=>{
+  const original=docClient.send;
+  let laterPages=0;
+  Object.defineProperty(docClient,"send",{configurable:true,value:async(command:QueryCommand)=>{
+    if(!(command instanceof QueryCommand))return {};
+    const input=command.input;
+    const pk=input.ExpressionAttributeValues?.[":pk"] as string;
+    if(!pk.startsWith("ANALYTICS#"))return {Items:[],Count:0};
+    if(!input.ExclusiveStartKey)return {Items:[{sk:"GEO#one",visits:10,visitors:2,location:{countryCode:"US",regionCode:"PA"}}],LastEvaluatedKey:{pk,sk:"GEO#one"}};
+    laterPages++;
+    return {Items:[{sk:"GEO#two",visits:5,visitors:1,location:{countryCode:"IN",regionCode:"MH"}},{sk:"SOURCE#search",visits:5,source:{category:"search",host:"google.com"}}]};
+  }});
+  try{
+    const report=await getTrafficReport(7);
+    assert.equal(laterPages,7);assert.equal(report.geography.measuredVisits,105);assert.equal(report.geography.regionVisits,105);
+    assert.equal(report.totals.mandatoryVisits,105);assert.equal(report.breakdowns.sources[0].count,35);
+  }finally{Object.defineProperty(docClient,"send",{configurable:true,value:original});}
+});
+
+test("mandatory reach and source writes are atomic and retries do not duplicate sessions",async()=>{
+  const original=docClient.send;let transactionCalls=0;
+  Object.defineProperty(docClient,"send",{configurable:true,value:async(command:GetCommand|TransactWriteCommand)=>{
+    if(command instanceof GetCommand)return {};
+    assert.ok(command instanceof TransactWriteCommand);transactionCalls++;
+    const items=command.input.TransactItems!;
+    assert.equal(items.length,4);
+    assert.ok(items[0].Put?.ConditionExpression);assert.ok(items[2].Update?.Key?.sk.startsWith("GEO#"));assert.ok(items[3].Update?.Key?.sk.startsWith("SOURCE#"));
+    if(transactionCalls===2)throw Object.assign(new Error("Duplicate"),{name:"TransactionCanceledException",CancellationReasons:[{Code:"ConditionalCheckFailed"}]});
+    return {};
+  }});
+  const input={eventId:UUIDS[1],visitorId:UUIDS[0],sessionId:UUIDS[1],location:{countryCode:"US",country:"United States",region:null,regionCode:"PA"},source:{category:"direct",host:null} as const};
+  try{assert.equal((await recordMandatoryVisitorSession(input)).duplicate,false);assert.equal((await recordMandatoryVisitorSession(input)).duplicate,true);}
+  finally{Object.defineProperty(docClient,"send",{configurable:true,value:original});}
 });

@@ -25,13 +25,13 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "About", preview: { icon: Home, title: "About Aditya", description: "An introduction to Aditya, his career journey, core skills, and featured ML/AI work.", tags: ["Introduction", "Career Timeline", "Featured Work"] } },
   { href: "/experience", label: "Experience", preview: { icon: Briefcase, title: "Work & Research", description: "LLM-agent research at Clemson, graduate data-science instruction, and software engineering at Amdocs.", tags: ["LLM Agent Research", "Applied Data Science", "Software Engineering"] } },
   { href: "/projects", label: "Projects", preview: { icon: Layers, title: "Live Systems & ML Work", description: "RAG, language models, recommendation systems, AI agents, analytics products, and security evaluation.", tags: ["BB-8 & RAG", "Neural Log", "Movie Recommender"] } },
+  { href: "/education", label: "Education", preview: { icon: GraduationCap, title: "Academic Background", description: "MS Computer Science at Clemson (2025) and BE from DYPCET.", tags: ["Clemson MS", "DYPCET BE"] } },
   { href: "/skills", label: "Skills", preview: { icon: Zap, title: "Technical Skills", description: "Python and TypeScript systems spanning ML, LLMs, full-stack applications, cloud deployment, and evaluation.", tags: ["PyTorch & OpenAI", "React & Flask", "AWS & Docker"] } },
   { href: "/contact", label: "Contact", preview: { icon: Mail, title: "Get in Touch", description: "Available for ML/AI and Data Science roles — reach out directly.", tags: ["Open to Work", "Form", "Email"] } },
-  { href: "/education", label: "Education", preview: { icon: GraduationCap, title: "Academic Background", description: "MS Computer Science at Clemson (2025) and BE from DYPCET.", tags: ["Clemson MS", "DYPCET BE"] } },
   { href: "/socials", label: "Socials", preview: { icon: Globe, title: "Find Me Online", description: "GitHub repos, LinkedIn profile, and other professional networks.", tags: ["GitHub", "LinkedIn"] } },
-  { href: "/Aditya%20More%20-%20Resume.pdf", label: "Resume ↗", external: true, preview: { icon: FileText, title: "Download Resume", description: "A concise overview of Aditya's experience, education, projects, and technical strengths.", tags: ["Experience", "Education", "PDF Download"] } },
   { href: "/notice", label: "Notice", preview: { icon: Info, title: "Product Notice", description: "Current feature status, AI limitations, deployment behavior, and the public roadmap.", tags: ["Live Status", "AI Disclosures", "Roadmap"] } },
   { href: "/privacy", label: "Privacy", preview: { icon: Shield, title: "Privacy Policy", description: "How tiered visitor analytics, contact submissions, BB-8 prompts, and browser data are handled.", tags: ["Analytics Choices", "Contact Data", "BB-8"] } },
+  { href: "/Aditya%20More%20-%20Resume.pdf", label: "Resume ↗", external: true, preview: { icon: FileText, title: "Download Resume", description: "A concise overview of Aditya's experience, education, projects, and technical strengths.", tags: ["Experience", "Education", "PDF Download"] } },
 ];
 
 function ThemeToggle() {

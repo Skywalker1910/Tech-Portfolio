@@ -74,7 +74,7 @@ Limits:
 
 `action` can be a validated navigation, resume, or contact-draft action. It is never raw model tool output. The server uses only the two latest user messages for retrieval, sends at most the six-message window to generation, and sets `store: false` on OpenAI requests.
 
-With Basic or Enhanced consent, random visitor, session, and BB-8 chat-session UUIDs support adoption counts and are SHA-256 hashed before storage. The route records outcomes, latency, model/token totals, retrieval status, and coarse country/region/device context; detailed agent-action type is Enhanced-only. It does not store prompt text, response text, source content, or raw IP addresses as analytics.
+With Basic or Enhanced consent, random visitor, session, and BB-8 chat-session UUIDs support adoption counts and are SHA-256 hashed before storage. The route records outcomes, latency, model/token totals, retrieval status, and coarse country/region/device context; detailed agent-action type is Enhanced-only. It does not store prompt text, response text, source content, or raw IP addresses as analytics. With `promptReviewConsentVersion: "3"` and valid Basic/Enhanced telemetry, it separately stores the newest redacted user prompt for manual review (90-day default BB-8 retention), without visitor IDs or responses.
 
 ## `POST /api/contact`
 
@@ -113,7 +113,7 @@ Sent once per anonymous 30-minute public session regardless of optional analytic
 }
 ```
 
-The server derives only country, country code, region, and region code from trusted edge headers and adds its own timestamp. It ignores city and more precise fields and never stores the source IP. The visitor identity is session-scoped unless Enhanced consent separately permits persistent recognition.
+The server derives only country, country code, region, and region code from trusted edge headers or a server-local GeoLite fallback and adds its own timestamp. It ignores city and more precise fields and never stores the source IP. The visitor identity is session-scoped unless Enhanced consent separately permits persistent recognition.
 
 ### BB-8 open
 
@@ -181,7 +181,7 @@ Validation and behavior:
 - `visitor_session_started` accepts random visitor/session UUIDs but never a raw IP or client-provided location.
 - `chat_open` requires valid visitor, session, and BB-8 chat-session UUIDs plus a Basic or Enhanced tier.
 - Basic page and feature events require valid visitor/session UUIDs; Enhanced page events additionally carry a valid visit UUID.
-- Traffic source is ignored unless an Enhanced visit ID is valid.
+- Mandatory `visitor_session_started` accepts a sanitized `source` category and hostname, independent of optional consent. Optional page events retain their existing Enhanced source context.
 - Duration is bounded from one second to two hours.
 - Paths are query-free public routes and cannot begin with `/admin` or `/api`.
 - Request bodies are capped at 4 KiB.
@@ -273,3 +273,7 @@ Returns a protected OpenAI organization Usage and Costs report covering completi
 ## Static-export behavior
 
 The GitHub Pages build replaces API route modules with static stubs because a static host cannot execute Next.js route handlers. The public UI exposes feature-parity notices or primary-site links rather than presenting static output as a fully operational backend.
+
+## Private prompt review
+
+`GET /api/admin/chat-review?day=YYYY-MM-DD&cursor=<last-id>` requires admin authorization and returns up to 50 retained prompt-review records plus `nextCursor`. Dates use UTC. `PATCH /api/admin/chat-review` accepts `{day,id,action:"review"|"delete"}`. Marking reviewed never indexes the prompt. Responses use private no-store caching. Public chat requires renewed consent version 3 before saving prompts.
