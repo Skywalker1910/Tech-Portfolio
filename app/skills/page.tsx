@@ -31,13 +31,13 @@ export default function Skills() {
         return <motion.section key={category.id} aria-labelledby={`skills-${category.id}`} data-skill-card
           initial={reducedMotion?false:{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:.3,delay:reducedMotion?0:index*.04}}
           className={`overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm ${category.id==="areas"?"md:col-span-2":""}`}>
-          <div className="flex items-center gap-3 border-b border-[var(--border)] px-5 py-5 sm:px-6">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text)]"><CategoryIcon size={18} aria-hidden="true"/></span>
-            <div className="min-w-0 flex-1">
+          <div className="relative flex items-center gap-3 overflow-hidden border-b border-[var(--border)] bg-[var(--bg)] px-5 py-5 sm:px-6">
+            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text)]"><CategoryIcon size={18} aria-hidden="true"/></span>
+            <div className="relative min-w-0 flex-1">
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--muted)]">{category.eyebrow}</p>
               <h2 id={`skills-${category.id}`} className="text-base font-semibold leading-snug text-[var(--text)]">{category.title}</h2>
             </div>
-            <span aria-label={`${category.skills.length} skills`} className="shrink-0 rounded-full border border-[var(--border)] px-2.5 py-1 font-mono text-[11px] text-[var(--muted)]">{String(category.skills.length).padStart(2,"0")}</span>
+            <span aria-label={`${category.skills.length} skills`} className="relative shrink-0 rounded-full border border-[var(--border)] px-2.5 py-1 font-mono text-[11px] text-[var(--muted)]">{String(category.skills.length).padStart(2,"0")}</span>
           </div>
           <ul className="flex flex-wrap gap-2 p-5 sm:p-6">
             {category.skills.map(skill=>{

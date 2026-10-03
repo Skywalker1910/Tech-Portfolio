@@ -9,6 +9,7 @@ import BB8ChatDroid from "./BB8ChatDroid";
 import { CONTACT_DRAFT_KEY, isBB8Action, type BB8Action } from "@/lib/bb8-actions";
 import {
   BB8_CHAT_SESSION_KEY,
+  ANALYTICS_CONSENT_VERSION,
   browserPrivacySignal,
   getOrCreateAnalyticsIdentity,
   optionalAnalyticsAllowed,
@@ -234,6 +235,7 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
         body: JSON.stringify({
           messages: conversation.map(({ role, text: content }) => ({ role, content })),
           telemetry: chatTelemetryContext(),
+          promptReviewConsentVersion: chatTelemetryContext() ? ANALYTICS_CONSENT_VERSION : null,
           client: chatClientHints(),
         }),
       });
@@ -555,6 +557,7 @@ export default function ChatWidget({ hideButton, fullPage = false }: ChatWidgetP
               </a>
             )}
 
+            <p className="px-3 pb-2 text-[9px] leading-relaxed text-[var(--sub-muted)]">With Basic or Enhanced consent, submitted prompts are saved for review (90-day retention target) to improve BB-8. Avoid personal or sensitive details. <a href="/privacy" className="underline">Privacy</a></p>
             {/* Input — overflow-hidden clips the AiInput blob animation overflow */}
             <div className="px-3 pb-3 shrink-0 overflow-hidden rounded-b-2xl">
               <AiInput

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAnalyticsContext, recordBasicFeatureEvent, recordChatOpen, recordMandatoryVisitorSession, recordOperationalPageView, recordPageActivity, recordPageEngagement, sanitizeAnalyticsId, sanitizeBasicFeatureEvent, sanitizeTrackedPath, sanitizeTrafficSource } from "@/lib/analytics";
 import { isMissingPortfolioTable } from "@/lib/content/repository";
+import { resolveAnalyticsLocation } from "@/lib/analytics-location";
 import { volatileRequestKey } from "@/lib/request-rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
   if (body.eventType === "visitor_session_started") {
     if (!visitorId || !sessionId) return NextResponse.json({ error:"Invalid mandatory identifiers." }, { status:400, headers:noStore });
     const context = getAnalyticsContext(req.headers);
-    try { await recordMandatoryVisitorSession({ eventId, visitorId, sessionId, location:context.location }); }
+    try { await recordMandatoryVisitorSession({ eventId, visitorId, sessionId, location:await resolveAnalyticsLocation(req.headers, context.location), source:sanitizeTrafficSource(body.source) }); }
     catch (error) {
       if (!isMissingPortfolioTable(error)) console.error("[analytics] Could not record mandatory visitor telemetry.", error);
       return NextResponse.json({ accepted:false }, { status:202, headers:noStore });
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
     const tier = body.tier === "enhanced" ? "enhanced" : body.tier === "basic" ? "basic" : null;
     if (!visitorId || !sessionId || !chatSessionId || !tier) return NextResponse.json({ error:"Invalid chat telemetry." }, { status:400, headers:noStore });
     const context = getAnalyticsContext(req.headers, body.client);
+    context.location = await resolveAnalyticsLocation(req.headers, context.location);
     try { await recordChatOpen({ eventId, visitorId, sessionId, chatSessionId, context, detailed:tier === "enhanced" }); }
     catch (error) {
       if (!isMissingPortfolioTable(error)) console.error("[analytics] Could not record BB-8 open.", error);
@@ -87,6 +89,7 @@ export async function POST(req: NextRequest) {
   if (!visitorId || !sessionId) return NextResponse.json({ error:"Invalid analytics identifiers." }, { status:400, headers:noStore });
   if (body.visitId && !visitId) return NextResponse.json({ error:"Invalid journey identifier." }, { status:400, headers:noStore });
   const context = getAnalyticsContext(req.headers, body.client);
+    context.location = await resolveAnalyticsLocation(req.headers, context.location);
   const source = visitId ? sanitizeTrafficSource(body.source) : null;
   try {
     await recordOperationalPageView({ path, eventId, visitorId, sessionId, context, source });

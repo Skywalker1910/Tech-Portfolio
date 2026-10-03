@@ -113,7 +113,7 @@ It provides:
 
 - Page views, average engaged time, returning visits, and journey coverage.
 - Daily mandatory visitors and visits for 7, 30, or 90 days, with consented page views shown as context.
-- Mandatory country/region reach plus separately labeled retained consented country page views, optional device, viewport, operating-system, browser, and Enhanced traffic-source breakdowns.
+- Mandatory country/region reach plus separately labeled retained consented country page views, optional device, viewport, operating-system, browser, and mandatory traffic-source breakdowns.
 - Controlled Basic feature-event totals for projects, demos, external links, and contact-form starts/submissions.
 - Route-level views, enhanced sessions, and average engagement.
 - Sortable page performance plus searchable/sortable visitor journeys.
@@ -124,7 +124,7 @@ It provides:
 
 Audience labels are annotations I apply manually. Location, device, source, and page behavior never perform automated classification.
 
-Random session-scoped visitor/session identity and country/region measurement are mandatory and cookieless. Page/device/BB-8 measurement requires Basic or Enhanced consent; cross-session recognition, source, and journeys require Enhanced consent. The complete model is documented in [Visitor Analytics](ANALYTICS.md).
+Random session-scoped visitor/session identity and country/region measurement are mandatory and cookieless. Page/device/BB-8 measurement requires Basic or Enhanced consent; cross-session recognition and journeys require Enhanced consent. The complete model is documented in [Visitor Analytics](ANALYTICS.md).
 
 ## API usage providers
 
@@ -173,3 +173,5 @@ The complete least-privilege split is maintained in [AWS Infrastructure](AWS_INF
 ## Scope limit
 
 This is not a multi-tenant CMS. It has no role hierarchy, collaborative editing, approval workflow, revision history, or per-user audit log. A future multi-operator system should replace the shared-key session model with managed identity and role-based authorization.
+
+The Intelligence navigation includes **Prompt review**: a UTC-date queue of renewed-consent user questions with redacted common contact details, outcome and retrieval context, pagination, reviewed state and deletion. Prompts are not linked to visitor profiles and cannot be promoted automatically. Use them to identify gaps, edit verified content, and then deliberately reindex in RAG Control. Traffic also exposes country/state coverage and mandatory source/hostname visit counts.

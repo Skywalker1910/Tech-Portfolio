@@ -30,7 +30,7 @@ socket.addEventListener("message", event => {
   if (message.method === "Fetch.requestPaused") {
     const url = message.params.request.url;
     if(message.params.request.method === "PUT")writes.push(JSON.parse(message.params.request.postData));
-    const body = url.endsWith("/admin/content/projects") ? fixtures.map(withProjectPresentation)
+    const body = url.includes("/admin/chat-review") ? {items:[{id:"2026-10-02T12:00:00.000Z#11111111-1111-4111-8111-111111111111",prompt:"Which projects use React?",occurredAt:"2026-10-02T12:00:00.000Z",successful:true,model:"fixture",retrievalMode:"keyword",retrievalFallback:false,status:"new"}],nextCursor:null} : url.endsWith("/admin/content/projects") ? fixtures.map(withProjectPresentation)
       : url.endsWith("/content/projects") ? fixtures
       : url.endsWith("/content/experience") ? DEFAULT_EXPERIENCE : {};
     void send("Fetch.fulfillRequest", {
@@ -58,10 +58,16 @@ try {
   await send("Emulation.setDeviceMetricsOverride", { width: 1366, height: 900, deviceScaleFactor: 1, mobile: false });
   await send("Page.navigate", { url: "http://localhost:3007" });
   await delay(5000);
-  await evaluate("Array.from(document.querySelectorAll('button')).find(e=>e.textContent==='Mandatory only')?.click()");
+  await evaluate("localStorage.clear(); sessionStorage.clear()");await send("Page.reload");await delay(1500);
+  for(const width of [390,320]) {
+    await send("Emulation.setDeviceMetricsOverride",{width,height:844,deviceScaleFactor:1,mobile:true});await delay(300);
+    const banner=JSON.parse((await evaluate("(()=>{const e=document.querySelector('aside[aria-label=\"Privacy and analytics preferences\"]');return JSON.stringify({height:e.getBoundingClientRect().height,overflow:document.documentElement.scrollWidth>innerWidth,text:e.innerText});})()")).result.value);
+    assert.ok(banner.height<140);assert.equal(banner.overflow,false);console.log("consent",width,banner);await screenshot(`consent-${width}`);
+  }
+  await evaluate("Array.from(document.querySelectorAll('button')).find(e=>e.textContent==='Essential')?.click()");
   await evaluate("Array.from(document.querySelectorAll('h2')).find(e=>e.textContent.includes('Featured Projects'))?.scrollIntoView()");
   await delay(1000);
-  console.log("desktop", (await evaluate("JSON.stringify({overflow:document.documentElement.scrollWidth>innerWidth,previews:Array.from(document.querySelectorAll('img[src*=\"project-previews\"]')).map(e=>({loaded:e.complete&&e.naturalWidth>0,alt:e.alt}))})")).result.value);
+  console.log("desktop", (await evaluate("JSON.stringify({overflow:document.documentElement.scrollWidth>innerWidth,previews:Array.from(document.querySelectorAll('img[src*=\"project-illustrations\"]')).map(e=>({loaded:e.complete&&e.naturalWidth>0,alt:e.alt}))})")).result.value);
   await screenshot("desktop");
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await evaluate("Array.from(document.querySelectorAll('h2')).find(e=>e.textContent.includes('Featured Projects'))?.scrollIntoView()");
@@ -72,7 +78,7 @@ try {
   await delay(4000);
   await send("Emulation.setDeviceMetricsOverride", { width: 1366, height: 900, deviceScaleFactor: 1, mobile: false });
   await evaluate("window.scrollTo(0,300)");await delay(800);
-  const cards=JSON.parse((await evaluate("JSON.stringify({heights:Array.from(document.querySelectorAll('article')).filter(e=>e.textContent.includes('Explore project details')).map(e=>Math.round(e.getBoundingClientRect().height)),expandedEvidenceVisible:document.body.innerText.includes('NDCG'),newNames:document.body.innerText.includes('BB8 Co-Pilot x Tech Portfolio')&&document.body.innerText.includes('Movie Recommendation Engine'),concepts:document.body.textContent.includes('Concept illustration')})")).result.value);
+  const cards=JSON.parse((await evaluate("JSON.stringify({heights:Array.from(document.querySelectorAll('article')).filter(e=>e.textContent.includes('Explore project details')).map(e=>Math.round(e.getBoundingClientRect().height)),expandedEvidenceVisible:document.body.innerText.includes('NDCG'),newNames:document.body.innerText.includes('BB8 Co-Pilot x Tech Portfolio')&&document.body.innerText.includes('Movie Recommendation Engine'),concepts:document.body.textContent.includes('Project illustration')})")).result.value);
   console.log("cards",cards);assert.equal(cards.heights.length,12);assert.ok(cards.heights.every(height=>height===560));assert.equal(cards.expandedEvidenceVisible,false);assert.equal(cards.newNames,true);assert.equal(cards.concepts,true);
   await screenshot("gallery");
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
@@ -81,16 +87,25 @@ try {
   await delay(900);
   await screenshot("details");
   console.log("details", (await evaluate("JSON.stringify({methodology:document.body.innerText.includes('Evaluation'),ranking:document.body.innerText.includes('NDCG')})")).result.value);
-  for(const width of [1366,390]) {
-    await send("Emulation.setDeviceMetricsOverride",{width,height:844,deviceScaleFactor:1,mobile:width===390});await delay(500);
-    const start=JSON.parse((await evaluate("(()=>{const e=document.querySelector('[data-project-overlay]');const d=e.querySelector('[role=dialog]');return JSON.stringify({scrollable:e.scrollHeight>e.clientHeight,width:d.getBoundingClientRect().width,overflow:d.getBoundingClientRect().right>innerWidth});})()")).result.value);
-    assert.equal(start.scrollable,true);assert.equal(start.overflow,false);if(width===1366)assert.ok(start.width>=1000);
-    await evaluate("(()=>{const e=document.querySelector('[data-project-overlay]');e.scrollTop=e.scrollHeight;})()");await delay(200);
-    const bottom=JSON.parse((await evaluate("(()=>{const e=document.querySelector('[data-project-overlay]');const links=e.querySelectorAll('a');const last=links[links.length-1].getBoundingClientRect();const close=e.querySelector('button[aria-label=\"Close project details\"]').getBoundingClientRect();return JSON.stringify({lastActionVisible:last.top>=0&&last.bottom<=innerHeight,closeVisible:close.top>=0&&close.bottom<=innerHeight,scroll:e.scrollTop});})()")).result.value);
-    console.log("expanded overlay",{viewport:width,...start,...bottom});assert.equal(bottom.lastActionVisible,true);assert.equal(bottom.closeVisible,true);await screenshot(`details-bottom-${width}`);
+  for(const [width,height] of [[1366,844],[390,844],[320,568],[844,390]]) {
+    await send("Emulation.setDeviceMetricsOverride",{width,height,deviceScaleFactor:1,mobile:width<500});await delay(500);
+    await evaluate("document.querySelector('[data-project-scroll]').scrollTop=0");
+    const start=JSON.parse((await evaluate("(()=>{const o=document.querySelector('[data-project-overlay]');const d=o.querySelector('[role=dialog]');const s=o.querySelector('[data-project-scroll]');const h=o.querySelector('[data-project-modal-header]');const b=o.querySelector('[data-project-badges]');const r=d.getBoundingClientRect(),hr=h.getBoundingClientRect(),br=b.getBoundingClientRect(),cr=o.querySelector('button[aria-label=\"Close project details\"]').getBoundingClientRect();return JSON.stringify({outerScrollable:o.scrollHeight>o.clientHeight,innerScrollable:s.scrollHeight>s.clientHeight,width:r.width,top:r.top,bottomGap:innerHeight-r.bottom,overflow:r.right>innerWidth,badgesInHeader:br.top>=hr.top&&br.bottom<=hr.bottom,badgesAtRight:innerWidth<640?Math.abs(br.right-cr.right)<=1:Math.abs(cr.left-br.right)<=16});})()")).result.value);
+    assert.equal(start.outerScrollable,false);assert.equal(start.innerScrollable,true);assert.equal(start.overflow,false);assert.ok(start.top>=12);assert.ok(Math.abs(start.top-start.bottomGap)<=1);assert.equal(start.badgesInHeader,true);assert.equal(start.badgesAtRight,true);if(width===1366)assert.ok(start.width>=1000);
+    await evaluate("(()=>{const e=document.querySelector('[data-project-scroll]');e.scrollTop=e.scrollHeight;})()");await delay(200);
+    const bottom=JSON.parse((await evaluate("(()=>{const o=document.querySelector('[data-project-overlay]');const d=o.querySelector('[role=dialog]');const e=o.querySelector('[data-project-scroll]');const links=e.querySelectorAll('a');const last=links[links.length-1].getBoundingClientRect();const close=o.querySelector('button[aria-label=\"Close project details\"]').getBoundingClientRect();const r=d.getBoundingClientRect();return JSON.stringify({top:r.top,bottomGap:innerHeight-r.bottom,lastActionVisible:last.top>=r.top&&last.bottom<=r.bottom,closeVisible:close.top>=r.top&&close.bottom<=r.bottom,scroll:e.scrollTop});})()")).result.value);
+    console.log("bounded expanded card",{viewport:[width,height],...start,...bottom});assert.equal(bottom.lastActionVisible,true);assert.equal(bottom.closeVisible,true);assert.ok(Math.abs(bottom.top-start.top)<=1);assert.ok(Math.abs(bottom.top-bottom.bottomGap)<=1);assert.ok(bottom.scroll>0);await screenshot(`details-bottom-${width}`);
   }
   await evaluate("document.querySelector('button[aria-label=\"Close project details\"]')?.click()");await delay(400);
   assert.equal((await evaluate("document.body.style.overflow==='hidden'")).result.value,false);
+  await send("Page.navigate",{url:"http://localhost:3007/experience"});await delay(2000);
+  for(const theme of ["light","dark"])for(const width of [1366,390,320]) {
+    await send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:width<500});
+    await evaluate(`document.documentElement.classList.toggle('dark',${theme==="dark"})`);await delay(300);
+    assert.equal((await evaluate("document.documentElement.scrollWidth>innerWidth")).result.value,false);
+    await screenshot(`experience-${theme}-${width}`);
+  }
+  await evaluate("document.documentElement.classList.remove('dark')");
   await send("Page.navigate", { url:"http://localhost:3007/skills" });await delay(1500);
   for(const theme of ["light","dark"])for(const width of [1366,390,320]) {
     await send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:width<500});
@@ -110,6 +125,12 @@ try {
   await send("Emulation.setDeviceMetricsOverride", { width:1366,height:900,deviceScaleFactor:1,mobile:false });await delay(700);
   await screenshot("admin");
   console.log("admin", (await evaluate("JSON.stringify({selection:document.body.innerText.includes('Featured work'),rankControls:document.querySelectorAll('input[max=\"9999\"]').length})")).result.value);
+  await send("Page.navigate",{url:"http://localhost:3007/admin/chat-review"});await delay(1000);
+  assert.equal((await evaluate("document.body.innerText.includes('Prompt review') && document.body.innerText.includes('React')")).result.value,true);
+  await evaluate("Array.from(document.querySelectorAll('button')).find(e=>e.textContent==='Mark reviewed')?.click()");await delay(200);
+  assert.equal((await evaluate("document.body.innerText.includes('reviewed')")).result.value,true);
+  await screenshot("prompt-review");
+  await send("Page.navigate",{url:"http://localhost:3007/admin/projects"});await delay(1000);
   // Toggle a local fixture only; Fetch interception prevents any server mutation.
   await evaluate("document.querySelector('fieldset input[type=checkbox]')?.click()");
   await evaluate("(()=>{const e=document.querySelector('fieldset input[type=number]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,'8');e.dispatchEvent(new Event('input',{bubbles:true}));})()");

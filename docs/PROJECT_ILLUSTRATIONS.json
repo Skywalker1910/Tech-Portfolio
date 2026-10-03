@@ -1,0 +1,148 @@
+{
+  "generator": "Built-in image_gen tool",
+  "images": [
+    {
+      "id": "bb8-rag",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: A white and orange spherical BB8 co-pilot in a quiet airy portfolio studio, warm ivory, charcoal typography shapes, orange highlights, floating source-document cards connected to a small vector-library and cloud. Painterly Japanese fantasy animation, soft watercolor, sophisticated editorial illustration. Next.js React frontend, OpenAI retrieval and AWS vector storage represented through elegant abstract interface motifs. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "neurallog",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: Neural Log personal progress application imagined as a charcoal and coral-red Japanese anime training journal studio: glowing red heartbeat icon, habit tiles, calendar checks, XP progress rings, nutrition bowl and study notebook. Crisp cinematic cel shading, deep blacks, warm focused atmosphere. Flask React SQLite Docker represented as a tiny connected workflow. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "movie-recommendation",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: Movie Recommendation Engine: midnight black, crimson red and burgundy cinema with glowing film poster cards, an inviting red play button and film reels joined by recommendation constellation lines. Rich hand-painted Japanese fantasy animation aesthetic, cozy cinema, no actual movie posters or famous characters. FunkSVD NeuMF TF-IDF PyTorch Flask React and AWS represented as neural nodes and layered recommendation cards. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "bb8-transformer",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: BB8 Transformer language-model playground: ivory and cool pale gray workspace with amber circular BB badge and teal-green chat button, a tiny orange and white spherical robot studying an open Shakespeare book. Precise Japanese anime ink linework and soft cel colors. Floating tokenizer tiles flow into attention-head ribbons and text cards; PyTorch LoRA Hugging Face Lambda motifs. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "fifa-world-cup-2026",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: World Cup prediction platform imagined as an isometric illustrated football stadium with bracket panels, scoreboards, player prediction cards, gold trophy, navy green and amber. Retro sports anime aesthetic, meticulous architectural drawing. Node SQLite Railway infrastructure represented by compact connected tournament cards. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "fifa-ai-agents",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: Football prediction AI agents in a futuristic anime control room, three abstract friendly analyst robots studying a stadium hologram, score forecast cards, confidence bars and a scheduling clock. Electric cyan violet midnight colors, cinematic Japanese science fiction anime. Structured outputs API validation and scheduled GitHub workflows as connected panels. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "skynet-aqi",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: Air-quality forecast: a sunlit Atlanta-inspired skyline beneath a satellite and softly layered atmospheric observation ribbons, green amber AQI cells, a small weather station and leaf. Gentle watercolor Japanese fantasy animation aesthetic, sage blue cream. NASA TEMPO OpenAQ LightGBM pandas data-flow motifs, no claimed accuracy. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "llm-defense",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: LLM jailbreak defense laboratory, a translucent protective shield surrounded by speech cards, an evaluation matrix and careful glowing red test vectors. Graphic cyberpunk anime noir, indigo mint coral, sophisticated rather than threatening. Python OpenAI evaluation workflow, security research. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "deep-learning-coursework",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: Graduate deep learning study studio with captioned video filmstrip, speech waveform and question-answer cards, generated image canvases, and luminous neural-network layers. Colorful Japanese anime academic illustration, cobalt lavender warm cream. PyTorch BERT GAN and attention motifs. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "alpr",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: License plate computer vision illustration, stylized silver car on an amber dusk road with clean rectangular contour overlay around an abstract unreadable plate and floating OCR glyph tiles. Crisp retro anime automotive aesthetic, teal amber charcoal. OpenCV Tesseract Python motifs. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "covid-safeguard",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: Computer vision safety-monitoring research illustration, abstract people wearing masks spaced in a spacious indoor scene, gentle bounding-box overlays and distancing guide lines. Soft geometric editorial animation aesthetic, sky blue white sage. TensorFlow OpenCV pipeline panels, no medical promises. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    },
+    {
+      "id": "alien-invasion",
+      "prompt": "Use case: stylized-concept. Asset type: wide portfolio project-card illustration, static raster intended for gentle CSS pan animation. Primary request: Python Pygame arcade illustration: a small spacecraft firing pixel-light beams toward playful alien waves in a star-filled purple and navy sky, glowing score-like abstract blocks. Nostalgic 1990s anime space adventure with pixel-art accents. Composition: landscape 3:2, single coherent scene, primary subject centered, ample safe margins for 16:9 crop. Polished professional art, detailed without clutter; NO readable labels, no fake screenshot, no watermark. An artistic interpretation of the project."
+    }
+  ],
+  "edits": [
+    {
+      "id": "neurallog",
+      "generator": "Built-in image_gen edit",
+      "prompt": "Edit this existing portfolio project illustration. Change every female human character into a young adult male character with short dark hair and a masculine face and build, including characters in inset panels, filmstrips, and thumbnails. Preserve the composition, camera framing, artistic animation/anime style, palette, lighting, pose/activity, clothing colors, all project-related interfaces, technology symbols, robot characters, cats, scenery, and props. Do not add people or change the project theme. Men should look natural and thoughtfully designed; no long hair, hair bun, or feminine face. Keep landscape 3:2 and the same image layout.",
+      "asset": "/project-illustrations/neurallog-male-v2.webp"
+    },
+    {
+      "id": "movie-recommendation",
+      "generator": "Built-in image_gen edit",
+      "prompt": "Edit this existing portfolio project illustration. Change every female human character into a young adult male character with short dark hair and a masculine face and build, including characters in inset panels, filmstrips, and thumbnails. Preserve the composition, camera framing, artistic animation/anime style, palette, lighting, pose/activity, clothing colors, all project-related interfaces, technology symbols, robot characters, cats, scenery, and props. Do not add people or change the project theme. Men should look natural and thoughtfully designed; no long hair, hair bun, or feminine face. Keep landscape 3:2 and the same image layout.",
+      "asset": "/project-illustrations/movie-recommendation-male-v2.webp"
+    },
+    {
+      "id": "deep-learning-coursework",
+      "generator": "Built-in image_gen edit",
+      "prompt": "Edit this existing portfolio project illustration. Change every female human character into a young adult male character with short dark hair and a masculine face and build, including characters in inset panels, filmstrips, and thumbnails. Preserve the composition, camera framing, artistic animation/anime style, palette, lighting, pose/activity, clothing colors, all project-related interfaces, technology symbols, robot characters, cats, scenery, and props. Do not add people or change the project theme. Men should look natural and thoughtfully designed; no long hair, hair bun, or feminine face. Keep landscape 3:2 and the same image layout.",
+      "asset": "/project-illustrations/deep-learning-coursework-male-v2.webp"
+    },
+    {
+      "id": "llm-defense",
+      "generator": "Built-in image_gen edit",
+      "prompt": "Edit this existing portfolio project illustration. Change every female human character into a young adult male character with short dark hair and a masculine face and build, including characters in inset panels, filmstrips, and thumbnails. Preserve the composition, camera framing, artistic animation/anime style, palette, lighting, pose/activity, clothing colors, all project-related interfaces, technology symbols, robot characters, cats, scenery, and props. Do not add people or change the project theme. Men should look natural and thoughtfully designed; no long hair, hair bun, or feminine face. Keep landscape 3:2 and the same image layout.",
+      "asset": "/project-illustrations/llm-defense-male-v2.webp"
+    },
+    {
+      "id": "covid-safeguard",
+      "generator": "Built-in image_gen edit",
+      "prompt": "Edit this existing portfolio project illustration. Change every female human character into a young adult male character with short dark hair and a masculine face and build, including characters in inset panels, filmstrips, and thumbnails. Preserve the composition, camera framing, artistic animation/anime style, palette, lighting, pose/activity, clothing colors, all project-related interfaces, technology symbols, robot characters, cats, scenery, and props. Do not add people or change the project theme. Men should look natural and thoughtfully designed; no long hair, hair bun, or feminine face. Keep landscape 3:2 and the same image layout.",
+      "asset": "/project-illustrations/covid-safeguard-male-v2.webp"
+    }
+  ],
+  "technicalEdits": [
+    {
+      "id": "bb8-rag",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Replace the spherical robot with a central abstract glowing vector index and retrieval pipeline: stacked data blocks, search lens, source-document cards and cloud connections.",
+      "asset": "/project-illustrations/bb8-rag-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    },
+    {
+      "id": "bb8-transformer",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Replace the robot with a central transformer attention network and layered tensor blocks. Replace the Shakespeare portrait with abstract token sequences. Keep the open book, tokenizer tiles, PyTorch, LoRA, Hugging Face and cloud technology motifs, but remove any smiling mascot face.",
+      "asset": "/project-illustrations/bb8-transformer-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    },
+    {
+      "id": "neurallog",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Replace the man and cat with a beautifully arranged empty technical productivity workstation: laptop dashboard, journal, habit tracking tiles, calendar checks, XP rings, nutrition bowl, dumbbells and the Flask React database Docker pipeline. Remove human pictograms from habit tiles.",
+      "asset": "/project-illustrations/neurallog-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    },
+    {
+      "id": "movie-recommendation",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Remove the seated man and cat, and every person in poster thumbnails and filmstrips. Make the recommendation network and central play button the subject; film posters contain only scenery and abstract cinematic artwork.",
+      "asset": "/project-illustrations/movie-recommendation-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    },
+    {
+      "id": "deep-learning-coursework",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Remove the student, cats, all robots, every portrait in filmstrip and cards. Center a technical research workstation with neural-network layers, tensors, convolution feature maps, audio waveform and image classification cards containing architecture and abstract objects only. Replace hologram animal with point-cloud geometry.",
+      "asset": "/project-illustrations/deep-learning-coursework-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    },
+    {
+      "id": "llm-defense",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Remove the man, robot, cat, demon faces and user avatar silhouettes. Center the protective shield around abstract language-model network nodes, surrounded by evaluation matrices, red adversarial test vectors, document cards and security dashboards.",
+      "asset": "/project-illustrations/llm-defense-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    },
+    {
+      "id": "fifa-ai-agents",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Remove all three robots and every human or player silhouette including inset panels. Replace robots with three abstract connected model nodes. Keep the stadium hologram, forecast charts, score cards, confidence bars and scheduling workflow; replace player views with pitch heatmaps and trajectories.",
+      "asset": "/project-illustrations/fifa-ai-agents-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    },
+    {
+      "id": "fifa-world-cup-2026",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Remove the four football-player portraits and all small people/crowds. Replace portraits with tactical pitch diagrams and team analytics heatmaps. Keep architectural stadium, gold trophy, tournament bracket, flags and connected infrastructure motifs.",
+      "asset": "/project-illustrations/fifa-world-cup-2026-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    },
+    {
+      "id": "alien-invasion",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Replace all face-like alien sprites with geometrical unmanned spacecraft sprites without faces or living characters. Keep the arcade game aesthetic, player spacecraft, projectiles, scoring/action composition, space station and planets.",
+      "asset": "/project-illustrations/alien-invasion-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    },
+    {
+      "id": "alpr",
+      "prompt": "Edit this portfolio project illustration into a neutral, technology-focused illustration with no characters: no people, portraits, hands, humanoids, robots, mascots, animals or faces anywhere, including tiny background and interface thumbnails. Preserve the original illustration style, project-specific palette, cinematic lighting and coherent landscape composition. Fill removed character areas naturally with project technology rather than blank holes. Keep polished detailed raster artwork, landscape 3:2, centered technical subject with safe margins for cropped project cards, no readable prose or watermark. Replace the existing sedan/sports coupe with a recognizable red Ferrari F80 hypercar viewed from the rear, not a generic Ferrari: angular short-tail bodywork, very wide carbon rear diffuser, black upper rear fascia, deployed large active rear wing and louvred engine cover. Keep the rear license plate visible with a cyan detection box, enlarged pixelated plate crop, OCR segmentation tiles, OpenCV Tesseract Python motifs, winding mountain road and sunset. No driver visible.",
+      "asset": "/project-illustrations/alpr-technical-v3.webp",
+      "generator": "Built-in image_gen edit"
+    }
+  ],
+  "alprDesignReference": "https://www.ferrari.com/content/dam/ferrari-fcom/old/pdf/CS_F80_gbr_v2.pdf"
+}

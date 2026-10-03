@@ -588,7 +588,7 @@ export default function Home() {
                 </div>
 
                 <div className="w-full md:w-[40%] lg:w-[42%] h-64 md:h-72 rounded-xl overflow-hidden shrink-0 border border-[var(--border)]">
-                  <ProjectApplicationPreview title={project.title} demo={project.demo}/>
+                  <ProjectApplicationPreview id={project.id} title={project.title} demo={project.demo}/>
                 </div>
               </motion.div>
             ))}

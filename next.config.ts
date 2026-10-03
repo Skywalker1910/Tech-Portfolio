@@ -13,6 +13,8 @@ import type { NextConfig } from "next";
 const isGitHubPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages:["geoip-lite"],
+  outputFileTracingIncludes:{"/api/*":["./node_modules/geoip-lite/data/*.dat"]},
   // --- GitHub Pages static-export settings (no-op for Amplify/main) ---
   ...(isGitHubPages && {
     output: "export",

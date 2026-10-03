@@ -461,7 +461,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
       </div>
       {/* ── Deployed application preview ── */}
       <div className="relative h-44 overflow-hidden shrink-0">
-        <ProjectApplicationPreview title={project.title} demo={project.demo}/>
+        <ProjectApplicationPreview id={project.id} title={project.title} demo={project.demo}/>
       </div>
 
       {/* ── Card body ── */}
@@ -528,7 +528,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
             <a href={project.huggingface} target="_blank" rel="noopener noreferrer"
               onClick={(e) => { e.stopPropagation(); trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"huggingface" } }); }}
               className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors">
-              <SiHuggingface size={11} /> Models
+              <SiHuggingface size={11} /> Model versions
             </a>
           )}
           {project.link && (
@@ -588,156 +588,154 @@ function ProjectModal({ project, number, onClose }: { project: Project; number: 
       
       {/* Modal */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.92, y: 20 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         onClick={event=>{if(event.target===event.currentTarget)onClose();}}
         data-project-overlay
-        className="fixed inset-0 z-[101] overflow-y-auto overscroll-contain px-3 py-5 sm:px-6 md:py-10"
+        className="fixed inset-0 z-[101] flex items-center justify-center overflow-hidden p-3 sm:p-6 md:p-8"
       >
-        <div role="dialog" aria-modal="true" aria-labelledby="expanded-project-title" className={`relative mx-auto w-full max-w-5xl bg-[var(--surface)] rounded-2xl border ${a.border} shadow-2xl card-elevated ${a.glow}`}>
-          <div className="sticky top-0 z-20 flex items-center gap-3 rounded-t-2xl border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
-            <span className="shrink-0 font-mono text-xs text-[var(--muted)]">PROJECT {number}</span>
-            <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[var(--text)]">{project.title}</span>
-            <button type="button" aria-label="Close project details" onClick={onClose} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--tag-bg)] text-[var(--text)] hover:text-[var(--accent)]"><X size={16}/></button>
-          </div>
-          {/* ── Gradient header ── */}
-          <div className="relative h-64 overflow-hidden md:h-80">
-            <div className={`absolute inset-0 bg-gradient-to-br ${a.bg}`} />
-            <ProjectApplicationPreview title={project.title} demo={project.demo}/>
-            {/* Status + featured badges */}
-            <div className="absolute top-4 left-4 flex gap-2">
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase bg-black/40 backdrop-blur-sm text-white/70 border border-white/10 px-2.5 py-1 rounded-full">
+        <div role="dialog" aria-modal="true" aria-labelledby="expanded-project-title" className={`relative flex h-[calc(100dvh-1.5rem)] min-h-0 w-full max-w-5xl flex-col overflow-hidden rounded-2xl border ${a.border} bg-[var(--surface)] shadow-2xl card-elevated ${a.glow} sm:h-[calc(100dvh-3rem)] md:h-[calc(100dvh-4rem)]`}>
+          <div data-project-modal-header className="z-20 flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-3 sm:px-5">
+            <div className="order-1 flex min-w-0 flex-1 items-center gap-2">
+              <span className="shrink-0 font-mono text-[10px] text-[var(--muted)] sm:text-xs">PROJECT {number}</span>
+              <span className="min-w-0 truncate text-xs font-semibold text-[var(--text)]">{project.title}</span>
+            </div>
+            <div data-project-badges className="order-3 flex w-full shrink-0 items-center justify-end gap-2 sm:order-2 sm:w-auto">
+              <span className="rounded-full border border-[var(--border)] bg-[var(--tag-bg)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[var(--muted)]">
                 {project.status === "in-progress" ? "In Progress" : project.status === "planned" ? "Planned" : "Completed"}
               </span>
-              {project.featured && (
-                <span className="text-[10px] font-bold tracking-[0.2em] uppercase bg-violet-500/30 backdrop-blur-sm text-violet-200 border border-violet-400/30 px-2.5 py-1 rounded-full">
-                  Featured
-                </span>
-              )}
+              {project.featured && <span className="rounded-full border border-violet-500/25 bg-violet-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-300">Featured</span>}
+              <span className="font-mono text-[10px] text-[var(--muted)]">{project.year}</span>
             </div>
-            {/* Year */}
-            <span className="absolute bottom-4 right-4 text-sm font-mono text-white/50">{project.year}</span>
+            <button type="button" aria-label="Close project details" onClick={onClose} className="order-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--tag-bg)] text-[var(--text)] hover:text-[var(--accent)] sm:order-3"><X size={16}/></button>
           </div>
+          <div data-project-scroll tabIndex={0} aria-label={`${project.title} details`} className="min-h-0 flex-1 overflow-y-auto overscroll-contain focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--accent)]" style={{scrollbarGutter:"stable"}}>
+            {/* Project illustration */}
+            <div className="relative h-64 overflow-hidden md:h-80">
+              <div className={`absolute inset-0 bg-gradient-to-br ${a.bg}`} />
+              <ProjectApplicationPreview id={project.id} title={project.title} demo={project.demo}/>
+            </div>
 
-          {/* The full overlay scrolls; no nested height-capped content pane. */}
-          <div className="space-y-2 p-6 pb-10 sm:p-8 md:p-12 md:pb-14">
-            {/* Title */}
-            <p className="mb-2 font-mono text-xs tracking-widest text-[var(--muted)]">PROJECT {number}</p>
-            <h2 id="expanded-project-title" className="text-2xl md:text-4xl font-bold text-[var(--text)] mb-5 leading-tight">
-              {project.title}
-            </h2>
+            {/* Artwork and details scroll inside the bounded card; header stays visible. */}
+            <div className="space-y-2 p-6 pb-10 sm:p-8 md:p-12 md:pb-14">
+              {/* Title */}
+              <p className="mb-2 font-mono text-xs tracking-widest text-[var(--muted)]">PROJECT {number}</p>
+              <h2 id="expanded-project-title" className="text-2xl md:text-4xl font-bold text-[var(--text)] mb-5 leading-tight">
+                {project.title}
+              </h2>
             
-            {/* Description */}
-            <p className="text-sm md:text-base text-[var(--muted)] leading-relaxed mb-6">
-              {project.description}
-            </p>
-            <ProjectTechnicalDetails project={project}/>
+              {/* Description */}
+              <p className="text-sm md:text-base text-[var(--muted)] leading-relaxed mb-6">
+                {project.description}
+              </p>
+              <ProjectTechnicalDetails project={project}/>
 
-            {/* Highlights */}
-            {project.highlights && project.highlights.length > 0 && (
+              {/* Highlights */}
+              {project.highlights && project.highlights.length > 0 && (
+                <div className="mb-6">
+                  <h3 className={`text-xs font-bold tracking-[0.2em] uppercase ${a.highlight} mb-3`}>
+                    Highlights
+                  </h3>
+                  <ul className="space-y-2">
+                    {project.highlights.map((h, i) => (
+                      <motion.li
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 + i * 0.05 }}
+                        className="flex items-start gap-2.5 text-sm text-[var(--tag-text)] leading-relaxed"
+                      >
+                        <CheckCircle2 size={14} className={`mt-0.5 shrink-0 ${a.highlight}`} />
+                        {h}
+                      </motion.li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Tech Stack */}
               <div className="mb-6">
                 <h3 className={`text-xs font-bold tracking-[0.2em] uppercase ${a.highlight} mb-3`}>
-                  Highlights
+                  Tech Stack
                 </h3>
-                <ul className="space-y-2">
-                  {project.highlights.map((h, i) => (
-                    <motion.li
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 + i * 0.05 }}
-                      className="flex items-start gap-2.5 text-sm text-[var(--tag-text)] leading-relaxed"
-                    >
-                      <CheckCircle2 size={14} className={`mt-0.5 shrink-0 ${a.highlight}`} />
-                      {h}
-                    </motion.li>
-                  ))}
-                </ul>
+                <div className="flex flex-wrap gap-2">
+                  {project.tags.map((t, i) => {
+                    const TagIcon = TAG_ICONS[t];
+                    return (
+                      <motion.span
+                        key={t}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.15 + i * 0.03 }}
+                        className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-full ${a.tag}`}
+                      >
+                        {TagIcon && <TagIcon size={11} />}
+                        {t}
+                      </motion.span>
+                    );
+                  })}
+                </div>
               </div>
-            )}
 
-            {/* Tech Stack */}
-            <div className="mb-6">
-              <h3 className={`text-xs font-bold tracking-[0.2em] uppercase ${a.highlight} mb-3`}>
-                Tech Stack
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {project.tags.map((t, i) => {
-                  const TagIcon = TAG_ICONS[t];
-                  return (
-                    <motion.span
-                      key={t}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.15 + i * 0.03 }}
-                      className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-full ${a.tag}`}
-                    >
-                      {TagIcon && <TagIcon size={11} />}
-                      {t}
-                    </motion.span>
-                  );
-                })}
+              {/* Actions */}
+              <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-[var(--border)]">
+                {project.github ? (
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"github" } })}
+                    className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--tag-bg)] border border-[var(--border)] text-sm font-medium text-[var(--text)] hover:bg-[var(--tag-bg)] transition-colors`}
+                  >
+                    <SiGithub size={16} /> View on GitHub
+                  </a>
+                ) : (
+                  <a
+                    href="https://github.com/Skywalker1910"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"github" } })}
+                    className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--tag-bg)] border border-[var(--border)] text-sm font-medium text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--tag-bg)] transition-colors`}
+                  >
+                    <SiGithub size={16} /> GitHub Profile
+                  </a>
+                )}
+                {project.demo && (
+                  <a
+                    href={project.demo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackBasicAnalyticsEvent("demo_started", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"demo" } })}
+                    className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
+                  >
+                    Live application <ExternalLink size={12} />
+                  </a>
+                )}
+                {project.huggingface && (
+                  <a
+                    href={project.huggingface}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"huggingface" } })}
+                    className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
+                  >
+                    <SiHuggingface size={15} /> Hugging Face models
+                  </a>
+                )}
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"other" } })}
+                    className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
+                  >
+                    View <ExternalLink size={12} />
+                  </a>
+                )}
               </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-[var(--border)]">
-              {project.github ? (
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"github" } })}
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--tag-bg)] border border-[var(--border)] text-sm font-medium text-[var(--text)] hover:bg-[var(--tag-bg)] transition-colors`}
-                >
-                  <SiGithub size={16} /> View on GitHub
-                </a>
-              ) : (
-                <a
-                  href="https://github.com/Skywalker1910"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"github" } })}
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--tag-bg)] border border-[var(--border)] text-sm font-medium text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--tag-bg)] transition-colors`}
-                >
-                  <SiGithub size={16} /> GitHub Profile
-                </a>
-              )}
-              {project.demo && (
-                <a
-                  href={project.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackBasicAnalyticsEvent("demo_started", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"demo" } })}
-                  className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
-                >
-                  Live application <ExternalLink size={12} />
-                </a>
-              )}
-              {project.huggingface && (
-                <a
-                  href={project.huggingface}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"huggingface" } })}
-                  className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
-                >
-                  <SiHuggingface size={15} /> Hugging Face
-                </a>
-              )}
-              {project.link && (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackBasicAnalyticsEvent("external_link_clicked", { page:"/projects", feature:projectFeature(project.title), metadata:{ targetCategory:"other" } })}
-                  className={`inline-flex items-center gap-1.5 text-sm ${a.badge} hover:text-[var(--text)] transition-colors`}
-                >
-                  View <ExternalLink size={12} />
-                </a>
-              )}
             </div>
           </div>
         </div>

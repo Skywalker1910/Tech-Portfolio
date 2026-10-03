@@ -14,7 +14,7 @@ An interactive, production-hosted portfolio for presenting my AI/ML engineering 
 - Validated co-pilot actions for contextual page navigation, resume delivery, and reviewable contact-form drafts.
 - Live project and experience publishing backed by DynamoDB, with bundled content as a resilience fallback.
 - Private Command Center for content operations, contact messages with consent-aware journey links, RAG configuration/indexing, streamlined visitor-experience analytics, BB-8 adoption, and provider-based API usage/cost monitoring.
-- Tiered first-party analytics with mandatory anonymous visitor/session identity and country/region reach, consent-controlled UX measurement and pseudonymous journeys, manual audience classification, and no stored raw IP address, city, or chat text.
+- Tiered first-party analytics with mandatory anonymous visitor/session identity and country/region reach, consent-controlled UX measurement and pseudonymous journeys, manual audience classification, and no stored raw IP address or city. Updated optional consent enables separately stored, redacted prompts for private knowledge-base review.
 - AWS Amplify SSR production hosting with Route 53, IAM compute-role access, DynamoDB, S3 Vectors, and an optional GitHub Pages static mirror.
 
 The full shipped-feature inventory is maintained in [Implemented Features](docs/FEATURES.md).
@@ -87,10 +87,10 @@ Detailed system, sequence, trust-boundary, and data-model diagrams are available
 
 - Server-only credentials remain outside browser bundles and production AWS access uses temporary compute-role credentials.
 - Admin sessions are signed, eight-hour, `HttpOnly`, `SameSite=Strict` cookies.
-- OpenAI chat requests set `store: false`; the application does not persist BB-8 transcripts server-side.
+- OpenAI chat requests set `store: false`; the application does not persist BB-8 transcripts server-side. Updated Basic/Enhanced consent enables 90-day, redacted latest-prompt review.
 - RAG falls back to deterministic local retrieval when semantic retrieval is disabled or unavailable.
 - Live content falls back to source-controlled defaults when DynamoDB cannot be read.
-- Analytics excludes raw IP storage, city or more precise location, fingerprints, advertising identifiers, form values, and chat text; category-specific DynamoDB TTL policies limit retention.
+- Analytics excludes raw IP storage, city or more precise location, fingerprints, advertising identifiers, form values, and chat responses; prompt reviews use a separate record family. category-specific DynamoDB TTL policies limit retention.
 - The GitHub proxy is cached and fails independently from the rest of the public experience.
 - Production changes pass linting, TypeScript checks, RAG evaluation, and a Next.js production build before merge.
 

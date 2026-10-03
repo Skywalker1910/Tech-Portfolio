@@ -36,7 +36,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install locked dependencies
@@ -52,6 +52,8 @@ jobs:
         run: npm run rag:evaluate
       - name: Test retrieval policies and budgets (offline)
         run: npm run rag:test
+      - name: Test analytics privacy and prompt review
+        run: npm run analytics:test
       - name: Test verified project details and preview assets
         run: npm run projects:test
 

@@ -6,7 +6,7 @@ import { RESUME_SKILL_CATEGORIES, RESUME_SKILLS_SOURCE } from "../lib/resume-ski
 import sharp from "sharp";
 import { DEFAULT_PROJECTS } from "../lib/content/defaults";
 import { validateContent } from "../lib/content/validation";
-import { projectCapture, withProjectPresentation, featuredWork } from "../lib/project-presentation";
+import { projectCapture, projectIllustration, withProjectPresentation, featuredWork } from "../lib/project-presentation";
 
 test("Skills page uses the reviewed current resume, not the older alias",async()=>{
   assert.equal(RESUME_SKILLS_SOURCE,"/Aditya More - Resume.pdf");
@@ -73,4 +73,20 @@ test("admin validation preserves technical fields, bounds data and rejects scrip
   assert.ok(content && content.kind==="project");assert.ok(content.technicalDetails?.length);assert.equal(content.evaluation?.[0].source,undefined);
   assert.deepEqual(content.limitations,DEFAULT_PROJECTS[2].limitations);
   assert.equal(validateContent("projects",{title:"Synthetic",technicalDetails:[null,{}, {label:"",detail:"x"}]} as unknown)?.title,"Synthetic");
+});
+
+test("legacy project records regain model repositories while custom links stay intact",()=>{
+  assert.equal(withProjectPresentation({id:"movie-recommendation",title:"Movie"}).huggingface,"https://huggingface.co/Skywalker1910/movie-rec-models");
+  assert.equal(withProjectPresentation({id:"bb8-transformer",title:"BB8"}).huggingface,"https://huggingface.co/Skywalker1910/BB8");
+  assert.equal(withProjectPresentation({id:"bb8-transformer",title:"BB8",huggingface:"https://huggingface.co/custom/model"}).huggingface,"https://huggingface.co/custom/model");
+});
+test("each project has a unique optimized illustration and unknown projects retain their fallback",async()=>{
+  assert.equal(projectIllustration("Renamed agent","https://game.adityamore.dev","fifa-ai-agents"),"/project-illustrations/fifa-ai-agents.webp");
+  const paths=new Set<string>();
+  for(const project of DEFAULT_PROJECTS){
+    const path=projectIllustration(project.title,project.demo);assert.ok(path);paths.add(path);
+    const data=await readFile(`public${path}`);assert.ok(data.length<300000);
+    const meta=await sharp(data).metadata();assert.equal(meta.width,1200);assert.equal(meta.height,800);
+  }
+  assert.equal(paths.size,12);assert.equal(projectIllustration("Unknown",undefined),null);
 });
