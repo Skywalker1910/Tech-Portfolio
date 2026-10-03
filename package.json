@@ -4,6 +4,9 @@
   "private": true,
   "homepage": "https://skywalker1910.github.io/Tech-Portfolio",
   "scripts": {
+    "predev": "node scripts/build-coarse-geoip.mjs",
+    "prebuild": "node scripts/build-coarse-geoip.mjs",
+    "preanalytics:test": "node scripts/build-coarse-geoip.mjs",
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
@@ -23,7 +26,7 @@
     "content:sync:profile:apply": "tsx --env-file-if-exists=.env.local scripts/sync-profile-content.ts --apply",
     "analytics:purge-city": "tsx --env-file-if-exists=.env.local scripts/purge-analytics-city.ts",
     "analytics:audit": "tsx --env-file-if-exists=.env.local scripts/audit-analytics-history.ts",
-    "analytics:test": "tsx --test tests/analytics-privacy.test.ts",
+    "analytics:test": "tsx --test tests/analytics-privacy.test.ts tests/coarse-geoip.test.ts",
     "build:ghpages": "cross-env NEXT_PUBLIC_GITHUB_PAGES=true next build --turbopack",
     "predeploy": "npm run build:ghpages",
     "deploy": "gh-pages -b gh-pages -d out --dotfiles"

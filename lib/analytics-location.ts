@@ -1,5 +1,6 @@
 import { isIP } from "node:net";
 import type { AnalyticsLocation } from "./analytics";
+import { lookupCoarseLocation } from "./coarse-geoip";
 
 type CoarseLookup = (ip:string)=>{country?:string;region?:string}|null;
 const emptyLocation:AnalyticsLocation={countryCode:null,country:null,region:null,regionCode:null};
@@ -24,8 +25,7 @@ export async function resolveAnalyticsLocation(headers:Headers, current:Analytic
   const ip=publicViewerIp(headers);
   if (!ip) return current;
   try {
-    const localLookup=lookup ?? (await import("geoip-lite")).default.lookup;
-    const result=localLookup(ip);
+    const result=lookup ? lookup(ip) : await lookupCoarseLocation(ip);
     const countryCode=result?.country && /^[A-Z]{2}$/.test(result.country) ? result.country : null;
     if (!countryCode || (current.countryCode && current.countryCode!==countryCode)) return current;
     const regionCode=result?.region && /^[A-Z0-9-]{1,12}$/.test(result.region) ? result.region : null;
