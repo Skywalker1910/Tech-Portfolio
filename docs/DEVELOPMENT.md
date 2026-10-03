@@ -9,6 +9,8 @@ The repository produces two deliberately different delivery surfaces:
 
 The Amplify application is the only full production system. Static-export compatibility must never weaken or change dynamic production route behavior.
 
+GeoIP source data is a build-time input. `prebuild`, `predev` and `preanalytics:test` derive a compressed country/state-only database in ignored `.geoip/` files. Next.js traces these compact files into API runtimes; the original city/coordinate dataset is excluded from the server dependency graph. This keeps the Amplify output within its hosting size limit without reducing coarse-location coverage. IPv6 compaction preserves the pinned provider's prefix-resolution behavior.
+
 ## Source-of-truth boundaries
 
 | Data | Primary source | Fallback or secondary source |
