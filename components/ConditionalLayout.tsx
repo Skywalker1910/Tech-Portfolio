@@ -27,7 +27,7 @@ export default function ConditionalLayout({ children }: { children: ReactNode })
       </main>
       <Footer />
       {isGhPages && <GhPagesBanner />}
-      {pathname !== "/chat" && <ChatWidget />}
+      {pathname !== "/chat" && !pathname?.startsWith("/games/") && <ChatWidget />}
     </>
   );
 }

@@ -14,6 +14,10 @@ const eslintConfig = [
   {
     ignores: [
       "node_modules/**",
+      ".venv-game/**",
+      "games/alien-invasion/build/**",
+      "games/build/**",
+      "public/games/alien-invasion/**",
       ".next/**",
       "out/**",
       "build/**",

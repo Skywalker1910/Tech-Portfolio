@@ -4,6 +4,8 @@
   "private": true,
   "homepage": "https://skywalker1910.github.io/Tech-Portfolio",
   "scripts": {
+    "game:build": "node scripts/build-alien-game.mjs",
+    "arcade:test": "tsx --test tests/arcade.test.ts",
     "predev": "node scripts/build-coarse-geoip.mjs",
     "prebuild": "node scripts/build-coarse-geoip.mjs",
     "preanalytics:test": "node scripts/build-coarse-geoip.mjs",
@@ -12,7 +14,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm run analytics:test && npm run rag:test && npm run projects:test && npm run rag:evaluate && npm run build",
+    "check": "npm run lint && npm run typecheck && npm run arcade:test && npm run analytics:test && npm run rag:test && npm run projects:test && npm run rag:evaluate && npm run build",
     "projects:test": "tsx --test tests/project-presentation.test.ts",
     "rag:test": "tsx --test tests/rag-retrieval.test.ts tests/rag-admin-evaluation.test.ts",
     "rag:compare": "tsx --env-file-if-exists=.env.local scripts/compare-rag.ts",

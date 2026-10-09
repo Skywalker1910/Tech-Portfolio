@@ -65,3 +65,12 @@ Deployment-*/
 /artifacts/project-illustration-male-contact-sheet.png
 /artifacts/project-illustration-technical-contact-sheet.png
 /.geoip/
+/.venv-game/
+/games/alien-invasion/build/
+/games/alien-invasion/__pycache__/
+/games/**/__pycache__/
+/games/build/
+/games/**/save/
+/public/games/alien-invasion/
+/public/arcade/flags/
+/artifacts/game-qa/

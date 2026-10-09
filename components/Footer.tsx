@@ -1,4 +1,6 @@
 import AnalyticsPreferencesButton from "./AnalyticsPreferencesButton";
+import Link from "next/link";
+import { ArcadeIcon } from "./ArcadeIcons";
 
 export default function Footer() {
   return (
@@ -44,11 +46,14 @@ export default function Footer() {
           </li>
         </ul>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500">
+        <div className="flex w-full flex-wrap items-center justify-between gap-6">
+        <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
           <span>© {new Date().getFullYear()} Aditya More</span>
           <a href="/notice" className="hover:text-slate-400 transition-colors">Notice</a>
           <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</a>
           <AnalyticsPreferencesButton />
+        </div>
+        <Link href="/games" className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full border border-orange-500/40 px-5 py-2.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-500/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-500 dark:text-orange-400"><ArcadeIcon className="h-5 w-5"/>Visit the arcade</Link>
         </div>
       </div>
     </footer>

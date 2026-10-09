@@ -8,6 +8,7 @@ import {
   GraduationCap, Globe, FileText, Info, Shield, ArrowUpRight,
 } from "lucide-react";
 import CareerStatus from "./CareerStatus";
+import ArcadeNav from "./ArcadeNav";
 
 interface NavItem {
   href: string;
@@ -124,7 +125,7 @@ export default function Navbar() {
         }}
       >
         {/* Full-width: name at extreme left, Open to Work at extreme right */}
-        <div className="w-full px-5 md:px-8 h-full flex items-center gap-4">
+        <div className="w-full px-3 sm:px-5 md:px-8 h-full flex items-center gap-2 sm:gap-4">
 
           {/* Wordmark — extreme left */}
           <Link
@@ -136,7 +137,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop nav — centered, all links flat */}
-          <nav className="hidden md:flex items-center flex-1 justify-center">
+          <nav className="hidden xl:flex items-center flex-1 justify-center">
             <div className="relative flex items-center" onMouseLeave={hidePreview}>
               {NAV_ITEMS.map((item) => {
                 const isActive = pathname === item.href;
@@ -226,7 +227,8 @@ export default function Navbar() {
           </nav>
 
           {/* Right: theme toggle + Open to Work — extreme right */}
-          <div className="hidden md:flex items-center gap-2 shrink-0 ml-auto" ref={careerRef}>
+          <div className="hidden xl:flex items-center gap-2 shrink-0 ml-auto" ref={careerRef}>
+            <ArcadeNav />
             <ThemeToggle />
             <button
               onClick={() => setCareerOpen(o => !o)}
@@ -251,8 +253,9 @@ export default function Navbar() {
           </div>
 
           {/* Mobile hamburger */}
+          <div className="ml-auto flex items-center gap-1 xl:hidden"><ArcadeNav /><ThemeToggle /></div>
           <button
-            className="flex md:hidden items-center justify-center h-8 w-8 ml-auto transition-opacity hover:opacity-70"
+            className="flex xl:hidden items-center justify-center h-8 w-8 transition-opacity hover:opacity-70"
             style={{ color: "var(--navbar-muted)" }}
             onClick={() => setMobileOpen(o => !o)}
             aria-label="Toggle menu"
@@ -276,7 +279,7 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="md:hidden flex max-h-[calc(100dvh-2.75rem)] flex-col overflow-y-auto overscroll-contain border-b border-[var(--navbar-border)] bg-[var(--surface)]/98 text-[var(--text)] shadow-xl backdrop-blur-xl"
+              className="xl:hidden flex max-h-[calc(100dvh-2.75rem)] flex-col overflow-y-auto overscroll-contain border-b border-[var(--navbar-border)] bg-[var(--surface)]/98 text-[var(--text)] shadow-xl backdrop-blur-xl"
             >
               {NAV_ITEMS.map(item =>
                 item.external ? (

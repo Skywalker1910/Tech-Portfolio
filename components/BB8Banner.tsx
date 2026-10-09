@@ -14,16 +14,16 @@ export default function BB8Banner() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.55, ease: "easeOut" }}
-      className="container-max relative z-[10] pb-10 md:pb-16"
+      className="relative min-w-0 h-full"
       aria-labelledby="bb8-banner-title"
     >
-      <div className="relative flex min-h-44 items-center overflow-hidden rounded-[1.75rem] border border-orange-500/25 bg-[var(--surface)] px-5 py-7 shadow-[0_24px_70px_rgba(249,115,22,0.11)] sm:px-8 md:pl-36">
+      <div className="relative flex h-full min-h-44 items-center overflow-hidden rounded-[1.75rem] border border-orange-500/25 bg-[var(--surface)] px-5 py-7 shadow-[0_24px_70px_rgba(249,115,22,0.11)] sm:px-8 md:pl-36">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_50%,rgba(249,115,22,0.22),transparent_30%),linear-gradient(110deg,transparent_45%,rgba(249,115,22,0.05))]" />
         <div className="absolute -left-2 bottom-0 hidden md:block">
           <div className={styles.bannerVisual}><BB8DroidVisual /></div>
         </div>
 
-        <div className="relative flex w-full flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div className="relative flex w-full min-w-0 flex-col gap-5">
           <div className="flex items-center gap-4 md:block">
             <div className="md:hidden">
               <div className={styles.bannerVisual}><BB8DroidVisual /></div>
@@ -44,7 +44,7 @@ export default function BB8Banner() {
           <button
             type="button"
             onClick={openChat}
-            className="cta-primary group inline-flex shrink-0 items-center justify-center gap-3 self-start rounded-full px-5 py-2.5 text-sm font-semibold md:self-center"
+            className="cta-primary group inline-flex shrink-0 items-center justify-center gap-3 self-start rounded-full px-5 py-2.5 text-sm font-semibold"
           >
             <Bot size={16} /> Talk to BB-8
             <ArrowUpRight size={15} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
