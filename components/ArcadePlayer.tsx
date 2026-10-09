@@ -6,6 +6,7 @@ import styles from "./ArcadePlayer.module.css";
 import { AlienIcon } from "./ArcadeIcons";
 import ArcadeLeaderboard, { type FinishedRun } from "./ArcadeLeaderboard";
 
+type Publication = {run_id:string;status:"saving"|"saved"|"error";message:string;name?:string;country?:string;score?:number;masked?:boolean;retryable?:boolean};
 type Phase = "idle"|"loading"|"ready"|"playing"|"over"|"error";
 const basePath = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true" ? "/Tech-Portfolio" : "";
 const buttonClass = "inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm hover:bg-[var(--tag-bg)] disabled:opacity-40 disabled:cursor-not-allowed";
@@ -17,22 +18,74 @@ export default function ArcadePlayer() {
   const [phase,setPhase]=useState<Phase>("idle"), [paused,setPaused]=useState(false), [briefing,setBriefing]=useState(false);
   const [score,setScore]=useState(0), [level,setLevel]=useState(1), [lives,setLives]=useState(3);
   const [attempt,setAttempt]=useState(0), [origin,setOrigin]=useState("");
-  const [completed,setCompleted]=useState<FinishedRun|null>(null), [suggested,setSuggested]=useState<{name:string;country:string}|null>(null);
+  const [completed,setCompleted]=useState<FinishedRun|null>(null);
+  const completedRun=useRef<Promise<FinishedRun|null>>(Promise.resolve(null));
+  const registrationError=useRef("");
+  const publications=useRef(new Map<string,Publication>());
+  const [publication,setPublication]=useState<Publication|null>(null), [refreshKey,setRefreshKey]=useState(0);
   const mounted = !["idle","error"].includes(phase);
-  const setConfigured=useCallback((value:boolean)=>{configured.current=value;},[]);
   const send=useCallback((type:string,fields:Record<string,unknown>={})=>{
     frame.current?.contentWindow?.postMessage({target:"alien-invasion",type,...fields},window.location.origin);
   },[]);
+
+  const hostConfig=useCallback(()=>send("host_config",{
+    publicLeaderboard:configured.current,
+    nameMax:20,
+    publicationDisclosure:"Saving publicly sends your gaming name to OpenAI for review. Your reviewed name, country flag, and score appear on the public leaderboard for up to 180 days. Inappropriate names are masked. Real names are not required.",
+  }),[send]);
+  const setConfigured=useCallback((value:boolean)=>{configured.current=value;hostConfig();},[hostConfig]);
+  const acknowledge=useCallback((result:Publication)=>{
+    publications.current.set(result.run_id,result);
+    if(activeRun.current===result.run_id)setPublication(result);
+    send("score_publication",result);
+  },[send]);
+  const submit=useCallback(async(data:Record<string,unknown>)=>{
+    const runId=typeof data.run_id==="string"?data.run_id:"";
+    if(!runId || runId!==activeRun.current)return;
+    const previous=publications.current.get(runId);
+    if(previous && previous.status!=="error") {send("score_publication",previous);return;}
+    if(data.publish!==true) {
+      acknowledge({run_id:runId,status:"error",message:"Saved on this device only. Choose Save & publish in the game to join the public leaderboard.",retryable:false});
+      return;
+    }
+    if(typeof data.name!=="string" || typeof data.country!=="string")return;
+    const completion=completedRun.current;
+    acknowledge({run_id:runId,status:"saving",message:"Reviewing your gaming name and saving your score…"});
+    try {
+      const result=await completion;
+      if(!result || result.gameRunId!==runId) {
+        acknowledge({run_id:runId,status:"error",message:"This round has no completed result to publish.",retryable:false});
+        return;
+      }
+      if(!result.ticket) {
+        acknowledge({run_id:runId,status:"error",message:registrationError.current || "This round could not register for public scoring. Start another round.",retryable:false});
+        return;
+      }
+      const response=await fetch("/api/arcade/leaderboard",{method:"POST",redirect:"error",headers:{"Content-Type":"application/json"},body:JSON.stringify({...result,name:data.name,country:data.country,publish:true})});
+      const body=await response.json();
+      if(response.status===409 && body.error==="This run has already been published.") {
+        acknowledge({run_id:runId,status:"saved",message:"This round is already saved on the public leaderboard.",retryable:false});
+        setRefreshKey(value=>value+1);
+        return;
+      }
+      if(!response.ok)throw new Error(body.error || "Score could not be saved. Retry from the game.");
+      if(!body.entry || typeof body.entry.name!=="string")throw new Error("Unexpected leaderboard response. Check your saved score before retrying.");
+      acknowledge({run_id:runId,status:"saved",message:body.entry.masked?`Score saved. Your public gaming name is ${body.entry.name}.`:`Score saved as ${body.entry.name}.`,name:body.entry.name,country:body.entry.country,score:body.entry.score,masked:body.entry.masked,retryable:false});
+      setRefreshKey(value=>value+1);
+    } catch(error) {
+      acknowledge({run_id:runId,status:"error",message:error instanceof Error?error.message:"Public score could not be saved. Retry from the game.",retryable:true});
+    }
+  },[send,acknowledge]);
 
   useEffect(()=>{
     const receive=(event:MessageEvent)=>{
       if (event.origin!==window.location.origin || event.source!==frame.current?.contentWindow) return;
       const data=event.data;
       if (!data || typeof data!=="object" || data.source!=="alien-invasion") return;
-      if (data.type==="ready") setPhase("ready");
+      if (data.type==="ready") {setPhase("ready");hostConfig();}
       if (data.type==="run_started") {
-        activeRun.current=data.run_id; setPhase("playing");setPaused(false);setCompleted(null);setSuggested(null);
-        ticket.current=configured.current ? fetch("/api/arcade/runs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gameRunId:data.run_id,seed:data.seed,version:data.version})}).then(async response=>{const result=await response.json();return response.ok?result.ticket:"";}).catch(()=>"") : Promise.resolve("");
+        activeRun.current=data.run_id; setPhase("playing");setPaused(false);setCompleted(null);setPublication(null);completedRun.current=Promise.resolve(null);registrationError.current="";
+        ticket.current=!basePath ? fetch("/api/arcade/runs",{method:"POST",redirect:"error",headers:{"Content-Type":"application/json"},body:JSON.stringify({gameRunId:data.run_id,seed:data.seed,version:data.version})}).then(async response=>{const result=await response.json();if(!response.ok || typeof result.ticket!=="string")throw new Error(result.error || "Round registration failed.");return result.ticket;}).catch(error=>{if(activeRun.current===data.run_id)registrationError.current=error instanceof Error?error.message:"Round registration failed.";return "";}) : Promise.resolve("");
       }
       if (data.type==="state") {
         if (Number.isSafeInteger(data.score) && data.score>=0) setScore(data.score);
@@ -49,17 +102,19 @@ export default function ArcadePlayer() {
       if (data.type==="game_over" && data.run_id===activeRun.current) {
         setPhase("over");setPaused(false);setBriefing(false);
         const runId=data.run_id;
-        void ticket.current.then(token=>{
-          if (activeRun.current===runId) setCompleted({gameRunId:runId,seed:data.seed,version:data.version,score:data.score,level:data.level,wave:data.wave,kills:data.kills,ticks:data.ticks,duration:data.duration,ticket:token});
+        completedRun.current=ticket.current.then(token=>{
+          const result={gameRunId:runId,seed:data.seed,version:data.version,score:data.score,level:data.level,wave:data.wave,kills:data.kills,ticks:data.ticks,duration:data.duration,ticket:token};
+          if (activeRun.current===runId) setCompleted(result);
+          return result;
         });
       }
-      if (data.type==="score_saved" && data.run_id===activeRun.current && typeof data.name==="string" && typeof data.country==="string") setSuggested({name:data.name,country:data.country});
+      if (data.type==="score_submit" || data.type==="score_saved") void submit(data);
     };
     window.addEventListener("message",receive);
     const hidden=()=>{if(document.hidden)send("pause");};
     document.addEventListener("visibilitychange",hidden);
     return ()=>{window.removeEventListener("message",receive);document.removeEventListener("visibilitychange",hidden);};
-  },[send]);
+  },[send,submit,hostConfig]);
   useEffect(()=>{
     if(phase!=="loading")return;
     const timeout=window.setTimeout(()=>setPhase("error"),120_000);
@@ -86,7 +141,7 @@ export default function ArcadePlayer() {
 
   async function load() {
     setExpanded(true);
-    setOrigin(window.location.origin);setPhase("loading");setAttempt(value=>value+1);setScore(0);setLevel(1);setLives(3);setPaused(false);setBriefing(false);setCompleted(null);activeRun.current="";
+    setOrigin(window.location.origin);setPhase("loading");setAttempt(value=>value+1);setScore(0);setLevel(1);setLives(3);setPaused(false);setBriefing(false);setCompleted(null);setPublication(null);publications.current.clear();completedRun.current=Promise.resolve(null);activeRun.current="";
     try {const response=await fetch(`${basePath}/games/alien-invasion/index.html`,{method:"HEAD"});if(!response.ok)setPhase("error");}catch{setPhase("error");}
   }
   function input(event:PointerEvent<HTMLButtonElement>,key:string,pressed:boolean) {
@@ -104,9 +159,9 @@ export default function ArcadePlayer() {
           <button onClick={load} className="cta-primary inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold"><Play size={17}/>Play game</button>
           <p className="text-xs text-[var(--muted)]">Opens in a larger game window. First load downloads Python.</p>
         </div>
-        {completed && <p className="border-t border-[var(--border)] p-4 text-sm">Last mission: {completed.score.toLocaleString()} points. Check the leaderboard to publish your score.</p>}
+        {completed && <p className="border-t border-[var(--border)] p-4 text-sm">Last mission: {completed.score.toLocaleString()} points. {publication?.message || "Enter your gaming name and country inside the game to save your score."}</p>}
       </section>
-      <ArcadeLeaderboard completed={completed} suggested={suggested} onConfigured={setConfigured}/>
+      <ArcadeLeaderboard refreshKey={refreshKey} onConfigured={setConfigured}/>
     </div>
     <dialog ref={dialog} className={styles.dialog} aria-labelledby="arcade-window-title" onCancel={event=>{event.preventDefault();close();}}>
       {expanded && <div className={styles.window}>
@@ -133,6 +188,7 @@ export default function ArcadePlayer() {
             <button className={buttonClass} aria-label="Next weapon" disabled={phase!=="playing"||paused||briefing} onClick={()=>send("switch",{direction:1})}><ArrowRight size={14}/></button>
             <button className={buttonClass} aria-label="Shockwave" disabled={phase!=="playing"||paused||briefing} onClick={()=>send("special")}><Zap size={14}/></button>
           </div>
+          {publication && <p role="status" aria-live="polite" className="text-xs text-[var(--muted)]">{publication.message}</p>}
           <p className={styles.hint}>Arrows / WASD: move · Space: fire · Q/E: weapons · Shift: shockwave · P/Esc: pause. Click inside the game to use your keyboard.</p>
         </footer>
       </div>}

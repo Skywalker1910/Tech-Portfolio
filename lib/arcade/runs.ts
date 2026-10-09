@@ -29,7 +29,7 @@ export function verifyRun(input:unknown, now=Date.now()):RunTicket {
 export type CompletedRun = { score:number; level:number; wave:number; kills:number; ticks:number; duration:number };
 export function validateCompletedRun(body:Record<string,unknown>, ticket:RunTicket, now=Date.now()):CompletedRun {
   if (body.seed !== ticket.seed || body.gameRunId !== ticket.gameRunId || body.version !== GAME_VERSION) throw new ArcadeError("Result does not match this run.");
-  const score = integer(body.score, "score", 1, MAX_SCORE);
+  const score = integer(body.score, "score", 0, MAX_SCORE);
   const level = integer(body.level, "level", 1, 10_000);
   const wave = integer(body.wave, "wave", 0, 10_000);
   const kills = integer(body.kills, "kills", 0, 1_000_000);

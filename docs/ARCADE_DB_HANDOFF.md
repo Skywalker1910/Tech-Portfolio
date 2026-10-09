@@ -51,6 +51,7 @@ Set these server-only values in Amplify and the local test environment:
 ```text
 DYNAMODB_ARCADE_TABLE=<dedicated table name>
 ARCADE_RUN_SECRET=<at least 32 cryptographically random characters>
+ARCADE_ALLOWED_ORIGINS=https://www.adityamore.dev,https://adityamore.dev
 OPENAI_API_KEY=<existing server-side project key>
 OPENAI_USERNAME_MODEL=gpt-4o-mini
 APP_AWS_REGION=<existing application region>
@@ -85,20 +86,20 @@ an Amplify preview before merging; no preview deployment has been performed yet.
   write**. Never fall back to an unchecked name.
 - Do not trust client `masked` or `approved` flags. Only `reviewName()` output
   may reach `saveScore()` via `publishScore()`.
-- Public publication requires its own checkbox; playing and local saves do not
-  publish or invoke OpenAI. The interface discloses the OpenAI name review.
+- Public publication requires explicit in-game Save & publish intent; playing and local saves do not
+  publish or invoke OpenAI. The in-game form must disclose the OpenAI name review.
 
 ## Python repository follow-up
 
-The published `feature/story-leaderboard-bb8` game branch already has 20-character
-names and strict bridge parent source/origin checks. Preserve these upstream.
-Merge that branch to the game repo's main before selecting main as the build ref.
+The game repo main branch now has 20-character names and strict bridge parent
+source/origin checks. Preserve these upstream. The portfolio fetches main.
 The portfolio no longer keeps a Python source copy.
 
 Keep SQLite for desktop and localStorage for device-local browser scores.
 Neither is the public leaderboard. Continue emitting `run_started`, `game_over`,
-`score_saved`, and `run_abandoned`. Do not automatically publish `score_saved`;
-the portfolio's explicit public form owns name review and publication.
+`score_saved`, and `run_abandoned`. Do not automatically publish plain local-only `score_saved`;
+the portfolio server owns name review and publication after explicit in-game
+Save & publish intent. See ARCADE_GAME_AGENT_PROMPT.md for the bridge contract.
 
 Do not introduce a second Python API or SQLite file into Amplify's temporary
 SSR filesystem. Additional hosting is unnecessary for the current design.

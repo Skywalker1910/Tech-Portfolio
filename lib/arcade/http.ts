@@ -3,9 +3,16 @@ import { volatileRequestKey } from "@/lib/request-rate-limit";
 import { ArcadeError } from "./policy";
 
 const buckets = new Map<string,{count:number; until:number}>();
+export function trustedArcadeOrigin(origin:string|null, requestOrigin:string, mode=process.env.NODE_ENV) {
+  if (!origin) return false;
+  const allowed = (process.env.ARCADE_ALLOWED_ORIGINS ?? "https://www.adityamore.dev,https://adityamore.dev").split(",").map(value=>value.trim());
+  // Amplify's SSR request URL can have an internal origin. Use explicit public
+  // origins in production; never trust arbitrary forwarded host headers.
+  return allowed.includes(origin) || (mode !== "production" && origin === requestOrigin);
+}
 export function allowWrite(request:NextRequest, limit=10) {
   const origin = request.headers.get("origin");
-  if (!origin || origin !== request.nextUrl.origin) throw new ArcadeError("Use the portfolio page to submit scores.",403);
+  if (!trustedArcadeOrigin(origin,request.nextUrl.origin)) throw new ArcadeError("Use the portfolio page to submit scores.",403);
   const key = volatileRequestKey(`${request.nextUrl.pathname}:${request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"}`);
   const now = Date.now();
   for (const [id,bucket] of buckets) if (bucket.until <= now) buckets.delete(id);
