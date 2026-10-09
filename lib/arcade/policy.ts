@@ -1,6 +1,7 @@
+import game from "@/data/arcade/game.json";
 import countries from "@/data/arcade/countries.json";
 export const NAME_MAX = 20;
-export const GAME_VERSION = "3.2.0";
+export const GAME_VERSION = game.version;
 export const MAX_SCORE = 999_999_999;
 export const COUNTRIES = countries as Array<{code:string; name:string}>;
 const countryCodes = new Set(COUNTRIES.map(country => country.code));

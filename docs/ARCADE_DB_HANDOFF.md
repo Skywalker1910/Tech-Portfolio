@@ -1,7 +1,8 @@
 # Public arcade database handoff
 
-Work on `feature/alien-invasion-web` in `E:/Projects/Tech-Portfolio`. The portfolio
-now contains the Python 3.2.0 browser game, the player, and server-side leaderboard
+Work in a feature branch in `E:/Projects/Tech-Portfolio`. The portfolio
+now builds the browser game from its authoritative GitHub repo and contains
+the player and server-side leaderboard
 code. Cloud resources have not been created or changed in this session.
 
 Read `lib/arcade/repository.ts`, `runs.ts`, `moderation.ts`, `submission.ts`, and
@@ -36,7 +37,7 @@ Storage contract:
 | Record | pk | sk | Purpose |
 |---|---|---|---|
 | Submission marker | `RUN#<server ticket UUID>` | `RESULT` | Conditional insertion prevents replay of the same ticket |
-| Public score | `BOARD#alien-invasion#3.2.0` | `<999999999-score padded to 9 digits>#<server ISO date>#<UUID>` | Ascending Query returns highest score first, oldest tie first |
+| Public score | `BOARD#alien-invasion#<built game version>` | `<999999999-score padded to 9 digits>#<server ISO date>#<UUID>` | Ascending Query returns highest score first, oldest tie first |
 
 Both records are inserted atomically and expire after 180 days. Reads filter
 expired entries even before DynamoDB's asynchronous TTL cleanup. Public results
@@ -72,7 +73,7 @@ an Amplify preview before merging; no preview deployment has been performed yet.
 
 ## Username guardrail — preserve the server boundary
 
-- `NAME_MAX` is 20 in the portfolio and its imported Python snapshot.
+- `NAME_MAX` is 20 in the portfolio and the authoritative upstream game.
 - Names are NFKC-normalized, trimmed, limited to ASCII letters/digits/spaces/
   underscore/dot/hyphen, then checked server-side.
 - OpenAI Moderation plus a strict JSON-schema Responses classifier must both
@@ -89,10 +90,10 @@ an Amplify preview before merging; no preview deployment has been performed yet.
 
 ## Python repository follow-up
 
-In `E:/Projects/alien_invasion`, update `invasion/storage.py`'s `NAME_MAX` from 14
-to 20 and its documentation/tests. Preserve the country-code/flag relationship.
-The portfolio copy also pins bridge `parentOrigin` and checks incoming origin
-as well as direct parent source. Upstream should adopt those hardening changes.
+The published `feature/story-leaderboard-bb8` game branch already has 20-character
+names and strict bridge parent source/origin checks. Preserve these upstream.
+Merge that branch to the game repo's main before selecting main as the build ref.
+The portfolio no longer keeps a Python source copy.
 
 Keep SQLite for desktop and localStorage for device-local browser scores.
 Neither is the public leaderboard. Continue emitting `run_started`, `game_over`,
@@ -132,3 +133,8 @@ Reference documentation:
 - [DynamoDB Query ordering](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.KeyConditionExpressions.html)
 - [OpenAI moderation](https://developers.openai.com/api/docs/guides/moderation)
 - [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs)
+
+The game source is now fetched during builds. See ALIEN_INVASION.md for the
+selected upstream branch and automated rebuild webhook setup. Game version and
+country metadata are synchronized automatically; no Python copies are maintained
+in the portfolio.

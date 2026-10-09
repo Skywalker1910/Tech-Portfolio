@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { validateName, validateCountry, validateRunIdentity } from "../lib/arcade/policy";
+import { GAME_VERSION, validateName, validateCountry, validateRunIdentity } from "../lib/arcade/policy";
 import { reviewResult } from "../lib/arcade/moderation";
 import { issueRun, verifyRun, validateCompletedRun } from "../lib/arcade/runs";
 import { scoreKey, scoreRecords, saveScore } from "../lib/arcade/repository";
 import { publishScore } from "../lib/arcade/submission";
 
 process.env.ARCADE_RUN_SECRET="test-secret-at-least-32-characters-long";
-const identity={gameRunId:"123-1",seed:123,version:"3.2.0"};
+const identity={gameRunId:"123-1",seed:123,version:GAME_VERSION};
 test("name limits reject long or invalid names and normalize safely",()=>{
   assert.equal(validateName("x".repeat(20)),"x".repeat(20));
   assert.throws(()=>validateName("x".repeat(21)));
