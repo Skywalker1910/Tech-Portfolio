@@ -1,9 +1,39 @@
-# Coding-agent task: one-step in-game public scores and Amplify webhook
+# Coding-agent task: finish one-step in-game public score saving
 
 Work in `E:/Projects/alien_invasion` (`Skywalker1910/alien-invasion`) on a separate
 branch from current main. Keep Python/Pygame native. The portfolio fetches the
 latest **main** during each build; do not copy game files into the portfolio.
 Read this task and upstream `docs/HOST_INTEGRATION.md` before changing the bridge.
+
+## Scope and verified current state (2026-10-09)
+
+**Implement the Python in-game public-score form and acknowledgement handling.**
+Read this entire document. This is the remaining feature task, rather than another
+webhook setup task. Reuse the existing automation and backend.
+
+Already completed and independently checked:
+
+- Game PR #2 is merged. Current game main includes 20-character names and strict
+  parent source/origin checks. Preserve these.
+- Game PR #3 is **merged**, not waiting for merge. It adds the tested, path-filtered
+  `.github/workflows/redeploy-portfolio.yml` and README deployment notes.
+  Its main push workflow run 37993989793 succeeded.
+- Amplify `ALIEN_GAME_REF=main` is set at the app level. The portfolio source config
+  on main also now selects main, so removal of the override cannot restore the
+  deleted branch.
+- The incoming webhook and game repo `AMPLIFY_WEBHOOK_URL` secret are already set
+  up. Reuse them; keep the URL private.
+- Portfolio PR #26 is merged. It removes the duplicate external form, implements
+  the event/acknowledgement contract below, refreshes public rankings, and fixes
+  Amplify production-origin validation. Its job #52 completed SUCCEED at
+  21:41:07 UTC; an invalid canonical POST returned 400, confirming the fix is live.
+- Production game provenance showed ref main, commit a6e2110e9351cba438a7998219bf5328dfeea4ce,
+  version 3.2.0. The public leaderboard GET returned configured:true with no entries.
+- Game main still emits plain `score_saved`; it has no `score_submit`, `host_config`,
+  or `score_publication` handling in app.py. This is the code this task must add.
+
+The full investigation and build timeline are in
+`docs/ARCADE_DEPLOYMENT_INCIDENT.md` in the portfolio repository.
 
 ## User-facing result
 
@@ -97,10 +127,13 @@ community submissions; do not claim anti-cheat verification.
 
 ## Production integration checks
 
-The production leaderboard GET returned `configured:true` with an empty board.
-A legitimate POST from `https://www.adityamore.dev` returned 403 because Amplify's
-internal request URL failed the old origin comparison. The portfolio fix uses an
-explicit allowlist and does not trust arbitrary forwarded host headers.
+The read API is configured. Configuration alone does not prove a public write
+succeeds. The original own-origin 403 bug is fixed by portfolio PR #26, which is
+merged. Verify the current production deployment includes it: use an invalid JSON
+body `{}` against the canonical www POST endpoint, without creating a score. It
+should return a validation error (400), rather than the old origin rejection (403).
+If it still returns 403, inspect the currently deployed portfolio commit and
+Amplify job status before changing the Python game or database permissions.
 
 Verify Amplify runtime settings without printing secrets:
 
@@ -118,53 +151,39 @@ See `docs/ARCADE_DB_HANDOFF.md` in the portfolio for exact schema and IAM guidan
 Use the canonical www URL for checks: the bare domain currently redirects with
 302, which can turn a diagnostic POST into a GET. Do not log raw names/tickets.
 
-## Automatic deployment after game changes
+## Existing automatic deployment: reuse and verify
 
-Create an Amplify incoming webhook for the **portfolio app's main branch**, not
-another game-hosting app. In Amplify Hosting → Build settings → Incoming webhooks,
-create it and store its full URL as the **game repo** Actions secret
-`AMPLIFY_WEBHOOK_URL`. Never commit the URL or print it.
+The game repo's `.github/workflows/redeploy-portfolio.yml` is already merged via
+PR #3. Keep this workflow and existing `AMPLIFY_WEBHOOK_URL` secret:
 
-Add `.github/workflows/redeploy-portfolio.yml` in the game repo:
+- main pushes that touch main.py, invasion/**, assets/**, requirements.txt, or the
+  workflow run tests and then trigger the portfolio's main Amplify webhook.
+- Pull requests run tests only; redeploy is skipped.
+- README-only changes do not redeploy.
+- workflow_dispatch supports a manual test-and-redeploy run.
 
-```yaml
-name: Redeploy portfolio arcade
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: read
-concurrency:
-  group: portfolio-arcade-deploy
-  cancel-in-progress: true
-jobs:
-  test-and-redeploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - name: Install game test dependencies
-        run: python -m pip install -r requirements-dev.txt
-      - name: Test game
-        env:
-          SDL_VIDEODRIVER: dummy
-          SDL_AUDIODRIVER: dummy
-        run: python -m pytest -q
-      - name: Trigger portfolio build
-        env:
-          AMPLIFY_WEBHOOK_URL: ${{ secrets.AMPLIFY_WEBHOOK_URL }}
-        run: |
-          test -n "$AMPLIFY_WEBHOOK_URL"
-          curl --fail --silent --show-error --retry 2 --request POST "$AMPLIFY_WEBHOOK_URL" > /dev/null
-```
+The remaining Python edits touch invasion/**, so merging them to main will trigger
+this workflow automatically. Confirm both test and redeploy jobs succeed, then
+follow the resulting Amplify job through BUILD, DEPLOY, and VERIFY. A successful
+webhook HTTP response starts a build; it does not prove that build deployed.
 
 The portfolio rebuild fetches current game main, generates the browser package,
 synchronizes version/country metadata, and serves visitors from its own domain.
 Visitors do not fetch GitHub. No portfolio source commit is needed for compatible
 game updates. Bridge protocol, dependency, or canvas-aspect changes require review.
+
+### Credential migration remains a separate owner decision
+
+Read-only inspection confirmed an Amplify compute role is attached and the
+app-level long-lived APP_AWS_ACCESS_KEY_ID / APP_AWS_SECRET_ACCESS_KEY settings
+are still present. The portfolio SDK explicitly prefers those configured keys,
+so the attached role is not evidence that runtime operations use it.
+
+Keep this game feature task scoped to the score flow. Report credential mode
+without displaying values. Coordinate removal of long-lived keys separately with
+the owner after verifying the role supports all existing portfolio AWS operations,
+not just leaderboard reads/writes. No credential settings were changed by this
+handoff or investigation.
 
 ## Acceptance tests and shipping order
 
@@ -180,9 +199,18 @@ success; refreshed public rankings show the chosen country's flag. The host's
 `scripts/smoke-arcade-public.py` covers the new bridge with fixtures; finish the
 real Python UI test because the fixture does not enter the new native form.
 
-Ship the portfolio origin/bridge fix first. Then merge the game form/ack changes
-to game main and trigger an Amplify rebuild (the webhook can do this). Verify source.json reports the correct main
-commit and game version. Check actual production API responses and an authorized
-real user score. Do not publish synthetic test handles to the public production
-board without explicit authorization. Include the webhook secret/configuration
-steps that remain pending in your final handoff.
+Portfolio PR #26 is merged and its Amplify job #52 has succeeded. Re-check current
+production health after your local tests, then open a **new game PR**
+from your game feature branch to main; PR #3 was only the completed webhook task.
+Its PR tests must pass and redeploy must remain skipped until merge.
+
+After the user merges the new game PR, the existing main-push workflow should
+trigger a portfolio build automatically. Verify every Amplify phase succeeds and
+source.json reports the expected game main commit/version. Check the real in-game
+form, returned acknowledgement, and refreshed country flag in a local fixture
+first, then an authorized real user score in production. Do not add synthetic
+handles to the public production board without explicit authorization.
+
+Your final response must identify the game code changes, tests, new game PR URL,
+workflow run, latest deployment state, and remaining integration issues. Do not
+report public scoring complete merely because the webhook or local saving works.
