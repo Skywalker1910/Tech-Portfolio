@@ -4,6 +4,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: "https://adityamore.dev/", lastModified: new Date() },
     { url: "https://adityamore.dev/projects", lastModified: new Date() },
+    { url: "https://adityamore.dev/games", lastModified: new Date() },
+    { url: "https://adityamore.dev/games/alien-invasion", lastModified: new Date() },
     { url: "https://adityamore.dev/education", lastModified: new Date() },
     { url: "https://adityamore.dev/experience", lastModified: new Date() },
     { url: "https://adityamore.dev/skills", lastModified: new Date() },

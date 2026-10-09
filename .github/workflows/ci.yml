@@ -42,6 +42,20 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Set up Python for the arcade bundle
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Build the Python arcade player
+        run: |
+          python -m venv .venv-game
+          .venv-game/bin/python -m pip install -r games/requirements.txt
+          npm run game:build
+
+      - name: Test arcade policies and name review
+        run: npm run arcade:test
+
       - name: Lint
         run: npm run lint
 

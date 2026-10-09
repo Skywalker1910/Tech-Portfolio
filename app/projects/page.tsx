@@ -1,5 +1,6 @@
 ﻿"use client";
 import { useMemo, useState, useEffect, type ComponentType } from "react";
+import Link from "next/link";
 import { FlaskConical, ExternalLink, FolderOpen, Brain, ShieldAlert, Languages, Eye, BookOpen, Phone, Workflow, TestTube2, Cpu, Bot, Swords, Car, Star, ClipboardList, Shield, Database, Layers, GitBranch, Search, X, ChevronDown, SlidersHorizontal, MessageSquare, Zap, CheckCircle2 } from "lucide-react";
 import { SiGithub, SiHuggingface, SiPython, SiTensorflow, SiOpencv, SiJupyter, SiCoursera, SiSelenium, SiPytorch, SiOpenai, SiScikitlearn, SiPandas, SiNumpy, SiDocker, SiPostman, SiNasa, SiFastapi, SiReact } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
@@ -496,6 +497,7 @@ function ProjectFancyCard({ project, index, onClick }: { project: Project; index
 
         {/* Footer links */}
         <div className="mt-auto flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 pt-3 border-t border-[var(--border)]">
+          {project.title.toLowerCase() === "alien invasion" && <Link href="/games/alien-invasion" onClick={event => event.stopPropagation()} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-[var(--bg)]">Play game</Link>}
           {project.github ? (
             <a
               href={project.github}

@@ -8,6 +8,7 @@ import { ShieldCheck, GraduationCap, Briefcase, ArrowRight, Brain, Eye, ShieldAl
 import { SiPython, SiTensorflow, SiOpencv, SiJupyter, SiCoursera, SiSelenium, SiPytorch, SiOpenai, SiScikitlearn, SiPandas, SiNumpy, SiDocker, SiPostgresql, SiGit, SiPostman, SiFastapi, SiMysql, SiCplusplus, SiPlotly } from "react-icons/si";
 import Link from "next/link";
 import BB8Banner from "../components/BB8Banner";
+import ArcadeTeaser from "@/components/ArcadeTeaser";
 import ProjectApplicationPreview from "@/components/ProjectApplicationPreview";
 import { DEFAULT_PROJECTS } from "@/lib/content/defaults";
 import { withProjectPresentation, featuredWork } from "@/lib/project-presentation";
@@ -367,7 +368,8 @@ export default function Home() {
           HERO
       ═══════════════════════════════════════════ */}
       <section ref={scrollRef} className="min-h-screen flex flex-col justify-center relative z-[10]">
-        <div className="container-max w-full pt-20 pb-24">
+        <ArcadeTeaser />
+        <div className="container-max w-full pt-28 pb-24">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -611,7 +613,10 @@ export default function Home() {
         </div>
       </section>
 
-      <BB8Banner />
+      <div className="container-max relative z-[10] grid grid-cols-1 gap-6 pb-10 md:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] md:pb-16">
+        <BB8Banner />
+        <ArcadeTeaser placement="banner" />
+      </div>
 
       {/* ═══════════════════════════════════════════
           CONTACT CTA

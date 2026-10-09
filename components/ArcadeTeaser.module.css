@@ -1,0 +1,152 @@
+/* Original geometric card inspired by imtausef's Uiverse reference:
+   https://uiverse.io/imtausef/hungry-rattlesnake-3 */
+.corner {
+  position: absolute;
+  top: 18px;
+  right: 28px;
+  perspective: 900px;
+  z-index: 20;
+}
+
+.card {
+  position: relative;
+  display: block;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--hero-accent) 35%, var(--border));
+  color: var(--text);
+  box-shadow: 6px 6px 0 color-mix(in srgb, var(--hero-accent) 16%, transparent), var(--card-shadow);
+  transform-style: preserve-3d;
+  transition: transform 300ms ease, box-shadow 300ms ease;
+}
+
+.pattern {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(135deg, transparent 0 15px, color-mix(in srgb, var(--hero-accent) 10%, transparent) 15px 16px);
+  pointer-events: none;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  background: var(--hero-accent);
+  color: #111113;
+  box-shadow: 3px 3px 0 var(--surface);
+  transform: translateZ(28px);
+}
+
+.badge svg { width: 28px; height: 28px; }
+
+.content {
+  position: relative;
+  padding: 13px 10px 10px;
+  border-left: 3px solid var(--hero-accent);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  transform: translateZ(14px);
+}
+
+.eyebrow {
+  display: block;
+  padding-right: 24px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 10px 0 7px;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+
+.description {
+  max-width: 130px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.play {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 13px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--hero-accent);
+  outline-offset: 7px;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .card:hover {
+    transform: rotateY(-12deg) rotateX(5deg) translateY(-3px);
+    box-shadow: 10px 10px 0 color-mix(in srgb, var(--hero-accent) 20%, transparent), 0 16px 30px #00000024;
+  }
+}
+
+.corner .card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 120px;
+  height: 44px;
+  padding: 7px;
+}
+
+.corner .badge {
+  position: relative;
+  top: auto;
+  right: auto;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  box-shadow: none;
+  transform: none;
+}
+
+.corner .badge svg { width: 20px; height: 20px; }
+.corner .content { padding: 0; border: 0; background: transparent; transform: none; }
+.corner .eyebrow, .corner .title, .corner .description { display: none; }
+.corner .play { margin: 0; padding: 0; border: 0; font-size: 11px; letter-spacing: 0; white-space: nowrap; }
+.corner .play svg { display: none; }
+
+.banner {
+  min-width: 0;
+  perspective: 900px;
+}
+
+.banner .card { width: 100%; height: 100%; min-height: 176px; }
+.banner .content { display: flex; flex-direction: column; height: 100%; }
+.banner .title { max-width: 160px; margin-top: 24px; }
+.banner .description { max-width: 180px; margin-bottom: 16px; }
+.banner .play { margin-top: auto; }
+
+@media (min-width: 768px) {
+  .banner .card { min-height: 240px; }
+}
+
+@media (max-width: 639px) {
+  .corner { right: 20px; top: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+}
