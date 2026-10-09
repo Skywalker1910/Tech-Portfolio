@@ -1,3 +1,4 @@
+import { trustedArcadeOrigin } from "../lib/arcade/http";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { GAME_VERSION, validateName, validateCountry, validateRunIdentity } from "../lib/arcade/policy";
@@ -36,6 +37,7 @@ test("run tickets reject modification, expiry, version and timing mismatches",()
   assert.throws(()=>validateRunIdentity({...identity,version:"0.0.1"}));
   const body={...identity,score:100,level:1,wave:1,kills:2,ticks:1200,duration:20};
   assert.equal(validateCompletedRun(body,ticket,now+21_000).score,100);
+  assert.equal(validateCompletedRun({...body,score:0},ticket,now+21_000).score,0);
   assert.throws(()=>validateCompletedRun({...body,seed:124},ticket,now+21_000));
   assert.throws(()=>validateCompletedRun(body,ticket,now));
   assert.throws(()=>validateCompletedRun({...body,score:NaN},ticket,now+21_000));
@@ -67,4 +69,12 @@ test("failed moderation prevents writes; rejected names reach storage only as ma
   assert.equal(writes,1);
   await assert.rejects(()=>publishScore({...body,name:"x".repeat(21)},{reviewName:async()=>{throw new Error("must not call");},saveScore:save}));
   assert.equal(writes,1);
+});
+
+test("production arcade writes trust explicit portfolio origins behind Amplify, not internal or forwarded hosts",()=>{
+  assert(trustedArcadeOrigin("https://www.adityamore.dev","http://localhost:3000","production"));
+  assert(!trustedArcadeOrigin("https://attacker.example","http://localhost:3000","production"));
+  assert(!trustedArcadeOrigin("http://localhost:3000","http://localhost:3000","production"));
+  assert(!trustedArcadeOrigin(null,"https://www.adityamore.dev","production"));
+  assert(trustedArcadeOrigin("http://localhost:3000","http://localhost:3000","development"));
 });

@@ -5,11 +5,10 @@ https://github.com/Skywalker1910/alien-invasion.git using Pygbag 0.9.3.
 Python source and assets are maintained only in that repository. The portfolio
 keeps the browser host, leaderboard API, build script, and generated metadata.
 
-`games/alien-invasion.source.json` selects the published branch. It currently
-uses `feature/story-leaderboard-bb8`, which contains the 3.2.0 story, leaderboard,
-20-character names, and strict origin bridge. Upstream `main` still contains an
-older 3.0 game; do not switch to it until the newer game branch is merged.
-Override the branch/tag/commit at build time with `ALIEN_GAME_REF` or `--ref`.
+`games/alien-invasion.source.json` selects upstream **main**. Override the
+branch/tag/commit at build time with `ALIEN_GAME_REF` or `--ref`. Clear an old
+feature-branch Amplify override when switching to main. The last verified main
+commit was 63e59e411e9d6a94523b791a4873e49a9bd03e5d (game 3.2.0).
 
 ## Local preview
 
@@ -45,7 +44,11 @@ missing BrowserFS warning was observed while the game loaded and ran successfull
 
 The Python game saves local scores in localStorage in the browser and SQLite on
 desktop. Those are separate from the optional public leaderboard. After a run,
-the host offers public publication with a gaming name and selected country.
+the in-game form owns gaming name, country, and explicit Save & publish intent.
+The host accepts `score_submit` (or `score_saved`) only with `publish:true`, awaits
+the completed run ticket, submits once, and returns `score_publication` with
+saving/saved/error status. Legacy local-only saves never publish silently.
+The outside leaderboard is read-only and refreshes after public saves.
 Names have a 20-character limit. Countries and flag files come from the game's
 bundled country list; countries are self-selected, not inferred from location.
 
@@ -53,7 +56,10 @@ The server validates a signed run ticket and completion fields, then calls
 OpenAI Moderation and a strict-schema Responses classifier. Flagged names are
 fully masked with asterisks before public storage; moderation failure prevents
 publication. No raw candidate handle is stored in the public table or logs.
-The form discloses OpenAI processing and asks for explicit publication consent.
+The in-game form must disclose OpenAI processing and public visibility before
+Save & publish. The required Python-side update is detailed in
+[game-agent prompt](ARCADE_GAME_AGENT_PROMPT.md). Until that update is merged,
+legacy in-game saves remain local; the removed external form is not a fallback.
 
 Run tickets and plausible timing do not verify gameplay: scores are visibly
 unverified community submissions until server replay verification is added.
@@ -118,8 +124,7 @@ For a reproducible release or rollback:
 npm run game:build -- --ref 51baed9a7cd867f0afd2bb20a1700f7283e652c3
 ```
 
-Amplify can use the same `ALIEN_GAME_REF` environment variable. Set it to `main`
-after merging the newer game branch there, or pin a tag/commit for release control.
+Amplify can use the same `ALIEN_GAME_REF` environment variable. Leave it unset or set `main`, or pin a tag/commit for release control.
 Compatible content/gameplay/version changes need no portfolio source edits.
 Changes to the bridge protocol, runtime dependencies, or canvas proportions
 still require integration review.
@@ -133,16 +138,14 @@ To automate it:
    Incoming webhooks. Create a webhook targeting the portfolio's `main` branch.
 2. Save its URL as the **game repo** Actions secret `AMPLIFY_WEBHOOK_URL`.
    Keep this URL private; it authorizes build triggers.
-3. Have the game coding agent add the workflow below to the game repo. Trigger
-   only the game branch selected by `ALIEN_GAME_REF` / source config. After the
-   game branch merges, set Amplify `ALIEN_GAME_REF=main` and change the trigger
-   below to `main`. Run the game's tests before calling the webhook.
+3. Have the game coding agent add the workflow below to the game repo on main.
+   Use the fuller tested-game workflow in ARCADE_GAME_AGENT_PROMPT.md.
 
 ```yaml
 name: Redeploy portfolio arcade
 on:
   push:
-    branches: [feature/story-leaderboard-bb8]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -164,3 +167,8 @@ jobs:
 The webhook and game-repo workflow are not provisioned by this portfolio PR.
 Visitors continue downloading the compiled package from the portfolio's domain;
 GitHub is fetched only by the build, not by each visitor.
+
+Production score writes use `ARCADE_ALLOWED_ORIGINS`, defaulting to the canonical
+www portfolio and bare-domain origin. Amplify's internal SSR URL is not the
+browser origin; forwarded host headers are not trusted for this allowlist.
+Both score-registration and submission endpoints use this protection.
