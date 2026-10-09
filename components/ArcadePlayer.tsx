@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { Pause, Play, RotateCcw, X, Zap, ArrowLeft, ArrowRight } from "lucide-react";
+import game from "@/data/arcade/game.json";
 import styles from "./ArcadePlayer.module.css";
 import { AlienIcon } from "./ArcadeIcons";
 import ArcadeLeaderboard, { type FinishedRun } from "./ArcadeLeaderboard";
@@ -95,7 +96,7 @@ export default function ArcadePlayer() {
   return <>
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-lg" aria-label="Alien Invasion game preview">
-        <div className="flex items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-3"><span className="inline-flex items-center gap-2 text-sm font-semibold"><AlienIcon className="h-5 w-5"/>Alien Invasion</span><span className="text-xs text-[var(--muted)]">Python arcade · v3.2</span></div>
+        <div className="flex items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-3"><span className="inline-flex items-center gap-2 text-sm font-semibold"><AlienIcon className="h-5 w-5"/>Alien Invasion</span><span className="text-xs text-[var(--muted)]">Python arcade · v{game.version}</span></div>
         <div className="flex aspect-[3/2] flex-col items-center justify-center gap-4 bg-[radial-gradient(ellipse_at_top,var(--tag-bg),var(--surface)_75%)] p-6 text-center">
           <AlienIcon className="h-12 w-12 text-[var(--hero-accent)]"/>
           <h2 className="text-xl font-semibold sm:text-2xl">Your mission starts here</h2>
