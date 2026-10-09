@@ -18,7 +18,7 @@ export function scoreRecords(ticket:RunTicket, run:CompletedRun, review:NameRevi
   const expiresAt = Math.floor(now/1000)+180*86400;
   return {
     entry,
-    marker:{ pk:`RUN#${ticket.id}`, sk:"RESULT", expiresAt },
+    marker:{ pk:`RUN#${ticket.id}`, sk:"RESULT", entry, expiresAt },
     result:{ pk:board, sk:scoreKey(run.score,createdAt,ticket.id), ...entry, ...run, seed:ticket.seed, gameRunId:ticket.gameRunId, version:ticket.version, policyVersion:review.policyVersion, expiresAt },
   };
 }
@@ -30,7 +30,18 @@ export async function saveScore(ticket:RunTicket, run:CompletedRun, review:NameR
       { Put:{ TableName:table(), Item:records.result, ConditionExpression:"attribute_not_exists(pk)" } },
     ] }));
   } catch (error) {
-    if (error && typeof error === "object" && "CancellationReasons" in error && Array.isArray(error.CancellationReasons) && error.CancellationReasons.some(reason => reason?.Code === "ConditionalCheckFailed")) throw new ArcadeError("This run has already been published.",409);
+    if (error && typeof error === "object" && "CancellationReasons" in error && Array.isArray(error.CancellationReasons) && error.CancellationReasons.some(reason => reason?.Code === "ConditionalCheckFailed")) {
+      // Return the original reviewed entry after a lost response, even if the
+      // player edited their name or country before retrying. Never echo inputs.
+      try {
+        const saved=await docClient.send(new QueryCommand({TableName:table(),KeyConditionExpression:"pk = :pk AND sk = :sk",ExpressionAttributeValues:{":pk":records.marker.pk,":sk":"RESULT"},ConsistentRead:true,Limit:1}));
+        const marker=saved.Items?.[0];
+        if(marker?.entry && marker.expiresAt>Math.floor(Date.now()/1000))return marker.entry as LeaderboardEntry;
+      } catch {
+        throw new ArcadeError("Public leaderboard storage is unavailable. Please try again.",503);
+      }
+      throw new ArcadeError("This run has already been published.",409);
+    }
     throw new ArcadeError("Public leaderboard storage is unavailable. Please try again.",503);
   }
   return records.entry;

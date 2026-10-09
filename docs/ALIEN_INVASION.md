@@ -7,8 +7,9 @@ keeps the browser host, leaderboard API, build script, and generated metadata.
 
 `games/alien-invasion.source.json` selects upstream **main**. Override the
 branch/tag/commit at build time with `ALIEN_GAME_REF` or `--ref`. Clear an old
-feature-branch Amplify override when switching to main. The last verified main
-commit was 63e59e411e9d6a94523b791a4873e49a9bd03e5d (game 3.2.0).
+feature-branch Amplify override when switching to main. The locally verified main
+commit is 2f392db3092ee95c47da35e566938c09e04717a3 (game 3.2.0), including game PR #4's
+native public-score form. Amplify job #53 succeeded after its merge.
 
 ## Local preview
 
@@ -58,8 +59,20 @@ fully masked with asterisks before public storage; moderation failure prevents
 publication. No raw candidate handle is stored in the public table or logs.
 The in-game form must disclose OpenAI processing and public visibility before
 Save & publish. The required Python-side update is detailed in
-[game-agent prompt](ARCADE_GAME_AGENT_PROMPT.md). Until that update is merged,
-legacy in-game saves remain local; the removed external form is not a fallback.
+[game-agent prompt](ARCADE_GAME_AGENT_PROMPT.md). Game PR #4 implements this flow.
+Registration times out after 10 seconds and publishing after 30 seconds, ahead
+of the game's 45-second acknowledgement timeout. A timed-out save can be retried;
+the database run marker prevents a second entry if the first request succeeded.
+New run markers retain the reviewed entry so duplicate retries return its
+original name, flag, and score, rather than the player's edited inputs. Existing
+markers without that snapshot use the legacy duplicate confirmation and a masked
+display until the player checks the public board. The existing Query permission
+is sufficient; no additional AWS resource or credential setting is required.
+Acknowledgements for closed or replaced rounds are ignored. The fixture smoke
+test exercises the actual Python form with a zero score, keyboard name/country
+input, storage failure, Retry, and the returned masked name and flag. It also
+checks host timeout recovery, duplicates, and spoofed messages. It writes no
+production scores.
 
 Run tickets and plausible timing do not verify gameplay: scores are visibly
 unverified community submissions until server replay verification is added.
@@ -130,6 +143,13 @@ Changes to the bridge protocol, runtime dependencies, or canvas proportions
 still require integration review.
 
 ## Automatically redeploy after upstream changes
+
+This is already configured: game PR #3 installed the path-filtered workflow,
+the secret and Amplify main webhook exist, and the PR #4 main-push run
+38002610876 passed and triggered successful Amplify job #53. Main pushes that
+change runtime files run tests before calling the webhook; pull requests run
+tests without redeploying. README-only changes do not trigger a rebuild.
+The setup example below is recovery reference; do not recreate existing resources.
 
 A push to the game repo does not automatically rebuild this separate Amplify app.
 To automate it:

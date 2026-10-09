@@ -1,5 +1,33 @@
 # Coding-agent task: finish one-step in-game public score saving
 
+## Completion update (2026-10-09)
+
+The implementation task below is now completed in game
+[PR #4](https://github.com/Skywalker1910/alien-invasion/pull/4), merged at
+23:04:59 UTC as `2f392db3092ee95c47da35e566938c09e04717a3` (version 3.2.0).
+Do not recreate the form, webhook, secret, or workflow. The historical handoff
+below records the acceptance contract for future changes.
+
+The portfolio has built that exact main commit. Amplify job #53 succeeded after
+the game merge. The portfolio follow-up bounds registration to 10 seconds and
+public submission to 30 seconds, so the game's 45-second pending timeout can
+recover rather than receiving an indefinitely cached saving acknowledgement.
+Late responses for closed or replaced rounds are ignored.
+Duplicate database submissions now return the original reviewed entry from the
+run marker, retaining its masked name and country if an earlier response was lost.
+This uses the existing table's Query permission; no new resource, credential,
+or game-side API is needed. Older markers without the entry snapshot still
+return a duplicate confirmation with a conservative masked display.
+
+For subsequent game work, preserve explicit Save & publish consent, local-only
+saving, 20-character gaming names, country selection, masked-name display,
+same-run retry, and pinned origin/source checks. Run the game tests and the
+portfolio's native-form fixture smoke test before shipping. No new DB setup is
+required for this form. A real production save remains a separate verification;
+do not create synthetic public entries without the owner's authorization.
+
+## Original implementation handoff (historical)
+
 Work in `E:/Projects/alien_invasion` (`Skywalker1910/alien-invasion`) on a separate
 branch from current main. Keep Python/Pygame native. The portfolio fetches the
 latest **main** during each build; do not copy game files into the portfolio.

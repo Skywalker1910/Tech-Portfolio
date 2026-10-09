@@ -14,13 +14,16 @@ with sync_playwright() as playwright:
            "level":2, "masked":True, "verification":"unverified", "createdAt":"2026-10-09T00:00:00Z"}
     writes=[]
     attempts=[]
-    mode={"fail":False,"registrationFail":False}
+    mode={"fail":False,"registrationFail":False,"hang":False}
+    pending_routes=[]
     def board(route):
         if route.request.method=="POST":
             data=route.request.post_data_json
             assert data["country"]=="in" and data["publish"] is True
             attempts.append(data)
-            if mode["fail"]:
+            if mode["hang"]:
+                pending_routes.append(route)
+            elif mode["fail"]:
                 route.fulfill(status=503,content_type="application/json",body='{"error":"Fixture storage unavailable"}')
             elif len(data["name"])>20:
                 route.fulfill(status=400,content_type="application/json",body='{"error":"Gaming names must be 1–20 characters."}')
@@ -39,14 +42,40 @@ with sync_playwright() as playwright:
     page.goto("http://localhost:3000/games/alien-invasion",wait_until="networkidle")
     page.get_by_role("button",name="Play game",exact=True).click()
     page.get_by_role("button",name="Start round",exact=True).click(timeout=60_000)
-    if page.get_by_role("button",name="Skip briefing",exact=True).count():
-        page.get_by_role("button",name="Skip briefing",exact=True).click()
+    page.get_by_role("button",name="Skip briefing",exact=True).click(timeout=10_000)
     page.get_by_role("status").filter(has_text="In flight").wait_for(timeout=10_000)
     game_frame=next(value for value in page.frames if "/games/alien-invasion/index.html" in value.url)
     game_frame.evaluate("""() => {
       window.fixtureAcks=[];
       addEventListener('message',e=>{if(e.data?.type==='score_publication')window.fixtureAcks.push(e.data);});
     }""")
+    # End the live Python run early, without altering the source or bundle.
+    # All form input, bridge messages and acknowledgements remain real.
+    def python(code):
+        game_frame.evaluate("code=>Module.PyRun_SimpleString(code)",code)
+    python("import gc\nfrom invasion.app import App\nfixture_app = next(obj for obj in gc.get_objects() if isinstance(obj, App))\nfixture_app.game.score = 0\nfixture_app.game._end_run()")
+    page.get_by_role("status").filter(has_text="Game over").wait_for()
+    game_frame.locator("#canvas").click(position={"x":5,"y":5})
+    page.keyboard.type("NovaPilot",delay=60)
+    page.keyboard.press("Tab")
+    page.keyboard.type("India",delay=60)
+    page.keyboard.press("Enter")
+    mode["fail"]=True
+    page.keyboard.press("Enter")
+    page.get_by_role("status").filter(has_text="Fixture storage unavailable").wait_for()
+    assert len(attempts)==1 and not writes
+    assert attempts[0]["score"]==0 and attempts[0]["name"]=="NovaPilot"
+    native_run_id=attempts[0]["gameRunId"]
+    mode["fail"]=False
+    page.keyboard.press("Enter")  # Python status screen's Retry button
+    page.get_by_role("status").filter(has_text="Score saved.").wait_for()
+    assert len(attempts)==2 and len(writes)==1
+    assert attempts[1]["gameRunId"]==native_run_id
+    python("import json, platform\nplatform.window.fixtureNative = json.dumps({'status': fixture_app.publication.status, 'name': fixture_app.publication.public_name, 'country': fixture_app.publication.public_country})")
+    assert json.loads(game_frame.evaluate("fixtureNative"))=={"status":"saved","name":"***********","country":"in"}
+    page.screenshot(path=str(ROOT/"artifacts"/"game-qa"/"native-public-fixture.png"))
+    attempts.clear()
+    writes.clear()
     def emit(events):
         game_frame.evaluate("""events => {
           for(const event of events) parent.postMessage({source:'alien-invasion',...event},location.origin);
@@ -86,6 +115,33 @@ with sync_playwright() as playwright:
     page.get_by_role("status").filter(has_text="Fixture registration unavailable").wait_for()
     assert len(attempts)==3
     assert game_frame.evaluate("fixtureAcks.some(v=>v.run_id==='123-4' && v.status==='error' && v.retryable===false)")
+    mode["registrationFail"]=False
+    emit(round_events("123-5"))
+    mode["hang"]=True
+    with page.expect_request("**/api/arcade/leaderboard"):
+        emit([{**submit,"run_id":"123-5"}])
+    page.wait_for_timeout(300)
+    assert len(attempts)==4
+    page.get_by_role("status").filter(has_text="The site took too long").wait_for(timeout=35_000)
+    assert game_frame.evaluate("fixtureAcks.some(v=>v.run_id==='123-5' && v.status==='error' && v.retryable)")
+    for route in pending_routes:
+        route.abort()
+    mode["hang"]=False
+    emit([{**submit,"run_id":"123-5"}])
+    page.get_by_role("status").filter(has_text="Score saved.").wait_for()
+    assert len(attempts)==5 and len(writes)==3
+    # A response from a previous round must not reach the current Python form.
+    mode["hang"]=True
+    emit(round_events("123-6"))
+    with page.expect_request("**/api/arcade/leaderboard"):
+        emit([{**submit,"run_id":"123-6"}])
+    page.wait_for_timeout(200)
+    old_ack_count=game_frame.evaluate("fixtureAcks.filter(v=>v.run_id==='123-6').length")
+    emit(round_events("123-7"))
+    page.wait_for_timeout(100)
+    pending_routes[-1].fulfill(status=201,content_type="application/json",body=json.dumps({"entry":entry}))
+    page.wait_for_timeout(300)
+    assert game_frame.evaluate("fixtureAcks.filter(v=>v.run_id==='123-6').length")==old_ack_count
     page.get_by_role("button",name="Close game",exact=True).click()
     page.get_by_role("img",name="India",exact=True).wait_for()
     page.get_by_text("***********",exact=True).wait_for()
@@ -93,5 +149,5 @@ with sync_playwright() as playwright:
     assert page.get_by_role("button",name="Publish score").count()==0
     assert not errors, errors
     page.screenshot(path=str(ROOT/"artifacts"/"game-qa"/"public-fixture.png"),full_page=True)
-    print("PASS: single in-game submission, explicit public intent, spoof/duplicate guards, masked ack, failure/retry, refreshed flags, no second form")
+    print("PASS: native Python zero-score form and Retry, masked name/flag, explicit public intent, spoof/duplicate guards, storage failure and timeout recovery, stale-response guard, refreshed flags, no second form")
     browser.close()
