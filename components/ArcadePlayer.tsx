@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
-import { Pause, Play, RotateCcw, X, Zap, ArrowLeft, ArrowRight } from "lucide-react";
+import { Pause, Play, RotateCcw, X, Zap, ArrowLeft, ArrowRight, LogOut } from "lucide-react";
 import game from "@/data/arcade/game.json";
 import styles from "./ArcadePlayer.module.css";
 import { AlienIcon } from "./ArcadeIcons";
@@ -40,10 +40,13 @@ export default function ArcadePlayer() {
   const registrationError=useRef("");
   const publications=useRef(new Map<string,Publication>());
   const [publication,setPublication]=useState<Publication|null>(null), [refreshKey,setRefreshKey]=useState(0);
-  const mounted = !["idle","error"].includes(phase);
+  const mounted = !["idle","error"].includes(phase) && viewport.width>0 && viewport.height>0;
   const send=useCallback((type:string,fields:Record<string,unknown>={})=>{
     frame.current?.contentWindow?.postMessage({target:"alien-invasion",type,...fields},window.location.origin);
   },[]);
+  const close=useCallback(()=>{
+    send("pause");setExpanded(false);setPhase("idle");setPaused(false);setBriefing(false);activeRun.current="";
+  },[send]);
 
   const hostConfig=useCallback(()=>send("host_config",{
     publicLeaderboard:configured.current,
@@ -99,6 +102,7 @@ export default function ArcadePlayer() {
       if (event.origin!==window.location.origin || event.source!==frame.current?.contentWindow) return;
       const data=event.data;
       if (!data || typeof data!=="object" || data.source!=="alien-invasion") return;
+      if (data.type==="exit_requested") {close();return;}
       if (data.type==="ready") {setPhase("ready");hostConfig();}
       if (data.type==="run_started") {
         activeRun.current=data.run_id; setPhase("playing");setPaused(false);setCompleted(null);setPublication(null);completedRun.current=Promise.resolve(null);registrationError.current="";
@@ -131,7 +135,7 @@ export default function ArcadePlayer() {
     const hidden=()=>{if(document.hidden)send("pause");};
     document.addEventListener("visibilitychange",hidden);
     return ()=>{window.removeEventListener("message",receive);document.removeEventListener("visibilitychange",hidden);};
-  },[send,submit,hostConfig]);
+  },[send,submit,hostConfig,close]);
   useEffect(()=>{
     if(phase!=="loading")return;
     const timeout=window.setTimeout(()=>setPhase("error"),120_000);
@@ -152,12 +156,9 @@ export default function ArcadePlayer() {
     if(stage.current)observer.observe(stage.current);
     return ()=>{observer.disconnect();element?.close();document.body.style.overflow=previous;};
   },[expanded]);
-  function close() {
-    send("pause");setExpanded(false);setPhase("idle");setPaused(false);setBriefing(false);activeRun.current="";
-  }
-
   async function load() {
     setExpanded(true);
+    if(!expanded)setViewport({width:0,height:0});
     setOrigin(window.location.origin);setPhase("loading");setAttempt(value=>value+1);setScore(0);setLevel(1);setLives(3);setPaused(false);setBriefing(false);setCompleted(null);setPublication(null);publications.current.clear();completedRun.current=Promise.resolve(null);activeRun.current="";
     try {const response=await fetch(`${basePath}/games/alien-invasion/index.html`,{method:"HEAD"});if(!response.ok)setPhase("error");}catch{setPhase("error");}
   }
@@ -199,6 +200,7 @@ export default function ArcadePlayer() {
             <button className={buttonClass} disabled={phase!=="playing"} onClick={()=>send(paused?"resume":"pause")}>{paused?<Play size={15}/>:<Pause size={15}/>} {paused?"Resume":"Pause"}</button>
             {briefing && <button className={buttonClass} onClick={()=>send("skip_briefing")}>Skip briefing</button>}
             {phase==="over" && <button className={buttonClass} onClick={close}>View leaderboard</button>}
+            <button className={buttonClass} onClick={close}><LogOut size={15}/>Exit game</button>
           </div>
           <div className={styles.touch} aria-label="Touch game controls">{[["left","←"],["up","↑"],["fire","Fire"],["down","↓"],["right","→"]].map(([key,label])=><button key={key} aria-label={key==="fire"?"Fire":`Move ${key}`} className={`${buttonClass} touch-none select-none`} disabled={phase!=="playing"||paused||briefing} onPointerDown={event=>input(event,key,true)} onPointerUp={event=>input(event,key,false)} onPointerCancel={event=>input(event,key,false)} onLostPointerCapture={()=>send("input",{[key]:false})} onKeyDown={event=>{if(["Enter"," "].includes(event.key)){event.preventDefault();send("input",{[key]:true});}}} onKeyUp={()=>send("input",{[key]:false})} onBlur={()=>send("input",{[key]:false})}>{label}</button>)}
             <button className={buttonClass} aria-label="Previous weapon" disabled={phase!=="playing"||paused||briefing} onClick={()=>send("switch",{direction:-1})}><ArrowLeft size={14}/></button>

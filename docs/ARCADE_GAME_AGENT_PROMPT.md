@@ -1,4 +1,66 @@
-# Coding-agent task: finish one-step in-game public score saving
+# Coding-agent task: consistent browser sizing and native Exit game
+
+Work in `E:/Projects/alien_invasion` (`Skywalker1910/alien-invasion`) on a new
+branch from current main. Keep the game Python/Pygame native. Read upstream
+`docs/HOST_INTEGRATION.md` and the portfolio's `docs/ALIEN_INVASION.md` first.
+The public-score flow is already implemented in merged PR #4; preserve it.
+Reuse the existing main-push tests and Amplify webhook. No DB configuration,
+new secret, credential change, or duplicate game copy is needed.
+
+## Current task
+
+1. Add a clearly labelled **Exit game** / **Exit to arcade** action inside the
+   browser game's title and pause menus, and make it reachable after a run.
+   On an explicit player action, emit through the existing pinned bridge:
+   `{"type":"exit_requested"}`. The bridge adds `source:"alien-invasion"` and
+   posts only to its configured parent origin. The portfolio now accepts this
+   event only from its actual iframe at its own origin, closes the modal,
+   unloads the runtime, and restores page scrolling and focus.
+2. Emit once per activation. Exit is not a game-over result and must not submit
+   a score or synthesize public consent. If a run is active, use the existing
+   abandonment path before emitting exit. When public saving is pending, show
+   an appropriate confirmation explaining that confirmation may be lost;
+   cancellation leaves the publishing screen intact. Do not report that exit
+   cancels an already accepted server write.
+3. Preserve desktop Quit behavior. In an embedded browser, do not call
+   `pygame.quit()`, `sys.exit()`, `window.close()`, or navigate the parent.
+   If running in a standalone browser without an embedding parent, return to
+   the title menu without terminating the runtime.
+4. Review browser startup and resize behavior. The portfolio reproduced a
+   960x640 canvas displayed at 904x904 on the first launch: Pygbag's resize
+   captured the temporary 1x1 buffer before SDL initialization. The portfolio
+   now waits for a measured iframe and injects CSS that makes the canvas fill
+   its fitted 3:2 viewport independently of Pygbag's inline width/height.
+   Keep the logical playfield 960x640 and preserve its aspect ratio. Ensure any
+   game-owned resize hook runs after display initialization and after viewport
+   changes. Avoid independent width/height stretching or browser-specific
+   runtime patches. If custom Pygbag HTML is maintained in the game repo,
+   apply equivalent aspect-preserving canvas sizing there for standalone play.
+5. Update the upstream bridge documentation with `exit_requested` and the
+   browser-versus-desktop exit behavior. Preserve strict origin/source checks,
+   publication acknowledgements, masked names, country flags, and retries.
+
+## Validation and delivery
+
+Add meaningful Python tests for menu availability, one exit event per action,
+active-run abandonment without score publication, pending-save confirmation,
+and unchanged desktop behavior. Run the complete existing game suite.
+Build via the portfolio's `npm run game:build -- --source E:/Projects/alien_invasion`
+for local integration; restore the normal main bundle afterward.
+
+Run `scripts/smoke-alien-game.py` against localhost. It verifies matching cold
+and warm canvas dimensions, the actual canvas aspect ratio on desktop/laptop
+and portrait/landscape phones, the footer Exit game button, and spoof-resistant
+handling of `exit_requested`. Also test clicking the real new Python menu action
+and rerun `scripts/smoke-arcade-public.py` with fixture APIs so publishing is
+unchanged. Do not write synthetic production scores.
+
+Commit, push, and open a new game PR. PR CI must run tests without redeploying.
+After merge, the existing workflow should rebuild the portfolio automatically.
+Report tests, the PR URL, and any remaining integration issue; do not recreate
+the webhook or repeat the completed score-form implementation below.
+
+## Previous public-score implementation handoff
 
 ## Completion update (2026-10-09)
 
