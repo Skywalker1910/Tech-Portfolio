@@ -28,7 +28,15 @@ The /games hub shows playable and upcoming games with readiness tags. Football's
 The arcade initially shows a game preview beside the public leaderboard (stacked
 on phones). Play game loads a large modal with margins on all four edges. A
 ResizeObserver fits the 3:2 iframe inside the available stage without stretching,
-including after resizing or rotating a phone. Closing unloads the runtime, restores
+including after resizing or rotating a phone. The iframe mounts after its first
+measurement; injected canvas CSS overrides Pygbag's startup inline sizing so
+the initial 1x1 buffer cannot squash the 960x640 game into a square. Cold launch
+and relaunch use the same fitted canvas dimensions. The control bar's Exit game
+button and header's Close game button both unload the player. A Python menu can
+also emit `exit_requested` through the pinned bridge; the host accepts it only
+from the embedded game at the portfolio origin. The updated
+[game-agent prompt](ARCADE_GAME_AGENT_PROMPT.md) covers that native menu action.
+Closing unloads the runtime, restores
 page scrolling and focus, and preserves completed scores for publication. The host implements the updated
 source/type event contract, movement in four directions, fire, weapon switching,
 shockwave, pause/resume, briefing skip, expanded game window and close/unload. The Python

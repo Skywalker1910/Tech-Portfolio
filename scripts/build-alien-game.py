@@ -90,8 +90,12 @@ if not index.is_file():
 html = index.read_text(encoding="utf-8")
 styles = """
 <style>
-html,body { margin:0; overflow:hidden; background:#0d1117 !important; }
-#canvas { outline:none; }
+html,body { margin:0; width:100%; height:100%; overflow:hidden; background:#0d1117 !important; }
+/* The host fits this iframe to the logical 960x640 playfield. Pygbag's
+   startup resize can capture the initial 1x1 buffer and keep a square canvas.
+   Keep CSS sizing tied to the fitted viewport, independent of that race. */
+#canvas { outline:none; display:block; width:100% !important; height:100% !important;
+  position:absolute; inset:0; margin:0 !important; border:0; padding:0; }
 #infobox { background:#161b22; color:#f0f6fc; font:14px system-ui;
   border-radius:12px; max-width:80vw; text-align:center; }
 #crt,#pyconsole { display:none !important; }

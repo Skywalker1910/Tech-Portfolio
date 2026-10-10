@@ -1,6 +1,6 @@
 """Optional local browser smoke check; requires Playwright and Microsoft Edge."""
 from pathlib import Path
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "artifacts" / "game-qa"
@@ -14,12 +14,30 @@ with sync_playwright() as playwright:
     page.goto("http://localhost:3000/games/alien-invasion", wait_until="networkidle")
     page.get_by_role("button", name="Play game", exact=True).click()
     frame = page.frame_locator('iframe[title="Alien Invasion Python game"]')
-    frame.locator("canvas#canvas").click(force=True)
+    def check_canvas():
+        game_frame=next(f for f in page.frames if "/games/alien-invasion/index.html" in f.url)
+        metrics=game_frame.evaluate("""() => {
+          const c=document.querySelector('#canvas'),r=c.getBoundingClientRect();
+          return {width:r.width,height:r.height,bufferWidth:c.width,bufferHeight:c.height,viewportWidth:innerWidth,viewportHeight:innerHeight};
+        }""")
+        assert (metrics["bufferWidth"],metrics["bufferHeight"])==(960,640),metrics
+        assert abs(metrics["width"]/metrics["height"]-1.5)<.01,metrics
+        assert abs(metrics["width"]-metrics["viewportWidth"])<2,metrics
+        assert abs(metrics["height"]-metrics["viewportHeight"])<2,metrics
+        return metrics
     try:
-        page.get_by_role("button", name="Start round", exact=True).wait_for(timeout=60_000)
+        expect(page.get_by_role("button",name="Start round",exact=True)).to_be_enabled(timeout=60_000)
+        cold=check_canvas()
+        page.screenshot(path=str(OUTPUT/"first-launch-fixed.png"))
+        page.get_by_role("button",name="Exit game",exact=True).click()
+        assert page.locator("iframe").count()==0
+        page.get_by_role("button",name="Play game",exact=True).click()
+        expect(page.get_by_role("button",name="Start round",exact=True)).to_be_enabled(timeout=60_000)
+        assert check_canvas()==cold
+        page.screenshot(path=str(OUTPUT/"relaunch-fixed.png"))
+        print("PASS: first launch and relaunch canvas dimensions match",cold)
         page.get_by_role("button", name="Start round", exact=True).click(timeout=60_000)
-        if page.get_by_role("button",name="Skip briefing",exact=True).count():
-            page.get_by_role("button",name="Skip briefing",exact=True).click()
+        page.get_by_role("button",name="Skip briefing",exact=True).click(timeout=10_000)
         page.get_by_role("status").filter(has_text="In flight").wait_for(timeout=10_000)
         frame.locator("canvas#canvas").press("ArrowLeft")
         frame.locator("canvas#canvas").press("Space")
@@ -42,14 +60,29 @@ with sync_playwright() as playwright:
             assert window["x"]+window["width"]<=width-11,window
             assert window["y"]+window["height"]<=height-11,window
             assert abs(game["width"]/game["height"]-1.5)<.01,game
+            check_canvas()
             assert game["y"]>=window["y"] and game["y"]+game["height"]<=window["y"]+window["height"],game
             assert page.get_by_role("button",name="Fire",exact=True).is_visible()
             page.screenshot(path=str(OUTPUT / f"expanded-{width}.png"))
             print("PASS: fitted game viewport",width,height,game)
-        page.get_by_role("button", name="Close game", exact=True).click()
+        page.evaluate("window.postMessage({source:'alien-invasion',type:'exit_requested'},location.origin)")
+        page.wait_for_timeout(100)
+        assert page.get_by_role("dialog",name="Alien Invasion",exact=True).is_visible()
+        game_frame=next(f for f in page.frames if "/games/alien-invasion/index.html" in f.url)
+        game_frame.evaluate("parent.postMessage({source:'alien-invasion',type:'exit_requested'},location.origin)")
+        page.get_by_role("dialog",name="Alien Invasion",exact=True).wait_for(state="hidden")
         assert not page.get_by_role("dialog",name="Alien Invasion",exact=True).is_visible()
         assert page.evaluate("document.body.style.overflow")!="hidden"
         assert page.locator("iframe").count() == 0
+        # Retry while the dialog is already open must retain its measured size.
+        def fail_head_once(route):
+            route.fulfill(status=503,body="Fixture loader failure")
+        page.route("**/games/alien-invasion/index.html",fail_head_once,times=1)
+        page.get_by_role("button",name="Play game",exact=True).click()
+        page.get_by_role("button",name="Retry loading",exact=True).click()
+        expect(page.get_by_role("button",name="Start round",exact=True)).to_be_enabled(timeout=60_000)
+        check_canvas()
+        page.get_by_role("button",name="Exit game",exact=True).click()
         page.set_viewport_size({"width": 375, "height": 812})
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
         page.get_by_role("button", name="Play game", exact=True).screenshot(path=str(ROOT / "artifacts" / "game-qa" / "mobile-play-button.png"))
@@ -64,7 +97,7 @@ with sync_playwright() as playwright:
         page.locator('section[aria-label="Portfolio arcade"]').first.scroll_into_view_if_needed()
         page.screenshot(path=str(OUTPUT / "landing.png"))
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
-        print("PASS: Python loaded, start, keyboard, pause/resume, touch fire, close/unload, mobile layout")
+        print("PASS: Python loaded, canvas scaling, start, keyboard, pause/resume, touch fire, footer exit, pinned game exit event, close/unload, mobile layout")
     finally:
         output = ROOT / "artifacts" / "game-qa"
         output.mkdir(parents=True, exist_ok=True)
