@@ -11,6 +11,23 @@ type Phase = "idle"|"loading"|"ready"|"playing"|"over"|"error";
 const basePath = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true" ? "/Tech-Portfolio" : "";
 const buttonClass = "inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm hover:bg-[var(--tag-bg)] disabled:opacity-40 disabled:cursor-not-allowed";
 
+// Finish before the Python game's 45-second acknowledgement timeout so Retry
+// can send a new request instead of replaying a permanently pending result.
+async function scoreRequest(url:string,body:Record<string,unknown>,timeout:number) {
+  const controller=new AbortController();
+  const timer=window.setTimeout(()=>controller.abort(),timeout);
+  try {
+    const response=await fetch(url,{method:"POST",redirect:"error",signal:controller.signal,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const result=await response.json();
+    return {response,result};
+  } catch(error) {
+    if(controller.signal.aborted)throw new Error(url==="/api/arcade/runs"?"Round registration took too long. Start another round for public scoring.":"The site took too long to respond. Retry to check whether your score was saved.");
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
 export default function ArcadePlayer() {
   const frame=useRef<HTMLIFrameElement>(null), dialog=useRef<HTMLDialogElement>(null), stage=useRef<HTMLDivElement>(null);
   const [expanded,setExpanded]=useState(false), [viewport,setViewport]=useState({width:0,height:0});
@@ -35,8 +52,9 @@ export default function ArcadePlayer() {
   }),[send]);
   const setConfigured=useCallback((value:boolean)=>{configured.current=value;hostConfig();},[hostConfig]);
   const acknowledge=useCallback((result:Publication)=>{
+    if(activeRun.current!==result.run_id)return;
     publications.current.set(result.run_id,result);
-    if(activeRun.current===result.run_id)setPublication(result);
+    setPublication(result);
     send("score_publication",result);
   },[send]);
   const submit=useCallback(async(data:Record<string,unknown>)=>{
@@ -61,10 +79,9 @@ export default function ArcadePlayer() {
         acknowledge({run_id:runId,status:"error",message:registrationError.current || "This round could not register for public scoring. Start another round.",retryable:false});
         return;
       }
-      const response=await fetch("/api/arcade/leaderboard",{method:"POST",redirect:"error",headers:{"Content-Type":"application/json"},body:JSON.stringify({...result,name:data.name,country:data.country,publish:true})});
-      const body=await response.json();
+      const {response,result:body}=await scoreRequest("/api/arcade/leaderboard",{...result,name:data.name,country:data.country,publish:true},30_000);
       if(response.status===409 && body.error==="This run has already been published.") {
-        acknowledge({run_id:runId,status:"saved",message:"This round is already saved on the public leaderboard.",retryable:false});
+        acknowledge({run_id:runId,status:"saved",message:"This round is already saved. Check the leaderboard for your reviewed name.",name:"*".repeat(data.name.length),country:data.country,score:result.score,masked:true,retryable:false});
         setRefreshKey(value=>value+1);
         return;
       }
@@ -85,7 +102,7 @@ export default function ArcadePlayer() {
       if (data.type==="ready") {setPhase("ready");hostConfig();}
       if (data.type==="run_started") {
         activeRun.current=data.run_id; setPhase("playing");setPaused(false);setCompleted(null);setPublication(null);completedRun.current=Promise.resolve(null);registrationError.current="";
-        ticket.current=!basePath ? fetch("/api/arcade/runs",{method:"POST",redirect:"error",headers:{"Content-Type":"application/json"},body:JSON.stringify({gameRunId:data.run_id,seed:data.seed,version:data.version})}).then(async response=>{const result=await response.json();if(!response.ok || typeof result.ticket!=="string")throw new Error(result.error || "Round registration failed.");return result.ticket;}).catch(error=>{if(activeRun.current===data.run_id)registrationError.current=error instanceof Error?error.message:"Round registration failed.";return "";}) : Promise.resolve("");
+        ticket.current=!basePath ? scoreRequest("/api/arcade/runs",{gameRunId:data.run_id,seed:data.seed,version:data.version},10_000).then(({response,result})=>{if(!response.ok || typeof result.ticket!=="string")throw new Error(result.error || "Round registration failed.");return result.ticket;}).catch(error=>{if(activeRun.current===data.run_id)registrationError.current=error instanceof Error?error.message:"Round registration failed.";return "";}) : Promise.resolve("");
       }
       if (data.type==="state") {
         if (Number.isSafeInteger(data.score) && data.score>=0) setScore(data.score);

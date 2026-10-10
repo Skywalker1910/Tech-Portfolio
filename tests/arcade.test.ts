@@ -1,6 +1,8 @@
 import { trustedArcadeOrigin } from "../lib/arcade/http";
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test, mock } from "node:test";
+import { QueryCommand, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
+import { docClient } from "../lib/dynamodb";
 import { GAME_VERSION, validateName, validateCountry, validateRunIdentity } from "../lib/arcade/policy";
 import { reviewResult } from "../lib/arcade/moderation";
 import { issueRun, verifyRun, validateCompletedRun } from "../lib/arcade/runs";
@@ -53,6 +55,35 @@ test("public score records contain only the reviewed handle and expire together"
   assert.equal(records.marker.expiresAt,records.result.expiresAt);
   assert(scoreKey(200,"2026-01-01",ticket.id)<scoreKey(100,"2026-01-01",ticket.id));
   assert.equal(records.entry.verification,"unverified");
+  assert.deepEqual(records.marker.entry,records.entry);
+});
+test("a lost-response retry returns the original reviewed entry without rewriting it",async()=>{
+  const previousTable=process.env.DYNAMODB_ARCADE_TABLE, previousKey=process.env.OPENAI_API_KEY;
+  process.env.DYNAMODB_ARCADE_TABLE="fixture-only-table";
+  process.env.OPENAI_API_KEY="fixture-only-key";
+  const ticket=verifyRun(issueRun(identity));
+  const run={score:0,level:1,wave:1,kills:0,ticks:60,duration:1};
+  const original=scoreRecords(ticket,run,reviewResult("unsafe_handle",false,'{"appropriate":false}'),"in");
+  const commands:unknown[]=[];
+  const send=mock.method(docClient,"send",async(command:unknown)=>{
+    commands.push(command);
+    if(command instanceof TransactWriteCommand)throw {CancellationReasons:[{Code:"ConditionalCheckFailed"}]};
+    assert(command instanceof QueryCommand);
+    assert.equal(command.input.ConsistentRead,true);
+    assert.equal(command.input.ExpressionAttributeValues?.[":pk"],original.marker.pk);
+    return {Items:[original.marker]};
+  });
+  try {
+    const entry=await saveScore(ticket,run,reviewResult("EditedName",false,'{"appropriate":true}'),"us");
+    assert.deepEqual(entry,original.entry);
+    assert.equal(entry.name,"*************");
+    assert.equal(entry.country,"in");
+    assert.equal(commands.length,2);
+  } finally {
+    send.mock.restore();
+    if(previousTable===undefined)delete process.env.DYNAMODB_ARCADE_TABLE;else process.env.DYNAMODB_ARCADE_TABLE=previousTable;
+    if(previousKey===undefined)delete process.env.OPENAI_API_KEY;else process.env.OPENAI_API_KEY=previousKey;
+  }
 });
 test("failed moderation prevents writes; rejected names reach storage only as masks",async()=>{
   const now=Date.now();

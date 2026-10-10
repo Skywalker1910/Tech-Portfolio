@@ -36,7 +36,7 @@ Storage contract:
 
 | Record | pk | sk | Purpose |
 |---|---|---|---|
-| Submission marker | `RUN#<server ticket UUID>` | `RESULT` | Conditional insertion prevents replay of the same ticket |
+| Submission marker | `RUN#<server ticket UUID>` | `RESULT` | Conditional insertion prevents replay; stores the reviewed entry for duplicate retry acknowledgements |
 | Public score | `BOARD#alien-invasion#<built game version>` | `<999999999-score padded to 9 digits>#<server ISO date>#<UUID>` | Ascending Query returns highest score first, oldest tie first |
 
 Both records are inserted atomically and expire after 180 days. Reads filter
